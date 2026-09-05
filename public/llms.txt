@@ -1,0 +1,41 @@
+# Crawlspace
+
+> Crawlspace is a generative engine optimisation (GEO) audit tool. It reads a web page the way
+> an AI assistant reads it, scores how citable that page is to five AI engines separately,
+> names the paragraphs an assistant cannot lift, and rewrites them.
+
+Crawlspace is free, requires no account, and stores nothing. It is built and maintained by
+Rohith Reddy (github.com/Stairexe).
+
+## What it does
+
+- Fetches a page as a crawler receives it — server HTML only, no JavaScript execution.
+- Resolves robots.txt against 12 named AI user agents (GPTBot, PerplexityBot, ClaudeBot,
+  Google-Extended, Bingbot and others) and reports which engines are shut out.
+- Scores six categories: extractability (30), answer structure (18), evidence density (16),
+  machine readability (14), authority signals (12), retrievability (10).
+- Applies five different weight vectors — one per engine — to the same evidence, because
+  Google states AI-specific files are not required for AI Overviews while Perplexity and
+  ChatGPT reward them. A single blended score would hide that difference.
+- Scores every content block on self-containment, answer directness, length band, factual
+  density and readability.
+- Rewrites weak passages with an LLM and re-scores the rewrite with the identical scorer,
+  so the improvement shown is measured rather than promised.
+- Generates the llms.txt, JSON-LD and robots.txt the page is missing, filled from the
+  page's own content, with no model involved.
+
+## Key pages
+
+- [Crawlspace — run an audit](https://crawlspace-geo.vercel.app)
+- [Methodology — every weight and where it came from](https://crawlspace-geo.vercel.app/methodology)
+- [Source on GitHub](https://github.com/Stairexe/crawlspace)
+
+## What it deliberately does not do
+
+Crawlspace models citability; it does not confirm citation. It does not measure off-domain
+presence, backlinks, or domain authority, and it audits one URL at a time. Those limits are
+published on the methodology page rather than hidden.
+
+## Contact
+
+- GitHub: https://github.com/Stairexe/crawlspace

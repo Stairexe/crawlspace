@@ -1,0 +1,23 @@
+# Crawlspace practises what it audits.
+
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: ClaudeBot
+User-agent: Claude-User
+User-agent: Claude-SearchBot
+User-agent: anthropic-ai
+User-agent: Google-Extended
+User-agent: Bingbot
+Allow: /
+
+User-agent: *
+Allow: /
+
+# Training-only crawler. Blocking it costs no citations.
+User-agent: CCBot
+Disallow: /
+
+Sitemap: https://crawlspace-geo.vercel.app/sitemap.xml
