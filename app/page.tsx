@@ -7,6 +7,7 @@ import { Findings } from "@/components/Findings";
 import { WeakBlocks, type AiState } from "@/components/Blocks";
 import { Generated } from "@/components/Generated";
 import { download, reportToMarkdown, safeFilename } from "@/lib/export";
+import { FAQ } from "@/lib/faq";
 
 type Phase = "idle" | "scanning" | "done" | "error";
 
@@ -340,6 +341,25 @@ export default function Home() {
                 <p className="mt-2 text-[13px] leading-relaxed text-ink-faint">{c.p}</p>
               </div>
             ))}
+          </div>
+
+          {/*
+            These answers come from lib/faq.ts, which also feeds the FAQPage schema.
+            Google requires schema content to be visible on the page, so they live here
+            rather than only in the JSON-LD — Crawlspace should pass its own audit.
+          */}
+          <div className="mt-20 border-t border-line pt-14">
+            <h2 className="text-[22px] font-semibold tracking-[-0.015em]">
+              Questions people ask about GEO
+            </h2>
+            <div className="mt-8 grid gap-x-12 gap-y-9 md:grid-cols-2">
+              {FAQ.map((f) => (
+                <div key={f.q}>
+                  <h3 className="text-[15px] font-semibold tracking-tight">{f.q}</h3>
+                  <p className="mt-2.5 text-[13.5px] leading-relaxed text-ink-dim">{f.a}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
       )}

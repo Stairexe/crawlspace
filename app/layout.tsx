@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { FAQ } from "@/lib/faq";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -58,32 +59,12 @@ const JSON_LD = {
     {
       "@type": "FAQPage",
       "@id": `${BASE}/#faq`,
-      mainEntity: [
-        {
-          "@type": "Question",
-          name: "What is generative engine optimisation?",
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: "Generative engine optimisation (GEO) is the practice of structuring content so AI assistants can extract and cite it. Traditional SEO gets a page ranked; GEO gets a passage quoted inside an AI-generated answer. The two are only loosely correlated — roughly 15% of Google AI Overview sources overlap with the traditional top ten results.",
-          },
-        },
-        {
-          "@type": "Question",
-          name: "Why does Crawlspace give five scores instead of one?",
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: "Because the engines genuinely disagree. Google states that AI-specific files and chunked content are not required for AI Overviews, while ChatGPT, Claude and Perplexity reward exactly those things. Crawlspace runs one evidence pass through five weight vectors, so a page can score 81 for one engine and 44 for another. A single blended number would hide the difference that matters.",
-          },
-        },
-        {
-          "@type": "Question",
-          name: "Does blocking AI crawlers affect whether you get cited?",
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: "Yes, completely. If robots.txt disallows GPTBot, PerplexityBot or ClaudeBot, that engine cannot cite the page at all — no amount of schema or structure compensates. CCBot is the exception: it feeds Common Crawl, which is used for model training rather than citation, so blocking it costs no AI visibility.",
-          },
-        },
-      ],
+      // Same array the home page renders — schema must describe visible content.
+      mainEntity: FAQ.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
     },
   ],
 };
