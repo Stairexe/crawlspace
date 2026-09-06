@@ -38,6 +38,8 @@ import {
   RefreshCw,
   Plus,
   ExternalLink,
+  Menu,
+  X,
 } from "lucide-react";
 
 type SidebarTab =
@@ -78,6 +80,7 @@ function DashboardContent() {
   const [exportOpen, setExportOpen] = useState(false);
   const [generateOpen, setGenerateOpen] = useState(false);
   const [issuesFilter, setIssuesFilter] = useState<"all" | "critical" | "high" | "medium">("all");
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
   useEffect(() => {
     if (activeTabFromUrl && activeTabFromUrl !== activeTab) {
@@ -87,6 +90,7 @@ function DashboardContent() {
 
   function switchTab(tab: SidebarTab) {
     setActiveTab(tab);
+    setMobileDrawerOpen(false);
     router.push(`/dashboard?tab=${tab}`);
   }
 
@@ -297,99 +301,305 @@ function DashboardContent() {
         </div>
       </aside>
 
+      {/* ── Mobile Drawer Modal ────────────────────────────────────────────── */}
+      {mobileDrawerOpen && (
+        <div className="fixed inset-0 z-50 md:hidden flex animate-fadeIn">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-void/85 backdrop-blur-md"
+            onClick={() => setMobileDrawerOpen(false)}
+          />
+          {/* Drawer Menu */}
+          <div className="relative z-10 w-4/5 max-w-[320px] h-full bg-surface-raised border-r border-line p-5 flex flex-col justify-between overflow-y-auto shadow-2xl">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between border-b border-line/80 pb-4">
+                <CrawlspaceLogo size={24} />
+                <button
+                  type="button"
+                  onClick={() => setMobileDrawerOpen(false)}
+                  className="rounded-xl p-2 text-ink-dim hover:text-ink hover:bg-surface border border-line/50 transition-colors"
+                  aria-label="Close navigation drawer"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* Navigation links grouped */}
+              <nav className="space-y-5 text-[13px]">
+                {/* Overview */}
+                <button
+                  type="button"
+                  onClick={() => switchTab("overview")}
+                  className={`flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-left font-medium transition-all ${
+                    activeTab === "overview"
+                      ? "bg-signal text-void font-bold shadow-[0_0_14px_var(--color-signal-glow)]"
+                      : "text-ink-dim hover:text-ink hover:bg-surface"
+                  }`}
+                >
+                  <LayoutDashboard className="h-4 w-4 shrink-0" />
+                  <span>Overview</span>
+                </button>
+
+                {/* Audit Group */}
+                <div className="space-y-1">
+                  <div className="mono px-3 text-[10.5px] uppercase tracking-wider text-ink-faint font-semibold">
+                    Audit
+                  </div>
+                  {(
+                    [
+                      ["audit", "Website Audit", Zap],
+                      ["pages", "Crawled Pages", FileText],
+                      ["issues", "Priority Issues", AlertTriangle],
+                    ] as const
+                  ).map(([id, label, Icon]) => (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => switchTab(id as SidebarTab)}
+                      className={`flex w-full items-center gap-3 rounded-xl px-3.5 py-2 text-left font-medium transition-all ${
+                        activeTab === id
+                          ? "bg-signal/15 text-signal font-bold"
+                          : "text-ink-dim hover:text-ink hover:bg-surface"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4 shrink-0" />
+                      <span>{label}</span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Analysis Group */}
+                <div className="space-y-1">
+                  <div className="mono px-3 text-[10.5px] uppercase tracking-wider text-ink-faint font-semibold">
+                    Engine Deep Dives
+                  </div>
+                  {(
+                    [
+                      ["seo", "SEO Engine", Search],
+                      ["geo", "GEO Engine (5 AI)", Sparkles],
+                      ["crawlers", "AI Crawlers", Bot],
+                      ["prompts", "Turnkey AI Prompts", Sparkles],
+                      ["content", "Content & Extraction", Cpu],
+                      ["technical", "Technical Health", Code2],
+                      ["schema", "Schema / JSON-LD", ShieldCheck],
+                      ["robots", "Robots.txt Rules", Globe],
+                      ["sitemap", "Sitemap XML", FileText],
+                      ["performance", "Performance & TTFB", Gauge],
+                    ] as const
+                  ).map(([id, label, Icon]) => (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => switchTab(id as SidebarTab)}
+                      className={`flex w-full items-center gap-3 rounded-xl px-3.5 py-2 text-left font-medium transition-all ${
+                        activeTab === id
+                          ? "bg-signal/15 text-signal font-bold"
+                          : "text-ink-dim hover:text-ink hover:bg-surface"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4 shrink-0" />
+                      <span>{label}</span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Monitoring */}
+                <div className="space-y-1">
+                  <div className="mono px-3 text-[10.5px] uppercase tracking-wider text-ink-faint font-semibold">
+                    Monitoring
+                  </div>
+                  {(
+                    [
+                      ["history", "Score History", Clock],
+                      ["reports", "Saved Reports", BarChart3],
+                    ] as const
+                  ).map(([id, label, Icon]) => (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => switchTab(id as SidebarTab)}
+                      className={`flex w-full items-center gap-3 rounded-xl px-3.5 py-2 text-left font-medium transition-all ${
+                        activeTab === id
+                          ? "bg-signal/15 text-signal font-bold"
+                          : "text-ink-dim hover:text-ink hover:bg-surface"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4 shrink-0" />
+                      <span>{label}</span>
+                    </button>
+                  ))}
+                </div>
+              </nav>
+            </div>
+
+            <div className="pt-4 border-t border-line/80 space-y-1 text-[13px]">
+              <button
+                type="button"
+                onClick={() => switchTab("settings")}
+                className={`flex w-full items-center gap-3 rounded-xl px-3.5 py-2 text-left transition-colors ${
+                  activeTab === "settings"
+                    ? "bg-signal/15 text-signal font-bold"
+                    : "text-ink-dim hover:text-ink"
+                }`}
+              >
+                <Settings className="h-4 w-4 shrink-0" />
+                <span>Settings</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => switchTab("help")}
+                className={`flex w-full items-center gap-3 rounded-xl px-3.5 py-2 text-left transition-colors ${
+                  activeTab === "help"
+                    ? "bg-signal/15 text-signal font-bold"
+                    : "text-ink-dim hover:text-ink"
+                }`}
+              >
+                <HelpCircle className="h-4 w-4 shrink-0" />
+                <span>Help & Docs</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Main Application Viewport ──────────────────────────────────────── */}
-      <div className="flex flex-1 flex-col overflow-x-hidden">
+      <div className="flex flex-1 flex-col overflow-x-hidden min-w-0">
         {/* Dashboard Topbar */}
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-line bg-void/85 px-6 backdrop-blur-xl">
-          <div className="flex items-center gap-4 flex-1 max-w-xl">
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-line bg-void/85 px-4 sm:px-6 backdrop-blur-xl gap-3">
+          <div className="flex items-center gap-3 flex-1 max-w-xl min-w-0">
+            {/* Mobile Hamburger Button */}
+            <button
+              type="button"
+              onClick={() => setMobileDrawerOpen(true)}
+              className="md:hidden flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-line bg-surface text-ink hover:border-line-bright"
+              aria-label="Open mobile navigation menu"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+
             {/* Quick URL Switcher */}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 void handleAuditRun(searchInput);
               }}
-              className="flex-1 relative"
+              className="flex-1 relative min-w-0"
             >
               <input
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 placeholder="Audit URL or domain..."
-                className="mono h-10 w-full rounded-xl border border-line bg-surface px-3.5 text-[13px] text-ink placeholder:text-ink-faint/60 transition-all focus:border-signal focus:shadow-[0_0_15px_var(--color-signal-glow)]"
+                className="mono h-10 w-full rounded-xl border border-line bg-surface px-3 sm:px-3.5 text-[12px] sm:text-[13px] text-ink placeholder:text-ink-faint/60 transition-all focus:border-signal focus:shadow-[0_0_15px_var(--color-signal-glow)] truncate"
               />
             </form>
             <button
               type="button"
               onClick={() => void handleAuditRun(searchInput)}
               disabled={isScanning}
-              className="mono h-10 rounded-xl bg-signal px-4 text-[12.5px] font-bold text-void hover:brightness-110 disabled:opacity-50"
+              className="mono h-10 rounded-xl bg-signal px-3.5 sm:px-4 text-[12px] sm:text-[12.5px] font-bold text-void hover:brightness-110 disabled:opacity-50 shrink-0"
             >
               {isScanning ? "Scanning…" : "Scan"}
             </button>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <Link
               href="/audit/new"
-              className="mono hidden sm:flex items-center gap-1.5 rounded-xl border border-signal/40 bg-signal/10 px-3.5 py-1.5 text-[12px] font-bold text-signal hover:bg-signal/20 transition-all"
+              className="mono hidden lg:flex items-center gap-1.5 rounded-xl border border-signal/40 bg-signal/10 px-3.5 py-1.5 text-[12px] font-bold text-signal hover:bg-signal/20 transition-all"
             >
               <span>+ New Audit</span>
             </Link>
             <button
               type="button"
               onClick={() => setExportOpen(true)}
-              className="mono rounded-xl border border-line bg-surface px-3 py-1.5 text-[12px] font-medium text-ink hover:border-line-bright transition-colors"
+              className="mono rounded-xl border border-line bg-surface px-2.5 sm:px-3 py-1.5 text-[11.5px] sm:text-[12px] font-medium text-ink hover:border-line-bright transition-colors"
             >
-              Export Report ↗
+              <span className="hidden sm:inline">Export Report ↗</span>
+              <span className="sm:hidden">Export ↗</span>
             </button>
             <Link
               href={`/report/stripe-docs`}
-              className="mono rounded-xl border border-line bg-surface px-3 py-1.5 text-[12px] font-medium text-ink hover:border-line-bright transition-colors"
+              className="mono hidden sm:inline rounded-xl border border-line bg-surface px-3 py-1.5 text-[12px] font-medium text-ink hover:border-line-bright transition-colors"
             >
-              Public Client View
+              Public View
             </Link>
           </div>
         </header>
 
+        {/* ── Mobile Horizontal Swipeable Tab Strip (Under Topbar) ───────────── */}
+        <div className="md:hidden border-b border-line/80 bg-surface/40 px-3 py-2 overflow-x-auto scrollbar-none flex items-center gap-1.5 shrink-0">
+          {[
+            { id: "overview", label: "Overview" },
+            { id: "audit", label: "Audit" },
+            { id: "seo", label: "SEO" },
+            { id: "geo", label: "GEO" },
+            { id: "crawlers", label: "Crawlers" },
+            { id: "prompts", label: "AI Prompts" },
+            { id: "content", label: "Content" },
+            { id: "technical", label: "Technical" },
+            { id: "schema", label: "Schema" },
+            { id: "robots", label: "Robots" },
+            { id: "performance", label: "Speed" },
+            { id: "issues", label: "Issues" },
+            { id: "pages", label: "Pages" },
+            { id: "history", label: "History" },
+            { id: "reports", label: "Reports" },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => switchTab(tab.id as SidebarTab)}
+              className={`tab-btn whitespace-nowrap rounded-lg px-3 py-1 text-[12px] font-semibold transition-all shrink-0 ${
+                activeTab === tab.id
+                  ? "bg-signal text-void shadow-[0_0_10px_var(--color-signal-glow)]"
+                  : "bg-surface border border-line text-ink-dim hover:text-ink"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
         {/* Dashboard Body */}
-        <main className="flex-1 p-6 sm:p-8 space-y-8 max-w-7xl">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 max-w-7xl w-full">
           {/* Active Target Banner */}
-          <div className="card glass-panel p-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <div className="flex items-center gap-5">
+          <div className="card glass-panel p-5 sm:p-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5 sm:gap-6">
+            <div className="flex items-center gap-4 sm:gap-5 min-w-0">
               {/* Huge Overall Score */}
-              <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl border border-signal/40 bg-signal/15 text-[34px] font-bold text-signal mono shadow-[0_0_24px_var(--color-signal-glow)]">
+              <div className="flex h-16 w-16 sm:h-20 sm:w-20 shrink-0 items-center justify-center rounded-2xl border border-signal/40 bg-signal/15 text-[28px] sm:text-[34px] font-bold text-signal num shadow-[0_0_24px_var(--color-signal-glow)]">
                 {v.overall}
               </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="mono text-[11px] uppercase tracking-wider text-signal font-semibold">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="mono text-[10.5px] sm:text-[11px] uppercase tracking-wider text-signal font-semibold">
                     Website Visibility Score
                   </span>
-                  <span className="mono text-[11px] text-ink-faint">
-                    • Last scanned 2 minutes ago
+                  <span className="mono text-[10.5px] sm:text-[11px] text-ink-faint hidden sm:inline">
+                    • Last scanned 2 mins ago
                   </span>
                 </div>
-                <h1 className="text-[22px] font-bold text-ink sm:text-[26px] mt-0.5">
+                <h1 className="font-satoshi text-[18px] sm:text-[24px] lg:text-[26px] font-bold text-ink mt-0.5 truncate">
                   {activeDomain}
                 </h1>
-                <p className="text-[13px] text-ink-dim mt-0.5">
+                <p className="text-[12px] sm:text-[13px] text-ink-dim mt-0.5 truncate">
                   Strong search crawlability & entity schema · High AI citation upside
                 </p>
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2.5">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
               <button
                 type="button"
                 onClick={() => void handleAuditRun(activeDomain)}
                 disabled={isScanning}
-                className="mono rounded-xl bg-signal px-4 py-2 text-[12.5px] font-bold text-void hover:brightness-110 shadow-[0_0_14px_var(--color-signal-glow)]"
+                className="mono flex-1 sm:flex-initial rounded-xl bg-signal px-3.5 sm:px-4 py-2 text-[12px] sm:text-[12.5px] font-bold text-void hover:brightness-110 shadow-[0_0_14px_var(--color-signal-glow)] text-center"
               >
                 {isScanning ? "Scanning…" : "Scan Again"}
               </button>
               <button
                 type="button"
                 onClick={() => setGenerateOpen(true)}
-                className="mono rounded-xl border border-line bg-surface px-4 py-2 text-[12.5px] font-medium text-ink hover:border-line-bright"
+                className="mono flex-1 sm:flex-initial rounded-xl border border-line bg-surface px-3.5 sm:px-4 py-2 text-[12px] sm:text-[12.5px] font-medium text-ink hover:border-line-bright text-center"
               >
                 Generate llms.txt & Fixes
               </button>
@@ -397,7 +607,7 @@ function DashboardContent() {
           </div>
 
           {/* ── Subscores Strip ──────────────────────────────────────────────── */}
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
+          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 lg:grid-cols-7 sm:gap-3">
             {[
               { id: "seo", label: "SEO", score: v.seo, status: "Indexable" },
               { id: "geo", label: "GEO", score: v.geo, status: "5-Engine" },
@@ -411,15 +621,15 @@ function DashboardContent() {
                 key={sub.id}
                 type="button"
                 onClick={() => switchTab(sub.id as SidebarTab)}
-                className="card glass-panel p-4 text-left transition-all hover:border-signal/50 hover:shadow-[0_0_16px_var(--color-signal-glow)]"
+                className="card glass-panel p-3.5 sm:p-4 text-left transition-all hover:border-signal/50 hover:shadow-[0_0_16px_var(--color-signal-glow)]"
               >
-                <div className="mono text-[10.5px] uppercase tracking-wider text-ink-faint">
+                <div className="mono text-[10px] sm:text-[10.5px] uppercase tracking-wider text-ink-faint truncate">
                   {sub.label}
                 </div>
-                <div className="mono mt-1 text-[22px] font-bold text-ink">
+                <div className="num mt-1 text-[20px] sm:text-[22px] font-bold text-ink">
                   {sub.score}
                 </div>
-                <div className="text-[11px] text-signal font-medium mt-0.5">
+                <div className="text-[10.5px] sm:text-[11px] text-signal font-medium mt-0.5 truncate">
                   {sub.status}
                 </div>
               </button>
@@ -427,9 +637,10 @@ function DashboardContent() {
           </div>
 
           {/* ── VIEWPORT CONTENT SWITCHER ─────────────────────────────────────── */}
+          <div className="tab-viewport min-h-[580px] w-full transition-all">
           {/* TAB 1: OVERVIEW */}
           {activeTab === "overview" && (
-            <div className="space-y-8 rise">
+            <div className="space-y-8 tab-transition">
               {/* Priority Issues & Recommended Actions */}
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 {/* Priority Issues */}
@@ -608,7 +819,7 @@ function DashboardContent() {
 
           {/* TAB 2: AUDIT & SUB-ANALYSES */}
           {activeTab === "audit" && (
-            <div className="space-y-6 rise">
+            <div className="space-y-6 tab-transition">
               <div className="card glass-panel p-6">
                 <h2 className="text-[18px] font-bold text-ink mb-1">Live Audit View</h2>
                 <p className="text-[13px] text-ink-dim mb-4">
@@ -631,7 +842,7 @@ function DashboardContent() {
 
           {/* TAB 3: SEO */}
           {activeTab === "seo" && (
-            <div className="space-y-6 rise">
+            <div className="space-y-6 tab-transition">
               <div className="card glass-panel p-6 space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -676,7 +887,7 @@ function DashboardContent() {
 
           {/* TAB 4: GEO */}
           {activeTab === "geo" && (
-            <div className="space-y-6 rise">
+            <div className="space-y-6 tab-transition">
               <div className="card glass-panel p-6 space-y-5">
                 <div className="flex items-center justify-between">
                   <div>
@@ -728,28 +939,28 @@ function DashboardContent() {
 
           {/* TAB 5: AI CRAWLERS */}
           {activeTab === "crawlers" && (
-            <div className="space-y-6 rise">
+            <div className="space-y-6 tab-transition">
               <CrawlerCenter evidence={e} />
             </div>
           )}
 
           {/* TAB 6: SCHEMA */}
           {activeTab === "schema" && (
-            <div className="space-y-6 rise">
+            <div className="space-y-6 tab-transition">
               <SchemaAnalyzer evidence={e} />
             </div>
           )}
 
           {/* TAB 7: ROBOTS */}
           {activeTab === "robots" && (
-            <div className="space-y-6 rise">
+            <div className="space-y-6 tab-transition">
               <RobotsAnalyzer evidence={e} />
             </div>
           )}
 
           {/* TAB 8: CONTENT */}
           {activeTab === "content" && (
-            <div className="space-y-6 rise">
+            <div className="space-y-6 tab-transition">
               <div className="card glass-panel p-6 space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -805,7 +1016,7 @@ function DashboardContent() {
 
           {/* TAB 9: SITEMAP */}
           {activeTab === "sitemap" && (
-            <div className="space-y-6 rise">
+            <div className="space-y-6 tab-transition">
               <div className="card glass-panel p-6 space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -874,21 +1085,21 @@ function DashboardContent() {
 
           {/* TAB: PERFORMANCE */}
           {activeTab === "performance" && (
-            <div className="space-y-6 rise">
+            <div className="space-y-6 tab-transition">
               <PerformanceAnalyzer evidence={e} />
             </div>
           )}
 
           {/* TAB: SPECIALIZED AI PROMPTS */}
           {activeTab === "prompts" && (
-            <div className="space-y-6 rise">
+            <div className="space-y-6 tab-transition">
               <SpecializedPrompts report={report} />
             </div>
           )}
 
           {/* TAB 10: PAGES */}
           {activeTab === "pages" && (
-            <div className="space-y-6 rise">
+            <div className="space-y-6 tab-transition">
               <div className="card glass-panel p-6 space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -959,7 +1170,7 @@ function DashboardContent() {
 
           {/* TAB 11: ISSUES */}
           {activeTab === "issues" && (
-            <div className="space-y-6 rise">
+            <div className="space-y-6 tab-transition">
               <div className="flex items-center gap-2 mb-2">
                 {(["all", "critical", "high", "medium"] as const).map((filter) => (
                   <button
@@ -988,7 +1199,7 @@ function DashboardContent() {
 
           {/* TAB 12: HISTORY */}
           {activeTab === "history" && (
-            <div className="space-y-6 rise">
+            <div className="space-y-6 tab-transition">
               <div className="card glass-panel p-6 space-y-4">
                 <h2 className="text-[18px] font-bold text-ink">Score Changes & Changelog</h2>
                 <p className="text-[13px] text-ink-dim">
@@ -1019,7 +1230,7 @@ function DashboardContent() {
 
           {/* TAB 13: REPORTS */}
           {activeTab === "reports" && (
-            <div className="space-y-6 rise">
+            <div className="space-y-6 tab-transition">
               <div className="card glass-panel p-6 space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -1092,7 +1303,7 @@ function DashboardContent() {
 
           {/* TAB 14: SETTINGS */}
           {activeTab === "settings" && (
-            <div className="space-y-6 rise">
+            <div className="space-y-6 tab-transition">
               <div className="card glass-panel p-6 space-y-6">
                 <div>
                   <h2 className="text-[18px] font-bold text-ink">Workspace Settings</h2>
@@ -1140,7 +1351,7 @@ function DashboardContent() {
 
           {/* TAB 15: HELP & DOCS */}
           {activeTab === "help" && (
-            <div className="space-y-6 rise">
+            <div className="space-y-6 tab-transition">
               <div className="card glass-panel p-6 space-y-4">
                 <h2 className="text-[18px] font-bold text-ink">Documentation & Methodology</h2>
                 <p className="text-[13px] text-ink-dim">
@@ -1165,6 +1376,7 @@ function DashboardContent() {
               </div>
             </div>
           )}
+          </div>
         </main>
       </div>
 

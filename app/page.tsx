@@ -142,12 +142,12 @@ export default function Home() {
             website visibility intelligence
           </div>
 
-          <h1 className="apple-heading text-[38px] font-bold leading-[1.08] tracking-[-0.035em] sm:text-[58px] text-ink spawn spawn-2">
+          <h1 className="font-satoshi text-[32px] sm:text-[56px] font-bold leading-[1.08] tracking-[-0.035em] text-ink spawn spawn-2">
             See how ready your website is for{" "}
             <span className="text-signal">search and AI.</span>
           </h1>
 
-          <p className="apple-body mx-auto mt-5 max-w-2xl text-[16.5px] leading-relaxed text-ink-dim font-medium spawn spawn-3">
+          <p className="font-geist mx-auto mt-5 max-w-2xl text-[15px] sm:text-[17px] leading-relaxed text-ink-dim font-normal spawn spawn-3">
             Audit your search fundamentals, AI citation readiness across 5 major engines, robots
             crawler permissions, and structured data from one unified command center.
           </p>
@@ -333,9 +333,9 @@ export default function Home() {
               className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[520px] w-[800px] rounded-full bg-signal/18 blur-[130px] pointer-events-none"
             />
 
-            {/* TOP TABS NAVIGATION (Put tabs at the top as requested) */}
-            <div className="mb-6 flex items-center justify-center">
-              <div className="flex flex-wrap items-center justify-center gap-1.5 rounded-2xl border border-line/80 bg-void/90 p-1.5 shadow-xl backdrop-blur-md">
+            {/* TOP TABS NAVIGATION (Smooth, touch-friendly) */}
+            <div className="mb-6 flex items-center justify-center max-w-full px-2">
+              <div className="flex items-center gap-1.5 rounded-2xl border border-line/80 bg-void/90 p-1.5 shadow-xl backdrop-blur-md overflow-x-auto max-w-full scrollbar-none">
                 {(
                   [
                     ["overview", "Overview"],
@@ -351,7 +351,7 @@ export default function Home() {
                     key={id}
                     type="button"
                     onClick={() => setPreviewTab(id)}
-                    className={`mono rounded-xl px-3.5 py-1.5 text-[12px] transition-all ${
+                    className={`tab-btn shrink-0 whitespace-nowrap rounded-xl px-3.5 py-1.5 text-[12px] font-medium ${
                       previewTab === id
                         ? "bg-signal text-void font-bold shadow-[0_0_14px_var(--color-signal-glow)]"
                         : "text-ink-dim hover:text-ink hover:bg-surface/60"
@@ -399,27 +399,27 @@ export default function Home() {
               </div>
 
               {/* Centerpiece Mockup Frame */}
-              <div className="card glass-panel-glow relative overflow-hidden rounded-3xl p-6 sm:p-8 z-10">
+              <div className="card glass-panel-glow relative overflow-hidden rounded-3xl p-5 sm:p-8 z-10">
               {/* Device Window Chrome */}
               <div className="flex items-center justify-between border-b border-line pb-4">
                 <div className="flex items-center gap-2.5">
                   <span className="block h-3 w-3 rounded-full bg-danger/80" />
                   <span className="block h-3 w-3 rounded-full bg-warn/80" />
                   <span className="block h-3 w-3 rounded-full bg-signal/80" />
-                  <span className="mono ml-2 text-[12px] text-ink-dim">
+                  <span className="mono ml-2 text-[12px] text-ink-dim truncate max-w-[200px] sm:max-w-none">
                     audit.crawlspace.dev · stripe.com/docs/payments
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full bg-signal pulse-dot" />
-                  <span className="mono rounded-full border border-signal/30 bg-signal/10 px-3 py-0.5 text-[11px] font-semibold text-signal">
+                  <span className="mono rounded-full border border-signal/30 bg-signal/10 px-2.5 py-0.5 text-[11px] font-semibold text-signal">
                     Live Simulator
                   </span>
                 </div>
               </div>
 
-              {/* Mockup Body Content */}
-              <div className="mt-6 space-y-6">
+              {/* Mockup Body Content in Stable Viewport */}
+              <div className="mt-6 space-y-6 tab-viewport min-h-[440px]">
                 {/* Score Header Banner */}
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-5 rounded-2xl border border-line bg-surface/60 p-5">
                   <div className="flex items-center gap-4">
@@ -430,7 +430,7 @@ export default function Home() {
                       <div className="mono text-[11px] uppercase tracking-wider text-signal font-semibold">
                         Overall Visibility Score
                       </div>
-                      <h3 className="text-[18px] font-bold text-ink">
+                      <h3 className="font-satoshi text-[18px] font-bold text-ink">
                         Robust Foundation · High AI Citation Upside
                       </h3>
                       <p className="text-[12.5px] text-ink-faint">
@@ -450,26 +450,26 @@ export default function Home() {
 
                 {/* Interactive Tab Viewports */}
                 {previewTab === "overview" && (
-                  <div className="space-y-4 rise">
+                  <div className="space-y-4 tab-transition">
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                       <div className="rounded-xl border border-line bg-surface/40 p-4">
                         <span className="mono text-[10.5px] uppercase text-ink-faint">SEO Health</span>
-                        <div className="mono mt-1 text-[24px] font-bold text-ink">84</div>
+                        <div className="num mt-1 text-[24px] font-bold text-ink">84</div>
                         <span className="text-[11.5px] text-signal font-medium">Indexable & Canonical</span>
                       </div>
                       <div className="rounded-xl border border-line bg-surface/40 p-4">
                         <span className="mono text-[10.5px] uppercase text-ink-faint">GEO Citability</span>
-                        <div className="mono mt-1 text-[24px] font-bold text-signal">71</div>
+                        <div className="num mt-1 text-[24px] font-bold text-signal">71</div>
                         <span className="text-[11.5px] text-ink-dim">5-Engine Spread</span>
                       </div>
                       <div className="rounded-xl border border-line bg-surface/40 p-4">
                         <span className="mono text-[10.5px] uppercase text-ink-faint">AI Crawlers</span>
-                        <div className="mono mt-1 text-[24px] font-bold text-signal">100%</div>
+                        <div className="num mt-1 text-[24px] font-bold text-signal">100%</div>
                         <span className="text-[11.5px] text-signal font-medium">Search Bots Allowed</span>
                       </div>
                       <div className="rounded-xl border border-line bg-surface/40 p-4">
                         <span className="mono text-[10.5px] uppercase text-ink-faint">Technical</span>
-                        <div className="mono mt-1 text-[24px] font-bold text-ink">82</div>
+                        <div className="num mt-1 text-[24px] font-bold text-ink">82</div>
                         <span className="text-[11.5px] text-ink-dim">200 OK · SSR Verified</span>
                       </div>
                     </div>
@@ -488,7 +488,7 @@ export default function Home() {
                 )}
 
                 {previewTab === "seo" && (
-                  <div className="rounded-xl border border-line bg-surface/40 p-5 space-y-3.5 rise">
+                  <div className="rounded-xl border border-line bg-surface/40 p-5 space-y-3.5 tab-transition">
                     <div className="flex items-center justify-between text-[13px]">
                       <div>
                         <div className="font-semibold text-ink">Meta Title & Description</div>
@@ -514,7 +514,7 @@ export default function Home() {
                 )}
 
                 {previewTab === "geo" && (
-                  <div className="rounded-xl border border-line bg-surface/40 p-5 space-y-4 rise">
+                  <div className="rounded-xl border border-line bg-surface/40 p-5 space-y-4 tab-transition">
                     <div className="flex items-center justify-between">
                       <h4 className="mono text-[12px] uppercase tracking-wider text-signal font-semibold">
                         Princeton GEO Empirical Uplift Metrics
@@ -524,22 +524,22 @@ export default function Home() {
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                       <div className="rounded-lg border border-line bg-surface/60 p-3">
                         <div className="text-[11px] text-ink-faint">Source Citations</div>
-                        <div className="mono text-[18px] font-bold text-signal">+40%</div>
+                        <div className="num text-[18px] font-bold text-signal">+40%</div>
                         <div className="text-[10px] text-ink-dim">Princeton lift benchmark</div>
                       </div>
                       <div className="rounded-lg border border-line bg-surface/60 p-3">
                         <div className="text-[11px] text-ink-faint">Statistical Evidence</div>
-                        <div className="mono text-[18px] font-bold text-signal">+37%</div>
+                        <div className="num text-[18px] font-bold text-signal">+37%</div>
                         <div className="text-[10px] text-ink-dim">Quantitative data verified</div>
                       </div>
                       <div className="rounded-lg border border-line bg-surface/60 p-3">
                         <div className="text-[11px] text-ink-faint">Direct Quotations</div>
-                        <div className="mono text-[18px] font-bold text-signal">+30%</div>
+                        <div className="num text-[18px] font-bold text-signal">+30%</div>
                         <div className="text-[10px] text-ink-dim">Expert attributions</div>
                       </div>
                       <div className="rounded-lg border border-line bg-surface/60 p-3">
                         <div className="text-[11px] text-ink-faint">Deixis Penalty</div>
-                        <div className="mono text-[18px] font-bold text-warn">-12%</div>
+                        <div className="num text-[18px] font-bold text-warn">-12%</div>
                         <div className="text-[10px] text-ink-dim">Vague pronouns detected</div>
                       </div>
                     </div>
@@ -547,7 +547,7 @@ export default function Home() {
                 )}
 
                 {previewTab === "crawlers" && (
-                  <div className="rounded-xl border border-line bg-surface/40 p-5 space-y-3 rise">
+                  <div className="rounded-xl border border-line bg-surface/40 p-5 space-y-3 tab-transition">
                     <div className="flex items-center justify-between border-b border-line pb-2 mb-2">
                       <span className="mono text-[12px] font-semibold text-ink">
                         AI Crawler Matrix: Search vs. Training Access
@@ -576,7 +576,7 @@ export default function Home() {
                 )}
 
                 {previewTab === "robots" && (
-                  <div className="rounded-xl border border-line bg-surface/40 p-5 space-y-3 rise">
+                  <div className="rounded-xl border border-line bg-surface/40 p-5 space-y-3 tab-transition">
                     <div className="flex items-center justify-between text-[12px]">
                       <span className="mono font-semibold text-ink">robots.txt Live Directives</span>
                       <span className="mono text-signal">HTTP 200 · 8 Rules Detected</span>
@@ -600,7 +600,7 @@ Sitemap: https://stripe.com/sitemap.xml`}
                 )}
 
                 {previewTab === "schema" && (
-                  <div className="rounded-xl border border-line bg-surface/40 p-5 space-y-3 rise">
+                  <div className="rounded-xl border border-line bg-surface/40 p-5 space-y-3 tab-transition">
                     <div className="flex items-center justify-between text-[12px]">
                       <span className="mono font-semibold text-ink">Schema.org JSON-LD Entities</span>
                       <span className="mono text-signal">3 Types Validated</span>
@@ -623,7 +623,7 @@ Sitemap: https://stripe.com/sitemap.xml`}
                 )}
 
                 {previewTab === "content" && (
-                  <div className="rounded-xl border border-line bg-surface/40 p-5 space-y-3 rise">
+                  <div className="rounded-xl border border-line bg-surface/40 p-5 space-y-3 tab-transition">
                     <div className="flex items-center justify-between text-[12px]">
                       <span className="mono font-semibold text-ink">Content Extractability & Chunking</span>
                       <span className="mono text-signal">1,480 Words · 18 Blocks</span>
@@ -851,107 +851,6 @@ Sitemap: https://stripe.com/sitemap.xml`}
                   </p>
                 </button>
               ))}
-            </div>
-          </section>
-
-          {/* ── Pricing Section ───────────────────────────────────────────── */}
-          <section id="pricing" className="space-y-8 pt-8">
-            <div className="text-center">
-              <span className="mono text-[11.5px] uppercase tracking-wider text-signal font-semibold">
-                Transparent Pricing
-              </span>
-              <h2 className="mt-2 text-[28px] font-bold text-ink sm:text-[38px]">
-                Simple, developer-first tiers
-              </h2>
-              <p className="mx-auto mt-3 max-w-2xl text-[14.5px] text-ink-dim">
-                Start for free with zero API key required. Upgrade when you need continuous monitoring and white-label client reports.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-              {/* Free */}
-              <div className="card glass-panel p-6 flex flex-col justify-between">
-                <div>
-                  <div className="mono text-[12px] font-bold text-ink-faint uppercase">Free</div>
-                  <div className="mt-3 flex items-baseline gap-1">
-                    <span className="mono text-[36px] font-bold text-ink">$0</span>
-                    <span className="text-[13px] text-ink-dim">/ forever</span>
-                  </div>
-                  <p className="mt-3 text-[13px] text-ink-dim">
-                    For developers and site owners checking visibility on individual URLs.
-                  </p>
-                  <ul className="mt-6 space-y-2.5 text-[12.5px] text-ink-dim border-t border-line pt-4">
-                    <li className="flex items-center gap-2.5"><Check className="h-4 w-4 text-signal shrink-0" /> Full 6-pillar visibility audit</li>
-                    <li className="flex items-center gap-2.5"><Check className="h-4 w-4 text-signal shrink-0" /> 5 AI engine citation scores</li>
-                    <li className="flex items-center gap-2.5"><Check className="h-4 w-4 text-signal shrink-0" /> AI Crawler & robots.txt analysis</li>
-                    <li className="flex items-center gap-2.5"><Check className="h-4 w-4 text-signal shrink-0" /> Copy turnkey LLM repair prompts</li>
-                    <li className="flex items-center gap-2.5"><Check className="h-4 w-4 text-signal shrink-0" /> Zero API key required</li>
-                  </ul>
-                </div>
-                <Link
-                  href="/#hero"
-                  className="mono mt-8 block w-full rounded-xl border border-line bg-surface py-2.5 text-center text-[13px] font-semibold text-ink hover:border-signal/50 transition-colors"
-                >
-                  Start Free Audit
-                </Link>
-              </div>
-
-              {/* Pro */}
-              <div className="card glass-panel-glow p-6 flex flex-col justify-between border-signal/50 relative">
-                <div className="absolute -top-3 right-5 mono rounded-full bg-signal px-3 py-0.5 text-[10px] font-bold uppercase text-void">
-                  Most Popular
-                </div>
-                <div>
-                  <div className="mono text-[12px] font-bold text-signal uppercase">Pro</div>
-                  <div className="mt-3 flex items-baseline gap-1">
-                    <span className="mono text-[36px] font-bold text-ink">$39</span>
-                    <span className="text-[13px] text-ink-dim">/ month</span>
-                  </div>
-                  <p className="mt-3 text-[13px] text-ink-dim">
-                    For fast-growing companies and marketing leaders seeking consistent search & AI visibility.
-                  </p>
-                  <ul className="mt-6 space-y-2.5 text-[12.5px] text-ink-dim border-t border-line pt-4">
-                    <li className="flex items-center gap-2.5 text-ink"><Check className="h-4 w-4 text-signal shrink-0" /> Everything in Free</li>
-                    <li className="flex items-center gap-2.5 text-ink"><Check className="h-4 w-4 text-signal shrink-0" /> Automated weekly scans & alert emails</li>
-                    <li className="flex items-center gap-2.5 text-ink"><Check className="h-4 w-4 text-signal shrink-0" /> AI passage rewrite generator</li>
-                    <li className="flex items-center gap-2.5 text-ink"><Check className="h-4 w-4 text-signal shrink-0" /> Score change history tracking</li>
-                    <li className="flex items-center gap-2.5 text-ink"><Check className="h-4 w-4 text-signal shrink-0" /> Crawl up to 50 pages per audit</li>
-                  </ul>
-                </div>
-                <Link
-                  href="/signup"
-                  className="mono mt-8 block w-full rounded-xl bg-signal py-2.5 text-center text-[13px] font-bold text-void hover:brightness-110 shadow-[0_0_14px_var(--color-signal-glow)] transition-all"
-                >
-                  Get Started with Pro
-                </Link>
-              </div>
-
-              {/* Agency */}
-              <div className="card glass-panel p-6 flex flex-col justify-between">
-                <div>
-                  <div className="mono text-[12px] font-bold text-ink-faint uppercase">Agency</div>
-                  <div className="mt-3 flex items-baseline gap-1">
-                    <span className="mono text-[36px] font-bold text-ink">$129</span>
-                    <span className="text-[13px] text-ink-dim">/ month</span>
-                  </div>
-                  <p className="mt-3 text-[13px] text-ink-dim">
-                    For digital agencies and consultants delivering modern GEO/SEO client deliverables.
-                  </p>
-                  <ul className="mt-6 space-y-2.5 text-[12.5px] text-ink-dim border-t border-line pt-4">
-                    <li className="flex items-center gap-2.5"><Check className="h-4 w-4 text-signal shrink-0" /> Everything in Pro</li>
-                    <li className="flex items-center gap-2.5"><Check className="h-4 w-4 text-signal shrink-0" /> White-label client reports (/report/:id)</li>
-                    <li className="flex items-center gap-2.5"><Check className="h-4 w-4 text-signal shrink-0" /> Custom brand logos on public reports</li>
-                    <li className="flex items-center gap-2.5"><Check className="h-4 w-4 text-signal shrink-0" /> Export branded client PDFs</li>
-                    <li className="flex items-center gap-2.5"><Check className="h-4 w-4 text-signal shrink-0" /> Multi-domain management dashboard</li>
-                  </ul>
-                </div>
-                <Link
-                  href="/signup"
-                  className="mono mt-8 block w-full rounded-xl border border-line bg-surface py-2.5 text-center text-[13px] font-semibold text-ink hover:border-signal/50 transition-colors"
-                >
-                  Upgrade to Agency
-                </Link>
-              </div>
             </div>
           </section>
 

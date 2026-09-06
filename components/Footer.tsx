@@ -126,11 +126,6 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/#pricing" className="hover:text-ink transition-colors">
-                  Transparent Pricing
-                </Link>
-              </li>
-              <li>
                 <Link href="/login" className="hover:text-ink transition-colors">
                   Account Sign In
                 </Link>

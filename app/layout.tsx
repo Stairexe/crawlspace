@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { FAQ } from "@/lib/faq";
@@ -76,8 +78,14 @@ const JSON_LD = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className="grain">
+    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700,800,900&display=swap"
+        />
+      </head>
+      <body className="grain font-geist text-ink antialiased">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}

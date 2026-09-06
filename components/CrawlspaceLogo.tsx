@@ -54,7 +54,7 @@ export function CrawlspaceLogo({
         />
       </div>
       <div className="flex flex-col">
-        <span className="text-[17px] font-bold tracking-tight text-ink font-sans flex items-center">
+        <span className="font-satoshi text-[18px] font-bold tracking-[-0.02em] text-ink flex items-center">
           Crawl<span className="text-signal">Space</span>
         </span>
         {showTagline && (
