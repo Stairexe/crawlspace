@@ -10,7 +10,15 @@ export function reportToMarkdown(r: AuditReport): string {
   L.push("");
   L.push(`**URL:** ${e.finalUrl}`);
   L.push(`**Audited:** ${new Date(e.fetchedAt).toUTCString()}`);
-  L.push(`**Composite:** ${r.composite}/100 · **Spread:** ${r.spread} points`);
+  L.push(`**Overall Visibility Score:** ${r.visibility?.overall ?? r.composite}/100`);
+  L.push(`- SEO: ${r.visibility?.seo ?? 0}/100`);
+  L.push(`- GEO / AI Search: ${r.visibility?.geo ?? r.composite}/100`);
+  L.push(`- AI Crawlers: ${r.visibility?.crawlers ?? 0}/100`);
+  L.push(`- Technical: ${r.visibility?.technical ?? 0}/100`);
+  L.push(`- Content: ${r.visibility?.content ?? 0}/100`);
+  L.push(`- Schema: ${r.visibility?.schema ?? 0}/100`);
+  L.push("");
+  L.push(`**Composite GEO:** ${r.composite}/100 · **Spread:** ${r.spread} points`);
   L.push("");
   L.push(r.summary);
   L.push("");
@@ -94,6 +102,102 @@ export function reportToMarkdown(r: AuditReport): string {
   );
 
   return L.join("\n");
+}
+
+/**
+ * Engineered Prompt for LLMs (Claude, ChatGPT, etc.)
+ * Provides the entire audit diagnostic context and asks the LLM to write exact code and fixes.
+ */
+export function reportToLLMPrompt(r: AuditReport): string {
+  const e = r.evidence;
+  const critical = r.findings.filter((f) => f.severity === "critical" || f.severity === "high");
+  const warnings = r.findings.filter((f) => f.severity === "medium");
+
+  const L: string[] = [];
+
+  L.push("You are a Principal Web Architect, Senior Technical SEO Specialist, and Generative Engine Optimization (GEO) expert.");
+  L.push(`I have audited the webpage at ${e.finalUrl} using Crawlspace Website Visibility Intelligence.`);
+  L.push("");
+  L.push("Your task: Provide concrete code, structured data, robots directives, and rewritten copy to fix all identified issues and maximize this page's visibility and citations across Google Search, ChatGPT, Perplexity, Claude, and Copilot.");
+  L.push("");
+  L.push("---");
+  L.push("");
+  L.push("### 1. AUDIT SNAPSHOT");
+  L.push(`- Page Title: ${e.html.title ?? "(missing)"}`);
+  L.push(`- Final URL: ${e.finalUrl}`);
+  L.push(`- Word Count: ${e.html.textWords} words (${e.html.htmlBytes} bytes HTML)`);
+  L.push(`- Overall Visibility Score: ${r.visibility?.overall ?? r.composite}/100`);
+  L.push(`  * SEO Score: ${r.visibility?.seo ?? 0}/100`);
+  L.push(`  * GEO / AI Search: ${r.visibility?.geo ?? r.composite}/100`);
+  L.push(`  * AI Crawler Access: ${r.visibility?.crawlers ?? 0}/100`);
+  L.push(`  * Technical Health: ${r.visibility?.technical ?? 0}/100`);
+  L.push(`  * Content Intelligence: ${r.visibility?.content ?? 0}/100`);
+  L.push(`  * Structured Data (Schema): ${r.visibility?.schema ?? 0}/100`);
+  L.push("");
+  L.push(`Composite Engine Citability Scores:`);
+  for (const engine of ENGINES) {
+    const s = r.engines[engine];
+    L.push(`  * ${ENGINE_LABELS[engine]}: ${s.score}/100 ${s.capped ? `(Capped: ${s.capReason})` : ""}`);
+  }
+  L.push("");
+  L.push("---");
+  L.push("");
+  L.push("### 2. PRIORITY ISSUES TO RESOLVE");
+  if (critical.length === 0 && warnings.length === 0) {
+    L.push("No critical or high issues found.");
+  } else {
+    for (const f of [...critical, ...warnings]) {
+      L.push(`#### [${f.severity.toUpperCase()}] ${f.label}`);
+      L.push(`- Category: ${CATEGORY_LABELS[f.category]}`);
+      L.push(`- Evidence on page: ${f.evidence}`);
+      L.push(`- Fix directive: ${f.fix.summary}`);
+      L.push(`- Technical details: ${f.fix.detail}`);
+      L.push("");
+    }
+  }
+
+  L.push("---");
+  L.push("");
+  L.push("### 3. STRUCTURED DATA & SCHEMA.ORG");
+  L.push(`Detected Schema Types: ${e.schemaAnalysis?.detectedTypes?.join(", ") || "None"}`);
+  if (e.schemaAnalysis?.issues?.length) {
+    L.push("Identified Schema Issues:");
+    for (const issue of e.schemaAnalysis.issues) {
+      L.push(`- ${issue}`);
+    }
+  }
+  L.push("");
+  L.push("Action needed: Write complete, valid JSON-LD (<script type=\"application/ld+json\">) incorporating Organization, WebPage/Article, and FAQPage schemas tailored specifically to this URL.");
+  L.push("");
+
+  if (r.weakestBlocks.length) {
+    L.push("---");
+    L.push("");
+    L.push("### 4. WEAK CONTENT PASSAGES TO REWRITE (FOR AI CITATION)");
+    L.push("These passages fail AI extractability tests due to deixis (vague pronouns like 'this', 'it' without antecedents), buried claims, or low factual density. Rewrite each block so it is self-contained, leads with an assertive answer, and maintains factual accuracy without hallucinating fake numbers:");
+    L.push("");
+    for (const b of r.weakestBlocks.slice(0, 4)) {
+      L.push(`Block [${b.id}] (Score: ${Math.round(b.scores.total * 100)}/100):`);
+      if (b.heading) L.push(`Heading context: "${b.heading}"`);
+      L.push(`Original Text:\n> ${b.text.replace(/\n/g, " ").slice(0, 500)}`);
+      L.push(`Diagnostic notes: ${b.notes.join("; ")}`);
+      L.push("");
+    }
+  }
+
+  L.push("---");
+  L.push("");
+  L.push("### 5. ROBOTS & AI CRAWLER CONFIGURATION");
+  L.push(`Robots.txt status: ${e.robots.found ? "Found" : "Missing"}`);
+  L.push("Action needed: Provide recommended robots.txt entries that allow AI search crawlers (OAI-SearchBot, ClaudeBot, PerplexityBot, Googlebot, Bingbot) while safely blocking training-only web scrapers (such as CCBot).");
+  L.push("");
+  L.push("Please provide the solution organized into 4 sections: 1. HTML Meta & Header Tags, 2. Complete JSON-LD Script, 3. Content Block Rewrites, 4. Robots.txt Snippet.");
+
+  return L.join("\n");
+}
+
+export function reportToJson(r: AuditReport): string {
+  return JSON.stringify(r, null, 2);
 }
 
 export function download(filename: string, content: string, type: string): void {

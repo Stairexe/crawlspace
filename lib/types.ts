@@ -111,6 +111,45 @@ export interface RobotRule {
   matchedLine?: string;
 }
 
+export interface OpenGraphData {
+  title?: string | null;
+  description?: string | null;
+  image?: string | null;
+  type?: string | null;
+  siteName?: string | null;
+}
+
+export interface TwitterCardData {
+  card?: string | null;
+  title?: string | null;
+  description?: string | null;
+  image?: string | null;
+}
+
+export interface RobotsRuleExplanation {
+  agent: string;
+  directive: string;
+  path: string;
+  explanation: string;
+  allowed: boolean;
+}
+
+export interface SchemaAnalysis {
+  detectedTypes: string[];
+  issues: string[];
+  rawSnippets: string[];
+}
+
+export interface VisibilityScores {
+  overall: number;
+  seo: number;
+  geo: number;
+  crawlers: number;
+  technical: number;
+  content: number;
+  schema: number;
+}
+
 export interface Evidence {
   url: string;
   finalUrl: string;
@@ -122,24 +161,31 @@ export interface Evidence {
     metaDescription: string | null;
     canonical: string | null;
     lang: string | null;
+    viewport: string | null;
+    charset: string | null;
     htmlBytes: number;
     textWords: number;
     textBytes: number;
     textToHtmlRatio: number;
   };
+  openGraph: OpenGraphData;
+  twitter: TwitterCardData;
   headings: { level: number; text: string }[];
   blocks: ContentBlock[];
   jsonLd: { types: string[]; raw: unknown }[];
   microdata: string[];
+  schemaAnalysis: SchemaAnalysis;
   robots: {
     found: boolean;
     status: number | null;
     rules: Record<string, RobotRule>;
     metaRobots: string | null;
     xRobotsTag: string | null;
+    rawText: string | null;
+    explainedRules: RobotsRuleExplanation[];
   };
   llmsTxt: { found: boolean; valid: boolean; issues: string[]; bytes: number };
-  sitemap: { found: boolean; inRobots: boolean };
+  sitemap: { found: boolean; inRobots: boolean; urlCount?: number };
   links: {
     internal: number;
     external: number;
@@ -217,6 +263,7 @@ export interface AuditReport {
   evidence: Evidence;
   checks: CheckResult[];
   engines: Record<Engine, EngineScore>;
+  visibility: VisibilityScores;
   composite: number;
   spread: number;
   findings: Finding[];

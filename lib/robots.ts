@@ -1,29 +1,72 @@
-import type { Engine, RobotRule } from "./types";
+import type { Engine, RobotRule, RobotsRuleExplanation } from "./types";
 
 /**
  * The AI user agents that matter, and which engine each one gates.
- * Source: research/SUMMARY.md §Per-engine crawler map.
+ * Source: research/SUMMARY.md §Per-engine crawler map and ref/guides.txt §6.
  */
 export interface AgentSpec {
   agent: string;
   engine: Engine | "training";
+  crawlerType: "search" | "training" | "browsing";
   role: string;
 }
 
 export const AI_AGENTS: AgentSpec[] = [
-  { agent: "GPTBot", engine: "chatgpt", role: "OpenAI index + training" },
-  { agent: "OAI-SearchBot", engine: "chatgpt", role: "ChatGPT search index" },
-  { agent: "ChatGPT-User", engine: "chatgpt", role: "ChatGPT live browsing" },
-  { agent: "PerplexityBot", engine: "perplexity", role: "Perplexity index" },
-  { agent: "Perplexity-User", engine: "perplexity", role: "Perplexity live fetch" },
-  { agent: "ClaudeBot", engine: "claude", role: "Anthropic index" },
-  { agent: "Claude-User", engine: "claude", role: "Claude live browsing" },
-  { agent: "Claude-SearchBot", engine: "claude", role: "Claude search index" },
-  { agent: "anthropic-ai", engine: "claude", role: "Anthropic (legacy agent)" },
-  { agent: "Google-Extended", engine: "google-aio", role: "Gemini / AI Overviews grounding" },
-  { agent: "Bingbot", engine: "copilot", role: "Bing index — powers Copilot" },
-  { agent: "CCBot", engine: "training", role: "Common Crawl — training only, safe to block" },
+  { agent: "Googlebot", engine: "google-aio", crawlerType: "search", role: "Google Search index — core Googlebot" },
+  { agent: "OAI-SearchBot", engine: "chatgpt", crawlerType: "search", role: "ChatGPT search index — citations" },
+  { agent: "GPTBot", engine: "chatgpt", crawlerType: "training", role: "OpenAI crawler — training & general index" },
+  { agent: "ClaudeBot", engine: "claude", crawlerType: "search", role: "Anthropic crawler — Claude citations" },
+  { agent: "Claude-SearchBot", engine: "claude", crawlerType: "search", role: "Claude search index" },
+  { agent: "Claude-User", engine: "claude", crawlerType: "browsing", role: "Claude live browser fetch" },
+  { agent: "PerplexityBot", engine: "perplexity", crawlerType: "search", role: "Perplexity search & citation index" },
+  { agent: "Perplexity-User", engine: "perplexity", crawlerType: "browsing", role: "Perplexity live fetch" },
+  { agent: "Google-Extended", engine: "google-aio", crawlerType: "training", role: "Gemini / AI Overviews training & grounding control" },
+  { agent: "Bingbot", engine: "copilot", crawlerType: "search", role: "Bing index — powers Microsoft Copilot" },
+  { agent: "ChatGPT-User", engine: "chatgpt", crawlerType: "browsing", role: "ChatGPT live web browsing" },
+  { agent: "anthropic-ai", engine: "claude", crawlerType: "search", role: "Anthropic legacy agent" },
+  { agent: "CCBot", engine: "training", crawlerType: "training", role: "Common Crawl — training only (safe to block)" },
 ];
+
+export function explainRobotsFile(raw: string | null): RobotsRuleExplanation[] {
+  if (!raw) return [];
+  const lines = raw.split(/\r?\n/);
+  const out: RobotsRuleExplanation[] = [];
+  let currentAgents: string[] = [];
+
+  for (const line of lines) {
+    const clean = line.split("#")[0].trim();
+    if (!clean) continue;
+    const idx = clean.indexOf(":");
+    if (idx === -1) continue;
+    const field = clean.slice(0, idx).trim().toLowerCase();
+    const value = clean.slice(idx + 1).trim();
+
+    if (field === "user-agent") {
+      currentAgents.push(value);
+    } else if (field === "disallow" || field === "allow") {
+      const agentNames = currentAgents.length > 0 ? currentAgents.join(", ") : "*";
+      const isAllowed = field === "allow";
+      let explanation = "";
+      if (value === "" && field === "disallow") {
+        explanation = `Grants full access: "${agentNames}" is allowed to crawl the entire site.`;
+      } else if (value === "/" && field === "disallow") {
+        explanation = `Full lockout: "${agentNames}" is blocked from crawling any page on this domain.`;
+      } else if (field === "disallow") {
+        explanation = `Blocks "${agentNames}" from crawling URLs beginning with or matching "${value}".`;
+      } else {
+        explanation = `Explicitly allows "${agentNames}" to crawl URLs matching "${value}".`;
+      }
+      out.push({
+        agent: agentNames,
+        directive: `${field.toUpperCase()}: ${value || "(empty)"}`,
+        path: value,
+        explanation,
+        allowed: isAllowed,
+      });
+    }
+  }
+  return out;
+}
 
 interface Group {
   agents: string[];

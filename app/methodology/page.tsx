@@ -5,6 +5,8 @@ import { BASE_WEIGHTS, ENGINE_MULTIPLIERS, ENGINE_RATIONALE, GATE_CAP } from "@/
 import { SUB_WEIGHTS, SUB_LABELS } from "@/lib/blocks";
 import { AI_AGENTS } from "@/lib/robots";
 import { GEO_TACTICS } from "@/lib/ai/prompts";
+import { Mail } from "lucide-react";
+import { GitHubIcon, LinkedInIcon } from "@/components/SocialIcons";
 
 export const metadata: Metadata = {
   title: "Methodology",
@@ -272,6 +274,55 @@ export default function Methodology() {
           </li>
         ))}
       </ul>
+
+      {/* Author & Research Attribution */}
+      <H id="author">Research & Architecture</H>
+      <div className="card glass-panel mt-4 p-6 border-line/80 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <div className="mono text-[11px] uppercase tracking-wider text-signal font-semibold">
+              Author & Architect
+            </div>
+            <h3 className="apple-heading text-[20px] font-bold text-ink mt-0.5">Rohith Reddy</h3>
+            <p className="text-[13px] text-ink-dim mt-1">
+              AI Marketing & Generative Engine Optimization (GEO) specialist architecting citation models, crawler diagnostics, and LLM visibility heuristics.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-line/60">
+          <a
+            href="https://github.com/Stairexe"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="GitHub profile"
+            className="mono inline-flex items-center gap-2 rounded-xl border border-line bg-surface/70 px-3.5 py-1.5 text-[12px] font-semibold text-ink transition-colors hover:border-signal/50 hover:text-signal"
+          >
+            <GitHubIcon className="h-4 w-4" />
+            <span>GitHub (Stairexe)</span>
+          </a>
+
+          <a
+            href="https://linkedin.com/in/rohithreddyasodi"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="LinkedIn profile"
+            className="mono inline-flex items-center gap-2 rounded-xl border border-line bg-surface/70 px-3.5 py-1.5 text-[12px] font-semibold text-ink transition-colors hover:border-signal/50 hover:text-signal"
+          >
+            <LinkedInIcon className="h-4 w-4" />
+            <span>LinkedIn</span>
+          </a>
+
+          <a
+            href="mailto:rohithreddyasodi@gmail.com"
+            aria-label="Send email"
+            className="mono inline-flex items-center gap-2 rounded-xl border border-line bg-surface/70 px-3.5 py-1.5 text-[12px] font-semibold text-ink transition-colors hover:border-signal/50 hover:text-signal"
+          >
+            <Mail className="h-4 w-4" />
+            <span>rohithreddyasodi@gmail.com</span>
+          </a>
+        </div>
+      </div>
 
       <div className="mt-12 border-t border-line pt-6">
         <Link href="/" className="mono text-[13px] text-signal hover:brightness-110">

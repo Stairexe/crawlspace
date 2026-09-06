@@ -7,6 +7,7 @@ import type {
   Evidence,
   Finding,
   Severity,
+  VisibilityScores,
 } from "../types";
 import { CATEGORIES, ENGINES, ENGINE_LABELS } from "../types";
 import { BASE_WEIGHTS, GATE_CAP, weightsFor } from "./weights";
@@ -55,6 +56,98 @@ function listJoin(items: string[]): string {
   return items.slice(0, -1).join(", ") + " and " + items[items.length - 1];
 }
 
+export function calculateVisibilityScores(
+  e: Evidence,
+  checks: CheckResult[],
+  compositeGeo: number,
+): VisibilityScores {
+  // 1. SEO Score (0..100)
+  let seo = 0;
+  if (e.html.title && e.html.title.length >= 10 && e.html.title.length <= 70) seo += 15;
+  else if (e.html.title) seo += 8;
+  if (e.html.metaDescription && e.html.metaDescription.length >= 40 && e.html.metaDescription.length <= 165) seo += 15;
+  else if (e.html.metaDescription) seo += 8;
+  if (e.semantics.h1Count === 1) seo += 15;
+  else if (e.semantics.h1Count > 1) seo += 7;
+  if (e.html.canonical) seo += 10;
+  if (e.openGraph?.title && (e.openGraph?.image || e.openGraph?.description)) seo += 10;
+  else if (e.openGraph?.title) seo += 5;
+  if (e.twitter?.card) seo += 5;
+  const noindex = /noindex/i.test(e.robots.metaRobots ?? "") || /noindex/i.test(e.robots.xRobotsTag ?? "");
+  if (!noindex) seo += 15;
+  if (e.semantics.hierarchyOk) seo += 10;
+  if (e.media.images === 0 || e.media.withAlt / Math.max(1, e.media.images) >= 0.7) seo += 5;
+
+  // 2. Crawler Score (0..100)
+  const searchAgents = ["Googlebot", "OAI-SearchBot", "ClaudeBot", "PerplexityBot", "Bingbot"];
+  let allowedCount = 0;
+  for (const agent of searchAgents) {
+    const rule = e.robots.rules[agent];
+    if (!rule || rule.allowed) allowedCount++;
+  }
+  const crawlers = Math.round((allowedCount / searchAgents.length) * 100);
+
+  // 3. Technical Score (0..100)
+  let technical = 0;
+  if (e.status >= 200 && e.status < 300) technical += 25;
+  if (e.url.startsWith("https://")) technical += 15;
+  if (e.timings.fetchMs < 800) technical += 20;
+  else if (e.timings.fetchMs < 1800) technical += 14;
+  else technical += 8;
+  if (e.renderedWithoutJs) technical += 20;
+  if (e.html.htmlBytes < 250_000) technical += 10;
+  else if (e.html.htmlBytes < 800_000) technical += 6;
+  if (e.html.viewport) technical += 10;
+
+  // 4. Content Score (0..100)
+  let content = 0;
+  if (e.html.textWords >= 600) content += 25;
+  else if (e.html.textWords >= 300) content += 18;
+  else if (e.html.textWords >= 150) content += 10;
+  else content += 4;
+  if (e.signals.questionHeadings >= 2) content += 20;
+  else if (e.signals.questionHeadings >= 1) content += 12;
+  const factualTotal = e.signals.stats + e.signals.percentages + e.signals.years;
+  if (factualTotal >= 10) content += 20;
+  else if (factualTotal >= 4) content += 14;
+  else content += 6;
+  if (e.links.externalCitations >= 2) content += 15;
+  else if (e.links.external >= 2) content += 8;
+  if (e.blocks.length >= 4) content += 20;
+  else if (e.blocks.length >= 2) content += 10;
+
+  // 5. Schema Score (0..100)
+  let schema = 0;
+  if (e.jsonLd.length > 0) schema += 35;
+  const types = e.schemaAnalysis?.detectedTypes ?? [];
+  if (types.some((t) => /Organization|Corporation|Brand/i.test(t))) schema += 25;
+  if (types.some((t) => /WebPage|Article|BlogPosting/i.test(t))) schema += 20;
+  if (types.some((t) => /FAQPage|BreadcrumbList|Product|Service/i.test(t))) schema += 20;
+  if (e.schemaAnalysis?.issues.length) {
+    schema = Math.max(0, schema - Math.min(25, e.schemaAnalysis.issues.length * 6));
+  }
+
+  // 6. Overall Blended Visibility Score (0..100)
+  const overall = Math.round(
+    seo * 0.22 +
+      compositeGeo * 0.22 +
+      crawlers * 0.16 +
+      technical * 0.15 +
+      content * 0.13 +
+      schema * 0.12,
+  );
+
+  return {
+    overall: Math.min(100, Math.max(0, overall)),
+    seo: Math.min(100, Math.max(0, seo)),
+    geo: Math.min(100, Math.max(0, compositeGeo)),
+    crawlers: Math.min(100, Math.max(0, crawlers)),
+    technical: Math.min(100, Math.max(0, technical)),
+    content: Math.min(100, Math.max(0, content)),
+    schema: Math.min(100, Math.max(0, schema)),
+  };
+}
+
 export function scoreReport(evidence: Evidence, checks: CheckResult[]): AuditReport {
   const categories = Object.fromEntries(
     CATEGORIES.map((c) => [c, categoryScore(checks, c)]),
@@ -91,6 +184,7 @@ export function scoreReport(evidence: Evidence, checks: CheckResult[]): AuditRep
   const scores = ENGINES.map((e) => engines[e].score);
   const composite = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
   const spread = Math.max(...scores) - Math.min(...scores);
+  const visibility = calculateVisibilityScores(evidence, checks, composite);
 
   const findings: Finding[] = checks
     .filter((c) => (c.status === "fail" || c.status === "warn") && c.fix)
@@ -125,6 +219,7 @@ export function scoreReport(evidence: Evidence, checks: CheckResult[]): AuditRep
     evidence,
     checks,
     engines,
+    visibility,
     composite,
     spread,
     findings,

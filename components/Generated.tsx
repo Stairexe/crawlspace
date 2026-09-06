@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { AuditReport } from "@/lib/types";
 import { CopyButton } from "./primitives";
+import { X } from "lucide-react";
 
 type Kind = "llms.txt" | "jsonld" | "robots";
 
@@ -27,7 +28,13 @@ const TABS: { kind: Kind; label: string; blurb: string }[] = [
   },
 ];
 
-export function Generated({ report }: { report: AuditReport }) {
+export function Generated({
+  report,
+  onClose,
+}: {
+  report: AuditReport;
+  onClose?: () => void;
+}) {
   const [active, setActive] = useState<Kind>("llms.txt");
   const [cache, setCache] = useState<Partial<Record<Kind, string>>>({});
   const [busy, setBusy] = useState(false);
@@ -57,6 +64,70 @@ export function Generated({ report }: { report: AuditReport }) {
   const content = cache[active];
   const tab = TABS.find((t) => t.kind === active)!;
 
+  const inner = (
+    <div className="card overflow-hidden">
+      <div className="mono flex items-center border-b border-line text-[12px] bg-surface/80">
+        {TABS.map((t) => (
+          <button
+            key={t.kind}
+            type="button"
+            onClick={() => load(t.kind)}
+            className={`border-b-2 px-4 py-2.5 transition-colors ${
+              active === t.kind
+                ? "border-signal text-ink font-bold"
+                : "border-transparent text-ink-faint hover:text-ink-dim"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+        {content && (
+          <span className="ml-auto flex items-center pr-3">
+            <CopyButton text={content} />
+          </span>
+        )}
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close generated panel"
+            className="mono flex items-center justify-center px-3 py-2 text-ink-faint hover:text-ink ml-2 transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+
+      <div className="p-5">
+        <p className="mb-3 text-[12.5px] leading-relaxed text-ink-faint">{tab.blurb}</p>
+        {!content && !busy && (
+          <button
+            type="button"
+            onClick={() => load(active)}
+            className="mono rounded-lg bg-signal px-4 py-2 text-[12.5px] font-semibold text-void transition-colors hover:brightness-110"
+          >
+            Generate {tab.label}
+          </button>
+        )}
+        {busy && <p className="mono text-[12px] text-ink-faint">generating…</p>}
+        {error && <p className="text-[12.5px] text-danger">{error}</p>}
+        {content && (
+          <pre className="thin-scroll max-h-96 overflow-auto rounded-md border border-line bg-base p-3.5 text-[11.5px] leading-relaxed text-ink-dim">
+            <code>{content}</code>
+          </pre>
+        )}
+      </div>
+    </div>
+  );
+
+  if (onClose) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-void/80 p-4 backdrop-blur-md">
+        <div className="w-full max-w-2xl">{inner}</div>
+      </div>
+    );
+  }
+
   return (
     <section className="space-y-3">
       <h2 className="text-[16px] font-semibold tracking-tight">
@@ -65,50 +136,7 @@ export function Generated({ report }: { report: AuditReport }) {
           generated from its own content · no model used
         </span>
       </h2>
-
-      <div className="card overflow-hidden">
-        <div className="mono flex border-b border-line text-[12px]">
-          {TABS.map((t) => (
-            <button
-              key={t.kind}
-              type="button"
-              onClick={() => load(t.kind)}
-              className={`border-b-2 px-4 py-2.5 transition-colors ${
-                active === t.kind
-                  ? "border-signal text-ink"
-                  : "border-transparent text-ink-faint hover:text-ink-dim"
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
-          {content && (
-            <span className="ml-auto flex items-center pr-3">
-              <CopyButton text={content} />
-            </span>
-          )}
-        </div>
-
-        <div className="p-4">
-          <p className="mb-3 text-[12.5px] leading-relaxed text-ink-faint">{tab.blurb}</p>
-          {!content && !busy && (
-            <button
-              type="button"
-              onClick={() => load(active)}
-              className="mono rounded-md border border-line px-3 py-1.5 text-[12px] text-ink-dim transition-colors hover:border-line-bright hover:text-ink"
-            >
-              generate {tab.label}
-            </button>
-          )}
-          {busy && <p className="mono text-[12px] text-ink-faint">generating…</p>}
-          {error && <p className="text-[12.5px] text-danger">{error}</p>}
-          {content && (
-            <pre className="thin-scroll max-h-96 overflow-auto rounded-md border border-line bg-base p-3.5 text-[11.5px] leading-relaxed text-ink-dim">
-              <code>{content}</code>
-            </pre>
-          )}
-        </div>
-      </div>
+      {inner}
     </section>
   );
 }

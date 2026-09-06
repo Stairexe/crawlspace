@@ -3,7 +3,7 @@ import type { AnyNode } from "domhandler";
 import type { ContentBlock, Evidence, BlockKind } from "./types";
 import { countWords, scoreBlockText } from "./blocks";
 import { guardedFetch, softFetch, normaliseUrl } from "./fetcher";
-import { resolveAllAgents } from "./robots";
+import { resolveAllAgents, explainRobotsFile } from "./robots";
 
 const MIN_BLOCK_WORDS = 12;
 const MAX_BLOCKS = 120;
@@ -280,6 +280,62 @@ export async function gatherEvidence(inputUrl: string): Promise<Evidence> {
 
   const textWords = countWords(bodyText);
 
+  const openGraph = {
+    title: $('meta[property="og:title"]').attr("content")?.trim() ?? null,
+    description: $('meta[property="og:description"]').attr("content")?.trim() ?? null,
+    image: $('meta[property="og:image"]').attr("content")?.trim() ?? null,
+    type: $('meta[property="og:type"]').attr("content")?.trim() ?? null,
+    siteName: $('meta[property="og:site_name"]').attr("content")?.trim() ?? null,
+  };
+
+  const twitter = {
+    card: $('meta[name="twitter:card"]').attr("content")?.trim() ?? null,
+    title: $('meta[name="twitter:title"]').attr("content")?.trim() ?? null,
+    description: $('meta[name="twitter:description"]').attr("content")?.trim() ?? null,
+    image: $('meta[name="twitter:image"]').attr("content")?.trim() ?? null,
+  };
+
+  const viewport = $('meta[name="viewport"]').attr("content")?.trim() ?? null;
+  const charset =
+    $('meta[charset]').attr("charset") ??
+    $('meta[http-equiv="Content-Type"]').attr("content") ??
+    null;
+
+  const detectedTypes = Array.from(new Set(jsonLd.flatMap((n) => n.types)));
+  const schemaIssues: string[] = [];
+  const rawSnippets: string[] = [];
+  $('script[type="application/ld+json"]').each((_, el) => {
+    const raw = $(el).contents().text().trim();
+    if (raw) rawSnippets.push(raw);
+  });
+
+  const orgNode = jsonLd.find((n) => n.types.includes("Organization"))?.raw as Record<string, unknown> | undefined;
+  if (orgNode) {
+    if (!orgNode.sameAs || (Array.isArray(orgNode.sameAs) && orgNode.sameAs.length === 0)) {
+      schemaIssues.push("Organization schema is missing sameAs social/entity profiles.");
+    }
+    if (!orgNode.logo) {
+      schemaIssues.push("Organization schema is missing brand logo URL.");
+    }
+  } else if (!detectedTypes.some((t) => /Organization|Corporation/i.test(t))) {
+    schemaIssues.push("No Organization schema detected — recommended for brand authority.");
+  }
+
+  const pageNode = jsonLd.find((n) => n.types.some((t) => /WebPage|Article|BlogPosting/i.test(t)))?.raw as Record<string, unknown> | undefined;
+  if (pageNode) {
+    if (!pageNode.dateModified && !pageNode.datePublished) {
+      schemaIssues.push("Page schema lacks dateModified and datePublished timestamps.");
+    }
+    if (!pageNode.author) {
+      schemaIssues.push("Page schema is missing an author entity.");
+    }
+  }
+
+  const sitemapUrlCount =
+    sitemapRes && sitemapRes.status === 200
+      ? (sitemapRes.body.match(/<loc>/gi) ?? []).length
+      : undefined;
+
   return {
     url: url.toString(),
     finalUrl: page.finalUrl,
@@ -291,11 +347,15 @@ export async function gatherEvidence(inputUrl: string): Promise<Evidence> {
       metaDescription: $('meta[name="description"]').attr("content")?.trim() ?? null,
       canonical: $('link[rel="canonical"]').attr("href") ?? null,
       lang: $("html").attr("lang") ?? null,
+      viewport,
+      charset,
       htmlBytes: page.bytes,
       textWords,
       textBytes: Buffer.byteLength(bodyText, "utf8"),
       textToHtmlRatio: page.bytes > 0 ? Math.round((Buffer.byteLength(bodyText, "utf8") / page.bytes) * 1000) / 1000 : 0,
     },
+    openGraph,
+    twitter,
     headings,
     blocks,
     jsonLd,
@@ -304,12 +364,19 @@ export async function gatherEvidence(inputUrl: string): Promise<Evidence> {
       .get()
       .filter(Boolean)
       .slice(0, 20),
+    schemaAnalysis: {
+      detectedTypes,
+      issues: schemaIssues,
+      rawSnippets,
+    },
     robots: {
       found: robotsRaw !== null,
       status: robotsRes?.status ?? null,
       rules: resolveAllAgents(robotsRaw, path),
       metaRobots: $('meta[name="robots"]').attr("content") ?? null,
       xRobotsTag: page.headers.get("x-robots-tag"),
+      rawText: robotsRaw,
+      explainedRules: explainRobotsFile(robotsRaw),
     },
     llmsTxt: {
       found: llmsFound,
@@ -320,6 +387,7 @@ export async function gatherEvidence(inputUrl: string): Promise<Evidence> {
     sitemap: {
       found: !!sitemapRes && sitemapRes.status === 200 && /<urlset|<sitemapindex/i.test(sitemapRes.body.slice(0, 500)),
       inRobots: robotsRaw !== null && /sitemap:/i.test(robotsRaw),
+      urlCount: sitemapUrlCount,
     },
     links: {
       internal,

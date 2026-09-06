@@ -1,0 +1,11 @@
+<svg width="32" height="32" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100" height="100" rx="22" fill="#0A2016" />
+  <path
+    d="M68 22L40 22L20 50L40 78L68 78L80 62L65 62L56 70L34 70L22 50L34 30L56 30L65 38L80 38L68 22Z"
+    fill="#3BF48A"
+  />
+  <polygon
+    points="50,38 60,44 60,56 50,62 40,56 40,44"
+    fill="#10B981"
+  />
+</svg>
