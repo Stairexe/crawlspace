@@ -186,6 +186,39 @@ export function Descent() {
     let raf = 0;
     let done = false;
     const start = performance.now();
+    const events = ["keydown", "pointerdown", "wheel", "touchstart"] as const;
+
+    // Reduced motion: the same sheet, composed and still, then a short fade. Opacity
+    // only — nothing walks, splits, stretches or flies.
+    if (html.hasAttribute("data-descent-calm")) {
+      floors.forEach((f) => put(f, "style:clip-path", "inset(0 0 0 0)"));
+      rulers.forEach((r) => put(r, "style:opacity", "1"));
+      unders.forEach((u) => put(u, "style:clip-path", "inset(0 0 0 0)"));
+      words.forEach((w) => put(w, "style:transform", "none"));
+      put(wrap, "style:transform", "none");
+      if (lens) put(lens, "style:fill", "var(--color-lamp)");
+      if (beam) put(beam, "opacity", "0.38");
+      const hold = window.setTimeout(() => {
+        html.dataset.descent = "open";
+        if (mark) mark.style.opacity = "1";
+        const fade = el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 320, easing: "ease", fill: "forwards" });
+        fade.onfinish = () => {
+          html.removeAttribute("data-descent-calm");
+          finish();
+        };
+      }, 1100);
+      const skipCalm = () => {
+        window.clearTimeout(hold);
+        html.removeAttribute("data-descent-calm");
+        finish();
+      };
+      events.forEach((ev) => window.addEventListener(ev, skipCalm, { once: true, passive: true }));
+      return () => {
+        window.clearTimeout(hold);
+        events.forEach((ev) => window.removeEventListener(ev, skipCalm));
+        document.body.style.overflow = prevOverflow;
+      };
+    }
 
     function finish() {
       if (done) return;
@@ -293,7 +326,6 @@ export function Descent() {
       removeListeners();
     }
 
-    const events = ["keydown", "pointerdown", "wheel", "touchstart"] as const;
     function removeListeners() {
       events.forEach((e) => window.removeEventListener(e, skip));
     }

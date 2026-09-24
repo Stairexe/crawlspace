@@ -85,7 +85,9 @@ const JSON_LD = {
   ],
 };
 
-const HEAD_SCRIPT = `(function(){var d=document.documentElement;d.setAttribute("data-js","");try{if(location.pathname==="/"&&!sessionStorage.getItem("cs-descent")&&!matchMedia("(prefers-reduced-motion: reduce)").matches){d.setAttribute("data-descent","play")}}catch(e){}})();`;
+// Every first visit to "/" gets the opening, on every device. With reduced motion it is
+// the calm version: a still title sheet that fades, no walking, splitting or flying.
+const HEAD_SCRIPT = `(function(){var d=document.documentElement;d.setAttribute("data-js","");try{if(location.pathname==="/"&&!sessionStorage.getItem("cs-descent")){d.setAttribute("data-descent","play");if(matchMedia("(prefers-reduced-motion: reduce)").matches)d.setAttribute("data-descent-calm","")}}catch(e){}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
