@@ -734,3 +734,9 @@ html[data-js] [data-draw][data-inview] .callout-pin {
   }
 }
 }
+
+/* Decorative numerals and markers live in CSS, not in the text layer, so crawlers and
+   copy-paste read "Access", not "01Access". */
+[data-n]::before {
+  content: attr(data-n);
+}

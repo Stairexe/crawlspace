@@ -13,25 +13,25 @@ export const FIG1_KEY = [
     n: 1,
     check: "self-contained-blocks",
     title: "Paragraph opens with “As noted above”",
-    body: "Lifted into an answer, the passage points at text the reader never sees. Assistants skip blocks that lean on their neighbours.",
+    body: "A passage that points backwards is unusable on its own: lifted into an answer, it refers to text the reader never sees. Assistants skip blocks that lean on their neighbours.",
   },
   {
     n: 2,
     check: "answer-length-band",
     title: "212 words in one block",
-    body: "Past roughly 220 words an assistant truncates mid-argument. 40–160 words is the band that gets quoted whole.",
+    body: "A block past roughly 220 words is truncated mid-argument when an assistant quotes it. 40–160 words is the band that gets quoted whole.",
   },
   {
     n: 3,
     check: "jsonld-present",
     title: "No structured data in the head",
-    body: "Nothing tells an engine what the page is about or who stands behind it, so it has to guess.",
+    body: "Structured data is how a page tells an engine what it is about and who stands behind it. Without it, the engine has to guess.",
   },
   {
     n: 4,
     check: "crawler-perplexity",
     title: "robots.txt refuses PerplexityBot",
-    body: "A gate, not a deduction: that engine cannot read the page, so its score is capped at 25 and marked not inspected.",
+    body: "A blocked crawler is a gate, not a deduction: that engine cannot read the page, so its score is capped at 25 and marked not inspected.",
   },
 ] as const;
 

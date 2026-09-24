@@ -67,7 +67,7 @@ export function LiveSpecimen({ specimen }: { specimen: Specimen }) {
                 {k}
               </div>
               <div className="mono mt-1 truncate text-[13px] text-ink" title={v}>
-                {v}
+                {k === "Inspected" ? <time dateTime={r.evidence.fetchedAt}>{v}</time> : v}
               </div>
             </div>
           ))}
@@ -112,14 +112,14 @@ export function LiveSpecimen({ specimen }: { specimen: Specimen }) {
           <p className="mt-5 border-t border-line pt-4 text-[13.5px] leading-relaxed text-ink-dim">
             {r.spread >= 8 ? (
               <>
-                Identical evidence, a {r.spread}-point gap: {ENGINE_LABELS[best]} scores{" "}
+                The same evidence produces a {r.spread}-point gap: {ENGINE_LABELS[best]} scores{" "}
                 {r.engines[best].score} and {ENGINE_LABELS[worst]} scores{" "}
                 {r.engines[worst].score}. A single blended number would have hidden that.
               </>
             ) : (
               <>
-                The five engines agree closely on this page, so every defect below improves
-                all of them at once.
+                The five scores are within {r.spread} points of each other on this page, so every
+                defect below improves all of them at once.
               </>
             )}
           </p>
@@ -138,9 +138,7 @@ export function LiveSpecimen({ specimen }: { specimen: Specimen }) {
                   key={f.checkId}
                   className="flex items-start gap-4 border-b border-line px-5 py-3 last:border-b-0"
                 >
-                  <span className="callout shrink-0" aria-label={`Defect ${i + 1}`}>
-                    {i + 1}
-                  </span>
+                  <span className="callout shrink-0" data-n={i + 1} aria-hidden />
                   <span className="min-w-0 flex-1">
                     <span className="block text-[13.5px] text-ink">{f.fix.summary}</span>
                     <span className="mono mt-1 block truncate text-[11px] text-ink-faint">
@@ -175,7 +173,7 @@ export function LiveSpecimen({ specimen }: { specimen: Specimen }) {
       </div>
 
       <p className="mono mt-3 text-center text-[11px] text-ink-faint">
-        Live output from this engine, refreshed at most once a day. Not a mockup.
+        This is live output from the engine, refreshed at most once a day. It is not a mockup.
       </p>
     </div>
   );

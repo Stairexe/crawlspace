@@ -29,7 +29,7 @@ export function DashboardEmpty({
         </span>
       </header>
 
-      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center px-6 py-20">
+      <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center px-6 py-20">
         <p className="mono text-[11px] uppercase tracking-[0.16em] text-ink-faint">
           No surveys on file
         </p>
@@ -71,7 +71,7 @@ export function DashboardEmpty({
           Surveys are not saved yet — this list stays empty between visits until accounts
           ship. Export from the results screen to keep one.
         </p>
-      </main>
+      </div>
     </div>
   );
 }

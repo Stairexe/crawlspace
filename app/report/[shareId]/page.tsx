@@ -22,7 +22,7 @@ export default function PublicReportPage() {
         </Link>
       </header>
 
-      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col justify-center px-6 py-20">
+      <div className="mx-auto flex w-full max-w-xl flex-1 flex-col justify-center px-6 py-20">
         <p className="mono text-[11px] uppercase tracking-[0.16em] text-ink-faint">
           Survey not on file
         </p>
@@ -54,7 +54,7 @@ export default function PublicReportPage() {
             Read the methodology
           </Link>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

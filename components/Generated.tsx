@@ -112,7 +112,7 @@ export function Generated({
         {busy && <p className="mono text-[12px] text-ink-faint">generating…</p>}
         {error && <p className="text-[12.5px] text-danger">{error}</p>}
         {content && (
-          <pre className="thin-scroll max-h-96 overflow-auto rounded-md border border-line bg-base p-3.5 text-[11.5px] leading-relaxed text-ink-dim">
+          <pre tabIndex={0} className="thin-scroll max-h-96 overflow-auto rounded-md border border-line bg-base p-3.5 text-[11.5px] leading-relaxed text-ink-dim">
             <code>{content}</code>
           </pre>
         )}

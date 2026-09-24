@@ -120,7 +120,7 @@ export function CrawlerCenter({ evidence }: { evidence: Evidence }) {
       </div>
 
       {/* Crawler Table */}
-      <div className="overflow-x-auto rounded-xl border border-line bg-surface">
+      <div tabIndex={0} role="region" aria-label="Crawler access table" className="overflow-x-auto rounded-xl border border-line bg-surface">
         <table className="w-full text-left text-[13px]">
           <thead className="border-b border-line bg-surface/80 text-[11px] uppercase tracking-wider text-ink-faint">
             <tr>

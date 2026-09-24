@@ -2,7 +2,8 @@ import Link from "next/link";
 import { ShieldCheck, ArrowLeft, Lock } from "lucide-react";
 
 export const metadata = {
-  title: "Privacy Policy · Crawlspace",
+  title: "Privacy Policy",
+  alternates: { canonical: "/privacy" },
   description: "Privacy policy and zero-storage guarantee for Crawlspace.",
 };
 

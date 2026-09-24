@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CATEGORIES, CATEGORY_BLURBS, CATEGORY_LABELS, ENGINES, ENGINE_LABELS } from "@/lib/types";
-import { BASE_WEIGHTS, ENGINE_MULTIPLIERS, ENGINE_RATIONALE, GATE_CAP } from "@/lib/scoring/weights";
+import { BASE_WEIGHTS, ENGINE_MULTIPLIERS, ENGINE_RATIONALE, GATE_CAP, MODEL_REVISED } from "@/lib/scoring/weights";
 import { SUB_WEIGHTS, SUB_LABELS } from "@/lib/blocks";
 import { AI_AGENTS } from "@/lib/robots";
 import { GEO_TACTICS } from "@/lib/ai/prompts";
@@ -12,6 +12,29 @@ export const metadata: Metadata = {
   title: "Methodology",
   description:
     "Every weight Crawlspace uses, where each one came from, and what the tool cannot measure.",
+  alternates: { canonical: "/methodology" },
+};
+
+const BASE = "https://crawlspace-geo.vercel.app";
+const REVISED_LABEL = new Date(`${MODEL_REVISED}T00:00:00Z`).toLocaleDateString("en-GB", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
+const ARTICLE_LD = {
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "@id": `${BASE}/methodology#article`,
+  headline: "Every weight, and where it came from",
+  description:
+    "The complete Crawlspace scoring model: categories, per-engine multipliers, block-level rules, gates, and what the tool does not measure.",
+  url: `${BASE}/methodology`,
+  dateModified: MODEL_REVISED,
+  author: { "@id": `${BASE}/#rohith` },
+  publisher: { "@id": `${BASE}/#organization` },
+  isPartOf: { "@id": `${BASE}/#app` },
 };
 
 function H({ children, id }: { children: React.ReactNode; id: string }) {
@@ -26,9 +49,19 @@ export default function Methodology() {
   return (
     <div className="mx-auto max-w-3xl px-5 pb-24 pt-14">
       <p className="mono text-[11px] uppercase tracking-[0.16em] text-signal">methodology</p>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(ARTICLE_LD) }}
+      />
       <h1 className="mt-3 text-[32px] font-semibold leading-tight tracking-[-0.02em]">
         Every weight, and where it came from
       </h1>
+      <p className="mono mt-3 text-[11.5px] text-ink-faint">
+        Model revised <time dateTime={MODEL_REVISED}>{REVISED_LABEL}</time> · by{" "}
+        <a href="https://github.com/Stairexe" rel="author" className="underline underline-offset-4">
+          Rohith Reddy
+        </a>
+      </p>
       <p className="mt-4 text-[15px] leading-relaxed text-ink-dim">
         A score you cannot argue with is a score you cannot trust. This page publishes the whole
         model: the categories, the per-engine multipliers, the block-level rules, and — at the
@@ -43,7 +76,7 @@ export default function Methodology() {
         different weight vectors. No stage reaches backwards, and no check performs its own
         network request, so the same evidence always produces the same score.
       </p>
-      <pre className="mono mt-4 overflow-x-auto rounded-lg border border-line bg-surface p-4 text-[12px] leading-relaxed text-ink-dim">
+      <pre tabIndex={0} className="mono mt-4 overflow-x-auto rounded-lg border border-line bg-surface p-4 text-[12px] leading-relaxed text-ink-dim">
         {`fetch → evidence → checks → 5 engine scores → findings`}
       </pre>
 
@@ -98,7 +131,7 @@ export default function Methodology() {
         100. This is the part most tools skip, and it is the reason a page can be an 81 for one
         engine and a 44 for another on identical evidence.
       </p>
-      <div className="mt-4 overflow-x-auto">
+      <div tabIndex={0} role="region" aria-label="Per-engine multipliers table" className="mt-4 overflow-x-auto">
         <table className="mono w-full min-w-[560px] border-collapse text-[12px]">
           <thead>
             <tr className="border-b border-line text-ink-faint">
@@ -174,7 +207,7 @@ export default function Methodology() {
       </div>
 
       <H id="crawlers">The crawlers checked</H>
-      <div className="mt-4 overflow-x-auto">
+      <div tabIndex={0} role="region" aria-label="Crawlers checked table" className="mt-4 overflow-x-auto">
         <table className="mono w-full min-w-[460px] border-collapse text-[12px]">
           <tbody>
             {AI_AGENTS.map((a) => (

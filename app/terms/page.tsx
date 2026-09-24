@@ -3,8 +3,9 @@ import { CrawlspaceLogo } from "@/components/CrawlspaceLogo";
 import { ShieldCheck, FileText, ArrowLeft } from "lucide-react";
 
 export const metadata = {
-  title: "Terms of Service · Crawlspace",
-  description: "Terms and conditions for utilizing Crawlspace Website Visibility Intelligence.",
+  title: "Terms of Service",
+  alternates: { canonical: "/terms" },
+  description: "Terms for using Crawlspace, the AI citability survey tool.",
 };
 
 export default function TermsPage() {
@@ -49,7 +50,7 @@ export default function TermsPage() {
         <section className="space-y-3">
           <h2 className="text-[18px] font-bold text-ink">2. Permitted Diagnostic Use</h2>
           <p>
-            Crawlspace provides website visibility intelligence, SEO auditing, and AI citation analysis. You may use our service to analyze publicly accessible websites that you own, operate, or have permission to inspect.
+            Crawlspace audits web pages for search fundamentals and AI citability. You may use our service to analyze publicly accessible websites that you own, operate, or have permission to inspect.
           </p>
           <p>
             You agree not to use the Service to conduct denial-of-service attacks, scrape prohibited endpoints, or reverse-engineer the proprietary scoring and weight matrices without authorization.

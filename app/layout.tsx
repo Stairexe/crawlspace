@@ -18,7 +18,6 @@ const martian = Martian_Mono({
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { RevealObserver } from "@/components/RevealObserver";
-import { FAQ } from "@/lib/faq";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -28,7 +27,9 @@ export const metadata: Metadata = {
     template: "%s · Crawlspace",
   },
   description:
-    "Crawlspace fetches a page the way an AI crawler does, measures every passage against what ChatGPT, Claude, Perplexity, Copilot and Google AI Overviews can quote, and issues five separate scores with a numbered defect schedule.",
+    "Crawlspace surveys a web page the way AI crawlers read it and scores it separately for ChatGPT, Claude, Perplexity, Copilot and Google AI Overviews.",
+  authors: [{ name: "Rohith Reddy", url: "https://github.com/Stairexe" }],
+  creator: "Rohith Reddy",
   keywords: [
     "GEO", "generative engine optimization", "AEO", "AI search", "SEO audit", "llms.txt",
     "AI crawlers", "GPTBot", "PerplexityBot", "ClaudeBot", "AI citations", "structured data", "JSON-LD"
@@ -59,12 +60,7 @@ const JSON_LD = {
       url: BASE,
       description:
         "Crawlspace audits how crawlable and citable a web page is to AI assistants, one engine at a time.",
-      founder: {
-        "@type": "Person",
-        name: "Asodi Rohith Reddy",
-        url: "https://github.com/Stairexe",
-        sameAs: ["https://www.linkedin.com/in/rohithreddyasodi"],
-      },
+      founder: { "@id": `${BASE}/#rohith` },
       sameAs: ["https://github.com/Stairexe/crawlspace"],
     },
     {
@@ -80,13 +76,11 @@ const JSON_LD = {
         "Audits how crawlable and citable a web page is to ChatGPT, Perplexity, Claude, Copilot and Google AI Overviews, scoring each engine separately and rewriting the passages an assistant cannot lift.",
     },
     {
-      "@type": "FAQPage",
-      "@id": `${BASE}/#faq`,
-      mainEntity: FAQ.map((f) => ({
-        "@type": "Question",
-        name: f.q,
-        acceptedAnswer: { "@type": "Answer", text: f.a },
-      })),
+      "@type": "Person",
+      "@id": `${BASE}/#rohith`,
+      name: "Rohith Reddy",
+      url: "https://github.com/Stairexe",
+      sameAs: ["https://www.linkedin.com/in/rohithreddyasodi", "https://github.com/Stairexe"],
     },
   ],
 };

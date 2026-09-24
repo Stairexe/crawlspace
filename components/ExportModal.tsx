@@ -228,7 +228,7 @@ export function ExportModal({
               </div>
             </div>
             <div className="p-4">
-              <pre className="mono thin-scroll max-h-64 overflow-auto rounded-lg bg-base p-3 text-[11.5px] leading-relaxed text-ink-dim">
+              <pre tabIndex={0} className="mono thin-scroll max-h-64 overflow-auto rounded-lg bg-base p-3 text-[11.5px] leading-relaxed text-ink-dim">
                 {activePreview === "prompt"
                   ? llmPrompt
                   : activePreview === "markdown"

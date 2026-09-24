@@ -58,7 +58,12 @@ export function Footer() {
                 {c.links.map((l) => (
                   <li key={l.href}>
                     {l.external ? (
-                      <a href={l.href} target={l.href.startsWith("http") ? "_blank" : undefined} rel="noreferrer" className="nav-link text-ink-dim">
+                      <a
+                        href={l.href}
+                        target={l.href.startsWith("http") ? "_blank" : undefined}
+                        rel={l.label === "Rohith Reddy" ? "author noreferrer" : "noreferrer"}
+                        className="nav-link text-ink-dim"
+                      >
                         {l.label}
                       </a>
                     ) : (

@@ -54,21 +54,33 @@ interface LegEls {
   foot: SVGLineElement | null;
 }
 
+// Most frames change only a few properties. Every write goes through this cache, so a
+// value that has not changed since the last frame never touches the DOM (no style
+// recalc, no SVG re-layout for legs that are standing still).
+const written = new WeakMap<Element, Map<string, string>>();
+function put(el: Element, key: string, value: string) {
+  let m = written.get(el);
+  if (!m) written.set(el, (m = new Map()));
+  if (m.get(key) === value) return;
+  m.set(key, value);
+  if (key.startsWith("style:")) (el as HTMLElement).style.setProperty(key.slice(6), value);
+  else el.setAttribute(key, value);
+}
+
 function setLeg(els: LegEls, knee: Pt, foot: Pt) {
   const { leg } = els;
-  els.limb.setAttribute(
-    "points",
-    `${leg.hip[0]},${leg.hip[1]} ${knee[0].toFixed(2)},${knee[1].toFixed(2)} ${foot[0].toFixed(2)},${foot[1].toFixed(2)}`,
-  );
+  const k = [knee[0].toFixed(1), knee[1].toFixed(1)];
+  const f = [foot[0].toFixed(1), foot[1].toFixed(1)];
+  put(els.limb, "points", `${leg.hip[0]},${leg.hip[1]} ${k[0]},${k[1]} ${f[0]},${f[1]}`);
   if (els.pin) {
-    els.pin.setAttribute("cx", knee[0].toFixed(2));
-    els.pin.setAttribute("cy", knee[1].toFixed(2));
+    put(els.pin, "cx", k[0]);
+    put(els.pin, "cy", k[1]);
   }
   if (els.foot) {
-    els.foot.setAttribute("x1", (foot[0] - 3).toFixed(2));
-    els.foot.setAttribute("x2", (foot[0] + 3).toFixed(2));
-    els.foot.setAttribute("y1", foot[1].toFixed(2));
-    els.foot.setAttribute("y2", foot[1].toFixed(2));
+    put(els.foot, "x1", (foot[0] - 3).toFixed(1));
+    put(els.foot, "x2", (foot[0] + 3).toFixed(1));
+    put(els.foot, "y1", f[1]);
+    put(els.foot, "y2", f[1]);
   }
 }
 
@@ -190,18 +202,29 @@ export function Descent() {
     function frame(now: number) {
       const t = now - start;
 
+      // Reads first. Layout is clean at the top of a frame, so measuring here is free;
+      // measuring after this frame's writes would force a synchronous reflow.
+      if (t >= T.fly[0] && !flight) {
+        const from = wrap.getBoundingClientRect();
+        const to = mark?.getBoundingClientRect();
+        flight =
+          to && to.width > 0
+            ? { dx: to.left - from.left, dy: to.top - from.top, s: to.width / from.width }
+            : { dx: 0, dy: -from.top - from.height, s: 0.2 };
+      }
+
       // Floor drafted left to right, across both halves as one line.
       const pf = easeInOut(span(t, T.floor));
       floors.forEach((f, i) => {
         const local = clamp01(pf * 2 - i); // left half first, then right
-        f.style.clipPath = `inset(0 ${(1 - local) * 100}% 0 0)`;
+        put(f, "style:clip-path", `inset(0 ${((1 - local) * 100).toFixed(2)}% 0 0)`);
       });
-      rulers.forEach((r) => (r.style.opacity = String(span(t, T.floor))));
+      rulers.forEach((r) => put(r, "style:opacity", span(t, T.floor).toFixed(3)));
       // The crawlspace fills in beneath the floor as it is drafted.
       const pu = easeInOut(span(t, [T.floor[0] + 150, T.word[1]]));
-      unders.forEach((u) => (u.style.clipPath = `inset(0 0 ${(1 - pu) * 100}% 0)`));
+      unders.forEach((u) => put(u, "style:clip-path", `inset(0 0 ${((1 - pu) * 100).toFixed(2)}% 0)`));
       const pw = easeOut(span(t, T.word));
-      words.forEach((w) => (w.style.transform = `translateY(${(1 - pw) * 105}%)`));
+      words.forEach((w) => put(w, "style:transform", `translateY(${((1 - pw) * 105).toFixed(2)}%)`));
 
       // Walk in.
       const pWalk = span(t, T.walk);
@@ -212,23 +235,23 @@ export function Descent() {
       // Torch.
       const pl = span(t, T.lamp);
       const pFly = easeInOut(span(t, T.fly));
-      if (lens) lens.style.fill = pl > 0.4 ? "var(--color-lamp)" : "";
-      if (beam) beam.setAttribute("opacity", String(0.38 * easeOut(pl) * (1 - clamp01(pFly * 3))));
+      if (lens) put(lens, "style:fill", pl > 0.4 ? "var(--color-lamp)" : "currentColor");
+      if (beam) put(beam, "opacity", (0.38 * easeOut(pl) * (1 - clamp01(pFly * 3))).toFixed(3));
 
       // Section cut struck through the inspector, then fading as the sheet parts.
       const ps = easeInOut(span(t, T.seam));
       const pSplit = easeInOut(span(t, T.split));
       // Struck outward from the floor (60% down), by clipping rather than scaling so the
       // dashes and the A markers never distort.
-      seam.style.clipPath = `inset(${60 * (1 - ps)}% -30px ${40 * (1 - ps)}% -30px)`;
-      seam.style.opacity = String(1 - pSplit);
+      put(seam, "style:clip-path", `inset(${(60 * (1 - ps)).toFixed(2)}% -30px ${(40 * (1 - ps)).toFixed(2)}% -30px)`);
+      put(seam, "style:opacity", (1 - pSplit).toFixed(3));
 
       // The split. Feet are planted on the floor, so they travel with their half.
       // As the sheet starts to part, the page's own entrance begins underneath it.
       if (t >= T.split[0] && html.dataset.descent === "play") html.dataset.descent = "open";
       const shift = pSplit * splitDistance;
       halves.forEach((h) => {
-        h.style.transform = `translate3d(${h.dataset.half === "l" ? -shift : shift}px,0,0)`;
+        put(h, "style:transform", `translate3d(${(h.dataset.half === "l" ? -shift : shift).toFixed(1)}px,0,0)`);
       });
       const stretch = shift * unit * (1 - pFly);
 
@@ -245,20 +268,12 @@ export function Descent() {
       }
 
       // Settle into the logo mark.
-      if (t >= T.fly[0] && !flight) {
-        const from = wrap.getBoundingClientRect();
-        const to = mark?.getBoundingClientRect();
-        flight =
-          to && to.width > 0
-            ? { dx: to.left - from.left, dy: to.top - from.top, s: to.width / from.width }
-            : { dx: 0, dy: -from.top - from.height, s: 0.2 };
-      }
       if (flight) {
-        wrap.style.transform = `translate3d(${flight.dx * pFly}px, ${flight.dy * pFly}px, 0) scale(${lerp(1, flight.s, pFly)})`;
-        wrap.style.opacity = String(1 - span(t, [T.fly[1] - 160, T.fly[1]]));
-        if (mark) mark.style.opacity = String(span(t, [T.fly[1] - 200, T.fly[1]]));
+        put(wrap, "style:transform", `translate3d(${(flight.dx * pFly).toFixed(1)}px, ${(flight.dy * pFly).toFixed(1)}px, 0) scale(${lerp(1, flight.s, pFly).toFixed(4)})`);
+        put(wrap, "style:opacity", (1 - span(t, [T.fly[1] - 160, T.fly[1]])).toFixed(3));
+        if (mark) put(mark, "style:opacity", span(t, [T.fly[1] - 200, T.fly[1]]).toFixed(3));
       } else {
-        wrap.style.transform = `translate3d(${x}px, ${bob}px, 0)`;
+        put(wrap, "style:transform", `translate3d(${x.toFixed(1)}px, ${bob.toFixed(2)}px, 0)`);
       }
 
       if (t >= T.end) finish();

@@ -11,6 +11,8 @@ import { FocusSurveyButton } from "./FocusSurveyButton";
 type Style = React.CSSProperties & { ["--i"]?: number };
 const i = (n: number): Style => ({ ["--i"]: n });
 
+const GOOGLE_AI_FEATURES_URL = "https://developers.google.com/search/docs/appearance/ai-features";
+
 function SectionHead({ mark, title, lede, id }: { mark: string; title: React.ReactNode; lede?: React.ReactNode; id?: string }) {
   return (
     <header id={id} className="grid scroll-mt-20 gap-4 border-t border-signal pt-5 md:grid-cols-12">
@@ -34,25 +36,25 @@ const STAGES = [
     n: "01",
     name: "Access",
     q: "Can the engine get in?",
-    body: "Reads robots.txt for each engine’s own crawler, then checks the response, noindex, and whether the content exists without JavaScript. An engine that cannot get in is marked not inspected and capped at 25. Its failure is never averaged into a passing score.",
+    body: "Access is checked before anything else: robots.txt for each engine’s own crawler, then the response, noindex, and whether the content exists without JavaScript. An engine that cannot get in is marked not inspected and capped at 25, and that failure is never averaged into a passing score.",
   },
   {
     n: "02",
     name: "Measure",
     q: "What is each passage worth on its own?",
-    body: "Splits the page into blocks and measures every one: its length band, whether it names its own subject, whether the answer comes first, question-shaped headings, tables, figures, sources and attributed quotes.",
+    body: "Every block on the page is measured on its own: its length band, whether it names its own subject, whether the answer comes first, question-shaped headings, tables, figures, sources and attributed quotes.",
   },
   {
     n: "03",
     name: "Score",
     q: "Five schedules, one evidence pass.",
-    body: "The same evidence runs through five weight vectors, one per engine, all published on the methodology page. The engines disagree — Google says llms.txt is unnecessary, others read it — so the scores are allowed to disagree too.",
+    body: "Scoring is one evidence pass through five weight vectors, one per engine, all published on the methodology page. The engines disagree about what matters, so the scores are allowed to disagree too.",
   },
   {
     n: "04",
     name: "Repair",
     q: "Rewrite what cannot be lifted.",
-    body: "With an API key, the rewriter drafts new versions of the weakest passages. It is forbidden from adding statistics, citations, quotes or claims the page does not already make. Structured data and llms.txt drafts come from what the page states.",
+    body: "The rewriter is optional and needs an API key. It drafts new versions of the weakest passages and is forbidden from adding statistics, citations, quotes or claims the page does not already make. Structured data and llms.txt drafts come from what the page states.",
   },
 ];
 
@@ -116,7 +118,7 @@ export function LandingSections({ specimen }: { specimen: React.ReactNode }) {
           id="method"
           mark="§ 01 — Method"
           title={<span id="method-h">A page, drawn in section.</span>}
-          lede="Crawlspace fetches the page once, the way a crawler does: no browser, no JavaScript. What comes back is the building. Anything an assistant quotes has to be in that HTML, so that is what gets measured."
+          lede="A survey is one fetch of the page, made the way a crawler makes it: no browser, no JavaScript. What comes back is the building. Anything an assistant quotes has to be in that HTML, so that is what gets measured."
         />
 
         <div className="mt-10 grid gap-8 lg:grid-cols-12">
@@ -131,9 +133,7 @@ export function LandingSections({ specimen }: { specimen: React.ReactNode }) {
           <ol className="space-y-5 lg:col-span-4">
             {FIG1_KEY.map((k, n) => (
               <li key={k.n} data-reveal style={i(n)} className="grid grid-cols-[28px_1fr] gap-3">
-                <span className="callout" aria-hidden>
-                  {k.n}
-                </span>
+                <span className="callout" data-n={k.n} aria-hidden />
                 <div>
                   <div className="text-[14.5px] font-semibold leading-snug text-ink">{k.title}</div>
                   <p className="mt-1 text-[13.5px] leading-relaxed text-ink-dim">{k.body}</p>
@@ -150,7 +150,7 @@ export function LandingSections({ specimen }: { specimen: React.ReactNode }) {
         <SectionHead
           mark="§ 02 — Procedure"
           title={<span id="stages-h">Four stages, in order.</span>}
-          lede="A survey stops where access stops. There is no point grading passages an engine was never allowed to read."
+          lede="Access is always surveyed first, because there is no point grading passages an engine was never allowed to read."
         />
         <ol className="mt-10 border-t border-line">
           {STAGES.map((s, n) => (
@@ -161,7 +161,7 @@ export function LandingSections({ specimen }: { specimen: React.ReactNode }) {
               className="grid gap-2 border-b border-line py-6 md:grid-cols-12 md:gap-6"
             >
               <div className="flex items-baseline gap-3 md:col-span-3">
-                <span className="num text-[13px] text-signal">{s.n}</span>
+                <span className="num text-[13px] text-signal" data-n={s.n} aria-hidden />
                 <span className="plate-title text-[22px] leading-none">{s.name}</span>
               </div>
               <div className="text-[15.5px] font-semibold text-ink md:col-span-3">{s.q}</div>
@@ -169,6 +169,25 @@ export function LandingSections({ specimen }: { specimen: React.ReactNode }) {
             </li>
           ))}
         </ol>
+
+        <figure data-reveal className="mt-12 grid gap-4 md:grid-cols-12">
+          <div className="tb-label md:col-span-3 md:pt-2">Why the scores differ</div>
+          <div className="md:col-span-9">
+            <blockquote cite={GOOGLE_AI_FEATURES_URL} className="plate-title max-w-3xl text-[clamp(21px,2.4vw,30px)] leading-[1.2] text-ink">
+              “You don’t need to create new machine readable files, AI text files, or markup to appear
+              in these features.”
+            </blockquote>
+            <figcaption className="mt-4 max-w-2xl text-[14px] leading-relaxed text-ink-dim">
+              That is Google, in{" "}
+              <a href={GOOGLE_AI_FEATURES_URL} className="underline underline-offset-4" rel="noopener">
+                AI features and your website
+              </a>{" "}
+              on Search Central. The other engines make no such statement, and the GEO research this
+              model is built on finds that structure and markup help them. One score cannot be right
+              for both, so Crawlspace issues five.
+            </figcaption>
+          </div>
+        </figure>
       </section>
 
       {/* §3 — the specimen */}
@@ -177,7 +196,7 @@ export function LandingSections({ specimen }: { specimen: React.ReactNode }) {
           id="specimen"
           mark="§ 03 — Specimen"
           title={<span id="specimen-h">Plate 2: a real survey.</span>}
-          lede="Stripe’s payments documentation, surveyed by this engine when the page was last built. Every figure is whatever the engine returned, including the unflattering ones."
+          lede="This plate is Stripe’s payments documentation, surveyed by this engine when the page was last built. Every figure is whatever the engine returned, including the unflattering ones."
         />
         <div className="mt-10">{specimen}</div>
       </section>
@@ -188,7 +207,7 @@ export function LandingSections({ specimen }: { specimen: React.ReactNode }) {
           id="schedule"
           mark="§ 04 — Schedule"
           title={<span id="schedule-h">What is inspected.</span>}
-          lede="Thirty-four checks in three schedules. Each has a permanent id, a stated weight per engine, and a line of literal evidence in the report."
+          lede="The survey is thirty-four checks in three schedules. Each has a permanent id, a stated weight per engine, and a line of literal evidence in the report."
         />
         <div className="mt-10 grid border-l border-t border-line md:grid-cols-3">
           {SCHEDULES.map((s, n) => (
@@ -203,10 +222,9 @@ export function LandingSections({ specimen }: { specimen: React.ReactNode }) {
                     {it.gate ? (
                       <span
                         className="mono inline-flex h-4 w-4 shrink-0 translate-y-[2px] items-center justify-center rounded-[2px] bg-signal text-[8.5px] font-semibold text-void"
+                        data-n="G"
                         aria-hidden
-                      >
-                        G
-                      </span>
+                      />
                     ) : (
                       <span className="inline-block h-px w-4 shrink-0 -translate-y-[4px] bg-line-bright" aria-hidden />
                     )}
@@ -221,10 +239,8 @@ export function LandingSections({ specimen }: { specimen: React.ReactNode }) {
           ))}
         </div>
         <p className="mono mt-4 flex items-center gap-2.5 text-[11px] text-ink-faint">
-          <span className="inline-flex h-4 w-4 items-center justify-center rounded-[2px] bg-signal text-[8.5px] font-semibold text-void" aria-hidden>
-            G
-          </span>
-          Gate — failing it caps the engines it affects at 25 and marks them not inspected.
+          <span className="inline-flex h-4 w-4 items-center justify-center rounded-[2px] bg-signal text-[8.5px] font-semibold text-void" data-n="G" aria-hidden />
+          A gate is a check whose failure caps the engines it affects at 25 and marks them not inspected.
         </p>
       </section>
 
@@ -235,13 +251,23 @@ export function LandingSections({ specimen }: { specimen: React.ReactNode }) {
           {FAQ.map((f, n) => (
             <details key={f.q} className="faq group border-b border-line" open={n === 0}>
               <summary className="flex cursor-pointer list-none items-baseline gap-4 py-5 text-left">
-                <span className="num w-7 shrink-0 text-[12px] text-ink-faint">{String(n + 1).padStart(2, "0")}</span>
-                <span className="flex-1 text-[16.5px] font-semibold leading-snug text-ink">{f.q}</span>
-                <span aria-hidden className="faq-mark mono text-[16px] text-signal">
-                  +
-                </span>
+                <span className="num w-7 shrink-0 text-[12px] text-ink-faint" data-n={String(n + 1).padStart(2, "0")} aria-hidden />
+                <h3 className="flex-1 text-[16.5px] font-semibold leading-snug text-ink" style={{ fontVariationSettings: '"wdth" 100' }}>
+                  {f.q}
+                </h3>
+                <span aria-hidden className="faq-mark mono text-[16px] text-signal" data-n="+" />
               </summary>
-              <p className="max-w-2xl pb-6 pl-11 text-[14.5px] leading-relaxed text-ink-dim">{f.a}</p>
+              <div className="max-w-2xl pb-6 pl-11">
+                <p className="text-[14.5px] leading-relaxed text-ink-dim">{f.a}</p>
+                {f.source && (
+                  <p className="mono mt-3 text-[11px] leading-relaxed text-ink-faint">
+                    Source:{" "}
+                    <a href={f.source.url} className="underline underline-offset-4 hover:text-ink" rel="noopener">
+                      {f.source.label}
+                    </a>
+                  </p>
+                )}
+              </div>
             </details>
           ))}
         </div>
@@ -254,7 +280,7 @@ export function LandingSections({ specimen }: { specimen: React.ReactNode }) {
           Survey a page.
         </h2>
         <p data-reveal style={i(1)} className="mx-auto mt-4 max-w-lg text-[15px] leading-relaxed text-ink-dim">
-          One URL. No account, no key. The report exports as Markdown or JSON.
+          A survey needs one URL and nothing else: no account, no key. The report exports as Markdown or JSON.
         </p>
         <div data-reveal style={i(2)} className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <FocusSurveyButton />

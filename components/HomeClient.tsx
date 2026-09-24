@@ -2,9 +2,17 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { AuditReport } from "@/lib/types";
-import { VisibilityDashboard } from "@/components/VisibilityDashboard";
+import dynamic from "next/dynamic";
 import type { AiState } from "@/components/Blocks";
 import { CrawlBot } from "@/components/CrawlBot";
+
+// The results view is most of this page's JavaScript and is only needed once a survey
+// returns, so it loads then (and is prefetched the moment a survey starts).
+const loadDashboard = () => import("@/components/VisibilityDashboard");
+const VisibilityDashboard = dynamic(() => loadDashboard().then((m) => m.VisibilityDashboard), {
+  ssr: false,
+  loading: () => <div className="plate h-64" aria-busy="true" />,
+});
 
 type Phase = "idle" | "scanning" | "done" | "error";
 type Style = React.CSSProperties & { ["--i"]?: number };
@@ -67,6 +75,7 @@ export function HomeClient({ children }: { children: React.ReactNode }) {
     if (!v) return;
     setTarget(v);
     setPhase("scanning");
+    void loadDashboard();
     setError(null);
     setReport(null);
     try {
@@ -120,8 +129,9 @@ export function HomeClient({ children }: { children: React.ReactNode }) {
               ))}
             </h1>
             <p className="after-descent mt-7 max-w-xl text-[17px] leading-relaxed text-ink-dim" style={i(3)}>
-              Crawlspace fetches it the way their crawlers do, measures every passage against what
-              each engine can lift, and issues five separate scores with a numbered defect schedule.
+              Crawlspace is a survey of one page as AI crawlers receive it. It measures every passage
+              against what each engine can lift, and issues five separate scores with a numbered
+              defect schedule.
             </p>
           </div>
 

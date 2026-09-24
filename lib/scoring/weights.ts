@@ -89,3 +89,11 @@ export function weightsFor(engine: Engine): Record<Category, number> {
 
 /** A failed gate caps the affected engines here. See research/scoring-model.md. */
 export const GATE_CAP = 25;
+
+/**
+ * The date the scoring model last changed — weights, gates, block rules or how page text
+ * is read. Shown on /methodology as its revision date. Change it only when behaviour
+ * changes; a date that moves without a change is a false freshness signal.
+ * 2026-09-24: text extraction now treats block-element boundaries as word boundaries.
+ */
+export const MODEL_REVISED = "2026-09-24";

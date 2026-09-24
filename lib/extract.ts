@@ -18,8 +18,34 @@ const BOILERPLATE_SELECTORS = [
   ".advertisement", ".ad", "#comments", ".comments",
 ].join(",");
 
-function textOf($: cheerio.CheerioAPI, el: AnyNode): string {
-  return $(el).text().replace(/\s+/g, " ").trim();
+/**
+ * Elements whose boundaries are word boundaries. cheerio's .text() concatenates text
+ * nodes with no separator, so `<span>01</span><h3>Access</h3>` would read as "01Access"
+ * and be counted as one word. A crawler's text extraction separates them; so does this.
+ */
+const BREAKING = new Set([
+  "address", "article", "aside", "blockquote", "br", "dd", "details", "div", "dl", "dt",
+  "figcaption", "figure", "footer", "h1", "h2", "h3", "h4", "h5", "h6", "header", "hr",
+  "li", "main", "nav", "ol", "p", "pre", "section", "summary", "table", "td", "th", "tr", "ul",
+]);
+
+function collectText(node: AnyNode, out: string[]): void {
+  const n = node as { type?: string; data?: string; name?: string; children?: AnyNode[] };
+  if (n.type === "text") {
+    out.push(n.data ?? "");
+    return;
+  }
+  if (n.type !== "tag" && n.type !== "root") return;
+  const breaking = !!n.name && BREAKING.has(n.name);
+  if (breaking) out.push(" ");
+  for (const c of n.children ?? []) collectText(c, out);
+  if (breaking) out.push(" ");
+}
+
+function textOf(_$: cheerio.CheerioAPI, el: AnyNode): string {
+  const out: string[] = [];
+  collectText(el, out);
+  return out.join("").replace(/\s+/g, " ").trim();
 }
 
 function domPath($: cheerio.CheerioAPI, el: AnyNode): string {
