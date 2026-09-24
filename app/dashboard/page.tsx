@@ -3,8 +3,8 @@
 import { useState, useEffect, useMemo, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
+import { DashboardEmpty } from "@/components/DashboardEmpty";
 import { CrawlspaceLogo } from "@/components/CrawlspaceLogo";
-import { SAMPLE_REPORT } from "@/lib/mockReport";
 import type { AuditReport } from "@/lib/types";
 import { CrawlerCenter } from "@/components/CrawlerCenter";
 import { SchemaAnalyzer } from "@/components/SchemaAnalyzer";
@@ -71,10 +71,8 @@ function DashboardContent() {
   const domainFromUrl = searchParams?.get("domain");
 
   const [activeTab, setActiveTab] = useState<SidebarTab>(activeTabFromUrl);
-  const [report, setReport] = useState<AuditReport>(SAMPLE_REPORT);
-  const [activeDomain, setActiveDomain] = useState(
-    domainFromUrl || "stripe.com/docs/payments"
-  );
+  const [report, setReport] = useState<AuditReport | null>(null);
+  const [activeDomain, setActiveDomain] = useState(domainFromUrl || "");
   const [searchInput, setSearchInput] = useState(activeDomain);
   const [isScanning, setIsScanning] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
@@ -119,19 +117,25 @@ function DashboardContent() {
     }
   }
 
+  // No scan history until surveys are stored. Previously this held four invented
+  // audits with invented scores and timestamps; an empty list is the honest state.
+  const recentScans = useMemo<
+    { domain: string; score: number; seo: number; geo: number; crawlers: string; time: string }[]
+  >(() => [], []);
+
+  if (!report) {
+    return (
+      <DashboardEmpty
+        value={searchInput}
+        onChange={setSearchInput}
+        onRun={() => handleAuditRun(searchInput)}
+        isScanning={isScanning}
+      />
+    );
+  }
+
   const v = report.visibility;
   const e = report.evidence;
-
-  // Recent Scans Table Data
-  const recentScans = useMemo(
-    () => [
-      { domain: "stripe.com/docs/payments", score: 78, seo: 84, geo: 71, crawlers: "100%", time: "2 mins ago" },
-      { domain: "linear.app", score: 85, seo: 91, geo: 78, crawlers: "100%", time: "3 hours ago" },
-      { domain: "supabase.com/docs", score: 79, seo: 82, geo: 74, crawlers: "100%", time: "1 day ago" },
-      { domain: "github.com/features/actions", score: 82, seo: 88, geo: 76, crawlers: "80%", time: "3 days ago" },
-    ],
-    []
-  );
 
   return (
     <div className="flex min-h-screen bg-void text-ink">

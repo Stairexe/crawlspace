@@ -1,0 +1,992 @@
+Yes. What you’re describing is basically an **AI-search + SEO website intelligence/audit platform**, but I would structure it differently from the typical “GEO score” tools.
+
+I researched the current landscape, including Google’s 2026 guidance and the way existing GEO platforms are positioning themselves. The biggest thing I’d change is this:
+
+> **Don’t build another generic “AI SEO score checker.” Build a website visibility command center.**
+
+Google itself says traditional SEO fundamentals still underpin visibility in AI Overviews/AI Mode, and there are **no special AI-only technical requirements** for appearing there. ([Google for Developers][1]) At the same time, Google has now introduced dedicated generative-AI performance reporting in Search Console, which makes AI visibility a real product category rather than just a buzzword. ([Google for Developers][2])
+
+## 1. What your product should actually be
+
+I'd position it as:
+
+### **Website Visibility Intelligence**
+
+Enter:
+
+`https://company.com`
+
+And your product analyzes:
+
+**SEO**
+→ Search engine fundamentals
+
+**GEO**
+→ Generative/AI-search readiness
+
+**AI Crawler Access**
+→ Which AI crawlers can actually access the website
+
+**Technical**
+→ Performance, HTML, indexability, canonicalization, sitemap, etc.
+
+**Content**
+→ Content quality, structure, topical coverage, entities, citations, readability
+
+**Schema**
+→ Structured data / JSON-LD
+
+**Robots**
+→ `robots.txt`, bot rules and conflicts
+
+**AI Instructions**
+→ `llms.txt` detection/analysis, but importantly **don't pretend it is mandatory**. Google explicitly says there is no requirement to create AI-specific machine-readable files to appear in AI features. ([Google for Developers][1])
+
+**Brand**
+→ Organization/entity signals
+
+**Accessibility**
+→ Whether content is actually machine-readable
+
+**Performance**
+→ Core Web Vitals and technical performance
+
+And eventually:
+
+**AI Visibility**
+→ Whether the brand is actually appearing in AI answers.
+
+That last section is different because your current product isn't API-integrated.
+
+---
+
+# 2. The dashboard
+
+The first screen after entering a domain should be fucking clean.
+
+Something like:
+
+```text
+┌───────────────────────────────────────────────────────────────┐
+│  WEBSITE VISIBILITY                                          │
+│                                                               │
+│  acme.com                                      Scan again ↻   │
+│                                                               │
+│          78                                                  │
+│       Visibility                                             │
+│                                                               │
+│   SEO       GEO       Technical       Content                │
+│   84        71          82             76                    │
+│                                                               │
+│  ───────────────────────────────────────────────────────────  │
+│                                                               │
+│  12 Issues Found                                              │
+│                                                               │
+│  🔴 3 Critical                                               │
+│  🟠 5 Warnings                                                │
+│  🔵 4 Recommendations                                         │
+│                                                               │
+└───────────────────────────────────────────────────────────────┘
+```
+
+But **don't make the score the product**.
+
+The score should be the entry point.
+
+The actual product is the diagnostic system underneath it.
+
+---
+
+# 3. Your main navigation
+
+I'd use:
+
+### Overview
+
+Everything important at a glance.
+
+### SEO
+
+Traditional search optimization.
+
+### GEO
+
+Generative search readiness.
+
+### AI Crawlers
+
+Who can access the website.
+
+### Content
+
+Content structure and quality.
+
+### Technical
+
+Technical website health.
+
+### Schema
+
+Structured data.
+
+### Robots
+
+`robots.txt` analysis.
+
+### Sitemap
+
+XML sitemap analysis.
+
+### Pages
+
+Individual page auditing.
+
+### Issues
+
+Everything broken, prioritized.
+
+### Reports
+
+Export/share audits.
+
+### Settings
+
+Workspace/domain/settings.
+
+---
+
+# 4. SEO module
+
+This should be a proper technical SEO audit.
+
+### On-page
+
+Check:
+
+* Title
+* Meta description
+* H1
+* H2 hierarchy
+* Canonical
+* Robots meta
+* Open Graph
+* Twitter/X cards
+* Image alt text
+* Internal links
+* External links
+* Duplicate titles
+* Duplicate descriptions
+* Missing headings
+* URL structure
+* Language
+* HTML structure
+
+### Indexability
+
+Check:
+
+* HTTP status
+* redirects
+* `noindex`
+* `nofollow`
+* canonical conflicts
+* robots blocking
+* crawlability
+* sitemap presence
+* sitemap URLs
+* canonical consistency
+
+### Technical
+
+Check:
+
+* HTTPS
+* HTTP → HTTPS redirect
+* response time
+* compression
+* caching
+* viewport
+* mobile friendliness
+* JavaScript dependency
+* renderability
+* page size
+
+---
+
+# 5. GEO module
+
+This is where you differentiate.
+
+But don't sell fake science like:
+
+> "Your website has a 92% chance of being cited by ChatGPT."
+
+There is no reliable public formula for that.
+
+A current audit product I found makes the same distinction: it explicitly says its readiness score is **not a probability of being cited**. ([AI Visibility Fixer][3])
+
+Instead, create **GEO Readiness**.
+
+### GEO Readiness
+
+Evaluate:
+
+**Discoverability**
+
+Can the page be crawled?
+
+**Extractability**
+
+Can important information be extracted cleanly?
+
+**Answerability**
+
+Does the page clearly answer questions?
+
+**Entity clarity**
+
+Can a system understand what the company/product/person is?
+
+**Content structure**
+
+Is information organized into useful sections?
+
+**Evidence**
+
+Does the website provide claims, sources, statistics, references, authorship, etc.?
+
+**Originality**
+
+Does it provide something beyond generic commodity content?
+
+**Internal consistency**
+
+Does the website consistently describe the company/product?
+
+**Citation readiness**
+
+Are there specific passages that could naturally serve as answer sources?
+
+Google's current guidance emphasizes unique, valuable, people-first content and good technical foundations rather than magical AI-specific optimization tricks. ([Google for Developers][4])
+
+---
+
+# 6. AI Crawler Center
+
+This could become one of the coolest parts of the product.
+
+Show:
+
+| Crawler         | Purpose                | Access    |
+| --------------- | ---------------------- | --------- |
+| Googlebot       | Search                 | ✅ Allowed |
+| OAI-SearchBot   | OpenAI Search          | ✅ Allowed |
+| GPTBot          | OpenAI training        | ❌ Blocked |
+| ClaudeBot       | Anthropic              | ✅ Allowed |
+| PerplexityBot   | Perplexity             | ✅ Allowed |
+| Google-Extended | Gemini-related control | ⚠️        |
+| Bingbot         | Search                 | ✅         |
+
+And explain the distinction.
+
+For example, OpenAI separates **OAI-SearchBot** from **GPTBot**. A website can allow search crawling while disallowing training crawling. ([GitHub][5])
+
+That means your UI shouldn't simply say:
+
+> "AI BOT: ALLOWED"
+
+Instead:
+
+> **AI Search Access**
+>
+> OAI-SearchBot → Allowed
+> GPTBot → Blocked
+
+That is much more useful.
+
+---
+
+# 7. Robots.txt analyzer
+
+This deserves its own product section.
+
+Show:
+
+```text
+ROBOTS.TXT
+
+Status                 ✓ Found
+HTTP Status             200
+Sitemap                 ✓ Found
+Total Rules             18
+
+AI CRAWLERS
+
+OAI-SearchBot           ✓ Allowed
+GPTBot                  ✕ Blocked
+ClaudeBot               ✓ Allowed
+PerplexityBot           ✓ Allowed
+
+WARNINGS
+
+⚠ Googlebot blocked on /resources/
+⚠ Sitemap contains blocked URLs
+⚠ Wildcard rule affects 42 pages
+```
+
+And importantly:
+
+### Explain every rule.
+
+Don't just show raw robots.txt.
+
+Show:
+
+> `Disallow: /admin/`
+
+**What this means**
+
+Search crawlers cannot access URLs beginning with `/admin/`.
+
+That's far more valuable for non-technical users.
+
+---
+
+# 8. `llms.txt`
+
+I'd include it.
+
+But label it properly:
+
+### AI Guidance File
+
+Instead of pretending:
+
+> "You need llms.txt."
+
+Say:
+
+> **llms.txt**
+> Optional machine-readable guidance file detected.
+
+Then:
+
+```text
+FOUND ✓
+
+Sections
+✓ Company description
+✓ Product overview
+✓ Documentation
+⚠ Missing important pages
+```
+
+This avoids falling into the current GEO-tool trap of treating `llms.txt` as a guaranteed ranking mechanism. Google says special AI-specific files aren't required for AI Search eligibility. ([Google for Developers][1])
+
+---
+
+# 9. Schema analyzer
+
+This can be REALLY good.
+
+Detect:
+
+* Organization
+* WebSite
+* WebPage
+* Article
+* Product
+* FAQPage
+* BreadcrumbList
+* LocalBusiness
+* Person
+* SoftwareApplication
+* Review
+* Service
+* Event
+
+Then:
+
+```text
+STRUCTURED DATA
+
+12 JSON-LD blocks detected
+
+Organization       ✓
+WebSite            ✓
+BreadcrumbList     ✓
+Product            ✓
+
+Issues
+
+⚠ Organization missing sameAs
+⚠ Product missing brand
+⚠ Breadcrumb hierarchy inconsistent
+```
+
+And then let the user open:
+
+> **View JSON-LD**
+
+with formatted JSON.
+
+---
+
+# 10. Content Intelligence
+
+This should be much deeper than word count.
+
+For each page:
+
+### Content structure
+
+```text
+CONTENT QUALITY
+
+Word count              1,842
+Reading level           Intermediate
+H1                      1
+H2                      8
+H3                      14
+
+Questions answered      11
+Entities detected       27
+Claims detected         18
+External sources        6
+Internal links          22
+```
+
+Then:
+
+### Content gaps
+
+```text
+MISSING TOPICS
+
+Competitors discuss:
+
+• Pricing
+• Implementation
+• Integrations
+• Security
+• Alternatives
+
+Your website doesn't clearly cover:
+
+⚠ Pricing
+⚠ Integrations
+⚠ Alternatives
+```
+
+This starts turning your product from an **auditor** into a **strategy tool**.
+
+---
+
+# 11. Page-level audit
+
+This is extremely important.
+
+User clicks:
+
+> `/products/platform`
+
+and sees:
+
+```text
+PLATFORM
+
+SEO                  91
+GEO                  73
+Technical            88
+Content              68
+Schema               94
+
+────────────────────────
+
+CRITICAL
+
+No clear answer to "What is Platform?"
+
+WARNING
+
+Product positioning differs from homepage.
+
+OPPORTUNITY
+
+Add pricing comparison section.
+
+OPPORTUNITY
+
+Add implementation documentation.
+```
+
+Then:
+
+### Fix
+
+Give the user the exact issue.
+
+Not:
+
+> "Improve content."
+
+Instead:
+
+> **Problem**
+> Product positioning is unclear within the first 200 words.
+
+> **Recommendation**
+> Add a concise definition immediately below the H1.
+
+That's actionable.
+
+---
+
+# 12. Issues center
+
+This could be one of your strongest features.
+
+Instead of forcing users to navigate through every module:
+
+### Issues
+
+```text
+37 TOTAL ISSUES
+
+🔴 CRITICAL       4
+🟠 HIGH           11
+🟡 MEDIUM         15
+🔵 LOW             7
+```
+
+Filters:
+
+`All | SEO | GEO | Technical | Content | Schema | Robots`
+
+Each issue:
+
+```text
+🔴 CRITICAL
+
+Googlebot blocked from /blog/
+
+SEO
+Indexability
+
+Why it matters
+Search engines cannot crawl these pages.
+
+Affected pages
+24
+
+Fix →
+```
+
+---
+
+# 13. Overall scoring system
+
+I'd actually avoid one giant mysterious number.
+
+Use:
+
+### Visibility Score
+
+**78 / 100**
+
+with:
+
+```text
+SEO                 84
+AI Search           71
+Technical           82
+Content             76
+Structured Data     91
+Crawler Access      88
+Performance         73
+```
+
+And then explain:
+
+> **78 — Good foundation, significant opportunities**
+
+Not:
+
+> "Your site has a 78% chance of ranking."
+
+---
+
+# 14. Benchmarking
+
+Eventually let companies compare themselves against competitors.
+
+Example:
+
+```text
+AI VISIBILITY LANDSCAPE
+
+                 YOU     A     B     C
+
+SEO              84     78    91    74
+GEO              71     83    68    79
+Content          76     88    74    81
+Technical        82     71    86    79
+Schema           91     63    79    72
+```
+
+This is where the product becomes useful to **marketing teams and agencies**, not just developers.
+
+---
+
+# 15. Reports
+
+This is essential for your SaaS model.
+
+### Generate report
+
+**Website Visibility Audit**
+
+```text
+Company
+Domain
+Audit date
+
+Overall visibility
+
+Key findings
+
+Critical issues
+
+SEO
+
+GEO
+
+Technical
+
+Content
+
+Schema
+
+Recommended actions
+
+Priority roadmap
+```
+
+Then:
+
+**Export PDF**
+
+**Share report**
+
+**Public report link**
+
+Example:
+
+`yourtool.com/report/acme-2026`
+
+Agencies could send this directly to clients.
+
+---
+
+# 16. Agency mode
+
+This is where I'd eventually monetize hard.
+
+Agency dashboard:
+
+```text
+CLIENTS
+
+Acme
+Nike
+Startup X
+Company Y
+
+────────────────
+
+ACTIVE AUDITS       24
+
+CRITICAL ISSUES     31
+
+AVG GEO             76
+
+AVG SEO             84
+```
+
+Each client gets their own workspace.
+
+---
+
+# 17. Monitoring
+
+This is the big upgrade after the static scanner.
+
+Instead of:
+
+> "Run audit."
+
+You eventually offer:
+
+> **Monitor website**
+
+Then:
+
+```text
+WEEKLY CHANGES
+
+SEO       ↑ 4
+GEO       ↓ 2
+Technical ↑ 7
+Schema    —
+Robots    ⚠ Changed
+```
+
+Example:
+
+> ⚠ `robots.txt` changed
+
+> `OAI-SearchBot` changed from Allow → Disallow.
+
+That's genuinely useful.
+
+---
+
+# 18. AI visibility tracking — later
+
+This is where API integration eventually becomes valuable.
+
+You could have a separate:
+
+### AI Search Monitor
+
+Track queries such as:
+
+```text
+"best CRM for startups"
+
+"CRM alternatives"
+
+"best CRM in India"
+
+"Acme CRM pricing"
+
+"Acme CRM vs Salesforce"
+```
+
+Then record:
+
+```text
+AI ENGINE VISIBILITY
+
+ChatGPT       42%
+Perplexity    31%
+Gemini        37%
+Google AI     48%
+
+Brand mentions
+23
+
+Citations
+17
+
+Competitor mentions
+41
+```
+
+But **do not build this into V1 if you don't have reliable API/data access**.
+
+Your current non-API product should focus on **what you can objectively inspect from the website itself**.
+
+---
+
+# 19. The most important product distinction
+
+I'd split your product into two categories:
+
+### WEBSITE READINESS
+
+Things you can objectively audit now.
+
+**SEO**
+**Technical**
+**Robots**
+**Sitemap**
+**Schema**
+**Content**
+**Crawler access**
+**GEO readiness**
+**Performance**
+
+↓
+
+### SEARCH VISIBILITY
+
+Things that require observing/searching external AI/search systems.
+
+**AI mentions**
+**AI citations**
+**Share of voice**
+**Competitor comparison**
+**Prompt tracking**
+**Search impressions**
+**AI referrals**
+
+This distinction makes your product much more credible.
+
+---
+
+# 20. Your homepage
+
+I would NOT make the homepage another generic SaaS landing page.
+
+Hero:
+
+## **How visible is your website to search engines and AI?**
+
+Subtext:
+
+> Audit your SEO, AI-search readiness, technical infrastructure, content, structured data and crawler access from one place.
+
+Then:
+
+```text
+https://yourwebsite.com
+                    [ Analyze Website ]
+```
+
+Below:
+
+### One audit. Every visibility layer.
+
+```text
+SEO                 GEO
+Technical           AI Crawlers
+Content             Schema
+Robots              Sitemap
+Performance         Accessibility
+```
+
+Then a fake/demo dashboard preview.
+
+---
+
+# 21. UI direction
+
+Since you're going to give me reference screenshots, **we should not design the UI yet**.
+
+Send me the references and I can map your existing product onto them.
+
+**Upload the reference screenshots/images you want the UI to follow.** I’ll use them as the visual source of truth for the redesign.
+
+And yes — **no AI-generated visual style, no random “AI SaaS” gradients, no unnecessary glowing blobs, no generic dashboard template.** We'll reproduce the visual language of your references while adapting it to your product's actual information architecture.
+
+---
+
+# 22. What I would build first
+
+Don't try to build everything above simultaneously.
+
+### V1 — Website Audit Engine
+
+**Input URL**
+
+↓
+
+**Crawler**
+
+↓
+
+**Analysis**
+
+↓
+
+```text
+SEO
+GEO
+Technical
+Robots
+AI Crawlers
+Schema
+Sitemap
+Content
+Performance
+```
+
+↓
+
+**Dashboard**
+
+↓
+
+**Issues**
+
+↓
+
+**Recommendations**
+
+↓
+
+**Report**
+
+That's your first genuinely useful product.
+
+### V2
+
+Add:
+
+* projects
+* accounts
+* saved audits
+* historical scans
+* monitoring
+* email alerts
+* PDF reports
+* shareable reports
+
+### V3
+
+Add:
+
+* competitor analysis
+* AI prompt tracking
+* AI citations
+* brand mentions
+* share of voice
+* AI engine comparisons
+* Search Console integration
+* API integrations
+
+---
+
+## One major change I'd make to your terminology
+
+You mentioned **"SEO, GEO, robots, MLM, text..."**
+
+I'd clean the terminology up substantially.
+
+Your product's taxonomy should be:
+
+**SEO**
+**GEO / AI Search**
+**Technical**
+**Crawlers**
+**Robots**
+**Sitemaps**
+**Structured Data**
+**Content**
+**Performance**
+**Accessibility**
+**Brand / Entity**
+
+And if by **MLM** you meant something specific, tell me what you intended — because I wouldn't put "MLM" into the product architecture until we define exactly what metric you're referring to.
+
+The current market is already separating **AI-readiness auditing** from **actual AI-answer monitoring**, and that's an important product distinction. ([squirrelscan.com][6])
+
+**Next step:** send me the UI reference screenshots. Once I see them, we can take your existing GEO tool and redesign the **entire screen-by-screen product structure** around this architecture rather than just making it prettier.
+
+[1]: https://developers.google.com/search/docs/appearance/ai-features?kgs=aa0bcc3d152ed142&utm_source=chatgpt.com "AI Features and Your Website | Google Search Central  |  Documentation  |  Google for Developers"
+[2]: https://developers.google.com/search/blog/2026/06/gen-ai-performance-reports?hl=en&utm_source=chatgpt.com "Introducing Search Generative AI performance reports in Search Console  |  Google Search Central Blog  |  Google for Developers"
+[3]: https://www.aivisibilityfixer.com/ai-visibility-audit?utm_source=chatgpt.com "Free AI Visibility Audit | ChatGPT, Claude & Perplexity Website Checker"
+[4]: https://developers.google.com/search/docs/fundamentals/ai-optimization-guide?authuser=4&hl=en&utm_source=chatgpt.com "Google's Guide to Optimizing for Generative AI Features on Google Search | Google Search Central  |  Documentation  |  Google for Developers"
+[5]: https://github.com/llms-txt-archive/openai-platform/blob/main/api/docs/bots.md?utm_source=chatgpt.com "openai-platform/api/docs/bots.md at main · llms-txt-archive/openai-platform · GitHub"
+[6]: https://squirrelscan.com/learn/geo-tools?utm_source=chatgpt.com "Best generative engine optimization tools and trackers (2026)"
