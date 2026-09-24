@@ -21,7 +21,7 @@ function severityRank(s: string): number {
 export function LiveSpecimen({ specimen }: { specimen: Specimen }) {
   if (!specimen.ok || !specimen.report) {
     return (
-      <section className="mx-auto max-w-5xl">
+      <div>
         <div className="card p-8">
           <p className="mono text-[11px] uppercase tracking-[0.16em] text-ink-faint">
             Specimen survey
@@ -31,7 +31,7 @@ export function LiveSpecimen({ specimen }: { specimen: Specimen }) {
             same rule the reports follow. Run an audit above to see live output.
           </p>
         </div>
-      </section>
+      </div>
     );
   }
 
@@ -52,9 +52,9 @@ export function LiveSpecimen({ specimen }: { specimen: Specimen }) {
   const worst = [...ENGINES].sort((a, b) => r.engines[a].score - r.engines[b].score)[0];
 
   return (
-    <section className="mx-auto max-w-5xl">
+    <div>
       {/* Title block — the survey document's identity strip */}
-      <div className="card overflow-hidden">
+      <div className="plate overflow-hidden">
         <div className="grid grid-cols-2 gap-x-6 gap-y-3 border-b border-line p-5 sm:grid-cols-4">
           {[
             ["Specimen", host],
@@ -77,7 +77,7 @@ export function LiveSpecimen({ specimen }: { specimen: Specimen }) {
         <div className="p-5">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h3 className="text-[15px] font-semibold text-ink">
-              Five inspection schedules, one measured page
+              Five schedules, one measured page
             </h3>
             <span className="mono text-[11px] text-ink-faint">
               {r.spread}-point spread
@@ -98,9 +98,9 @@ export function LiveSpecimen({ specimen }: { specimen: Specimen }) {
                       </span>
                     </span>
                   </div>
-                  <div className="mt-1.5 h-[5px] overflow-hidden rounded-full bg-line">
+                  <div className="mt-1.5 h-[6px] overflow-hidden bg-line">
                     <div
-                      className="h-full rounded-full bg-signal"
+                      className={`h-full ${s.capped ? "bg-danger" : "bg-signal"}`}
                       style={{ width: `${Math.max(2, s.score)}%` }}
                     />
                   </div>
@@ -138,8 +138,8 @@ export function LiveSpecimen({ specimen }: { specimen: Specimen }) {
                   key={f.checkId}
                   className="flex items-start gap-4 border-b border-line px-5 py-3 last:border-b-0"
                 >
-                  <span className="mono w-6 shrink-0 pt-0.5 text-[12px] text-ink-faint">
-                    {String(i + 1).padStart(2, "0")}
+                  <span className="callout shrink-0" aria-label={`Defect ${i + 1}`}>
+                    {i + 1}
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block text-[13.5px] text-ink">{f.fix.summary}</span>
@@ -175,8 +175,8 @@ export function LiveSpecimen({ specimen }: { specimen: Specimen }) {
       </div>
 
       <p className="mono mt-3 text-center text-[11px] text-ink-faint">
-        Live output from this engine, re-run daily. Not a mockup.
+        Live output from this engine, refreshed at most once a day. Not a mockup.
       </p>
-    </section>
+    </div>
   );
 }

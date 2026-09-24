@@ -1,16 +1,20 @@
 import { getSpecimen } from "@/lib/demo";
 import { LiveSpecimen } from "@/components/LiveSpecimen";
 import { HomeClient } from "@/components/HomeClient";
+import { LandingSections } from "@/components/LandingSections";
+import { Descent } from "@/components/Descent";
 
-/**
- * Server component. It runs a real audit of the specimen URL and hands the rendered
- * result to the client shell, so the landing page's headline evidence is measured
- * output rather than authored numbers — and so it exists in the server HTML, which is
- * what this tool's own renders-without-JS gate checks for.
- */
-export const revalidate = 86400; // re-survey the specimen once a day
+// The specimen is a real audit, re-run when this page regenerates (at most daily).
+export const revalidate = 86400;
 
 export default async function Page() {
   const specimen = await getSpecimen();
-  return <HomeClient specimen={<LiveSpecimen specimen={specimen} />} />;
+  return (
+    <>
+      <Descent />
+      <HomeClient>
+        <LandingSections specimen={<LiveSpecimen specimen={specimen} />} />
+      </HomeClient>
+    </>
+  );
 }
