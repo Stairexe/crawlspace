@@ -1,23 +1,14 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import { useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-
-export default function AuditSectionRedirect() {
-  const params = useParams();
-  const router = useRouter();
-  const id = params?.id as string;
-  const section = params?.section as string;
-
-  useEffect(() => {
-    if (id && section) {
-      router.replace(`/dashboard?domain=${encodeURIComponent(id)}&tab=${encodeURIComponent(section)}`);
-    }
-  }, [id, section, router]);
-
-  return (
-    <div className="flex min-h-screen items-center justify-center p-8 mono text-ink-faint">
-      Loading {section} analysis for {id}…
-    </div>
+// /audit/<domain>/<section> opens that dashboard tab (unknown sections fall back to the
+// overview inside the dashboard).
+export default async function AuditSectionRedirect({
+  params,
+}: {
+  params: Promise<{ id: string; section: string }>;
+}) {
+  const { id, section } = await params;
+  redirect(
+    `/dashboard?domain=${encodeURIComponent(decodeURIComponent(id))}&tab=${encodeURIComponent(section)}`,
   );
 }

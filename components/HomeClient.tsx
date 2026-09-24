@@ -88,6 +88,12 @@ export function HomeClient({ children }: { children: React.ReactNode }) {
       if (!res.ok) throw new Error(json.error ?? "The survey failed.");
       setReport(json as AuditReport);
       setPhase("done");
+      try {
+        // Same key the dashboard restores from, so "Dashboard" in the nav opens this survey.
+        sessionStorage.setItem("crawlspace:last-report", JSON.stringify(json));
+      } catch {
+        /* storage unavailable */
+      }
       setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
     } catch (e) {
       setError(e instanceof Error ? e.message : "The survey failed.");

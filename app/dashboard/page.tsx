@@ -63,11 +63,29 @@ type SidebarTab =
   | "settings"
   | "help";
 
+const TABS: readonly SidebarTab[] = [
+  "overview", "audit", "pages", "issues", "seo", "geo", "crawlers", "content", "technical",
+  "schema", "robots", "sitemap", "performance", "prompts", "history", "changes", "reports",
+  "settings", "help",
+];
+
+/** A tab from the URL, validated. Unknown values fall back to the overview, and the
+ *  old "changes" entry shows the same panel as history. */
+function tabFrom(raw: string | null | undefined): SidebarTab {
+  const t = (raw ?? "") as SidebarTab;
+  if (!TABS.includes(t)) return "overview";
+  return t === "changes" ? "history" : t;
+}
+
+/** The last survey is kept for this browser tab only, so moving between pages and tabs
+ *  (or refreshing) does not throw it away. Nothing leaves the browser. */
+const LAST_REPORT_KEY = "crawlspace:last-report";
+
 function DashboardContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const activeTabFromUrl = (searchParams?.get("tab") as SidebarTab) || "overview";
+  const activeTabFromUrl = tabFrom(searchParams?.get("tab"));
   const domainFromUrl = searchParams?.get("domain");
 
   const [activeTab, setActiveTab] = useState<SidebarTab>(activeTabFromUrl);
@@ -81,16 +99,39 @@ function DashboardContent() {
   const [issuesFilter, setIssuesFilter] = useState<"all" | "critical" | "high" | "medium">("all");
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
+  // The URL is the source of truth for the tab. This effect must depend on the URL only:
+  // depending on activeTab as well made it snap back to the previous tab for a frame on
+  // every click (state had changed, the URL had not yet).
   useEffect(() => {
-    if (activeTabFromUrl && activeTabFromUrl !== activeTab) {
-      setActiveTab(activeTabFromUrl);
-    }
-  }, [activeTabFromUrl, activeTab]);
+    setActiveTab(activeTabFromUrl);
+  }, [activeTabFromUrl]);
 
-  function switchTab(tab: SidebarTab) {
+  // Restore the last survey of this browser tab. A ?domain= that does not match it (for
+  // example from /audit/<domain>) runs a fresh survey of that domain instead.
+  useEffect(() => {
+    let saved: AuditReport | null = null;
+    try {
+      const raw = sessionStorage.getItem(LAST_REPORT_KEY);
+      if (raw) saved = JSON.parse(raw) as AuditReport;
+    } catch {
+      /* storage unavailable or stale shape: start empty */
+    }
+    const matches = (r: AuditReport) =>
+      !domainFromUrl || r.evidence.finalUrl.includes(domainFromUrl.replace(/^https?:\/\//, "").replace(/\/$/, ""));
+    if (saved && matches(saved)) {
+      setReport((r) => r ?? saved);
+    } else if (domainFromUrl) {
+      void handleAuditRun(domainFromUrl);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function switchTab(raw: SidebarTab) {
+    const tab = tabFrom(raw);
     setActiveTab(tab);
     setMobileDrawerOpen(false);
-    router.push(`/dashboard?tab=${tab}`);
+    router.push(`/dashboard?tab=${tab}`, { scroll: false });
+    window.scrollTo({ top: 0 });
   }
 
   async function handleAuditRun(target: string) {
@@ -110,6 +151,11 @@ function DashboardContent() {
       // relabel the previous report with the new domain.
       setReport(json as AuditReport);
       setActiveDomain(val);
+      try {
+        sessionStorage.setItem(LAST_REPORT_KEY, JSON.stringify(json));
+      } catch {
+        /* over quota or unavailable: the survey still shows, it just won't survive a reload */
+      }
     } catch (err) {
       setScanError(err instanceof Error ? err.message : "The survey failed.");
     } finally {
@@ -230,7 +276,6 @@ function DashboardContent() {
               {(
                 [
                   ["history", "History", TrendingUp],
-                  ["changes", "Changes", Clock],
                 ] as const
               ).map(([id, label, Icon]) => (
                 <button
@@ -957,6 +1002,38 @@ function DashboardContent() {
                     </div>
                   ))}
                 </dl>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "technical" && (
+            <div className="space-y-6 tab-transition">
+              <div className="card p-6 space-y-4">
+                <div>
+                  <h2 className="text-[18px] font-bold text-ink">Technical</h2>
+                  <p className="text-[13px] text-ink-dim">
+                    Machine readability and retrievability checks, exactly as the survey recorded them.
+                  </p>
+                </div>
+                <ul className="divide-y divide-line border-y border-line">
+                  {report.checks
+                    .filter((c) => c.category === "machine-readability" || c.category === "retrievability")
+                    .map((c) => (
+                      <li key={c.id} className="grid gap-1 py-3 sm:grid-cols-[1fr_auto] sm:gap-4">
+                        <div>
+                          <div className="text-[13.5px] font-semibold text-ink">{c.label}</div>
+                          <div className="mono mt-0.5 text-[11.5px] text-ink-faint">{c.evidence}</div>
+                        </div>
+                        <span
+                          className={`mono self-start text-[11px] uppercase tracking-[0.12em] ${
+                            c.status === "pass" ? "text-good" : c.status === "fail" ? "text-danger" : c.status === "warn" ? "text-warn" : "text-ink-faint"
+                          }`}
+                        >
+                          {c.status === "na" ? "n/a" : c.status}
+                        </span>
+                      </li>
+                    ))}
+                </ul>
               </div>
             </div>
           )}
