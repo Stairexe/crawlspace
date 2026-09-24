@@ -1,19 +1,34 @@
 import type { Metadata } from "next";
-import { GeistSans } from "geist/font/sans";
-import { GeistMono } from "geist/font/mono";
+import { Archivo, Martian_Mono } from "next/font/google";
+
+// Archivo carries a width axis: 100 for body, stretched to 118-125 for plate titles.
+const archivo = Archivo({
+  subsets: ["latin"],
+  axes: ["wdth"],
+  variable: "--font-archivo",
+  display: "swap",
+});
+
+// Annotation face: addresses, agent names, scores, the title block.
+const martian = Martian_Mono({
+  subsets: ["latin"],
+  variable: "--font-martian",
+  display: "swap",
+});
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { RevealObserver } from "@/components/RevealObserver";
 import { FAQ } from "@/lib/faq";
 import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://crawlspace-geo.vercel.app"),
   title: {
-    default: "Crawlspace — Website Visibility Intelligence & GEO Audit Command Center",
+    default: "Crawlspace — a structural survey of any page, for AI assistants",
     template: "%s · Crawlspace",
   },
   description:
-    "Audit your website's search fundamentals, AI citation readiness across ChatGPT, Claude, Perplexity, Copilot, and Google AI Overviews, robots crawler permissions, and structured data.",
+    "Crawlspace fetches a page the way an AI crawler does, measures every passage against what ChatGPT, Claude, Perplexity, Copilot and Google AI Overviews can quote, and issues five separate scores with a numbered defect schedule.",
   keywords: [
     "GEO", "generative engine optimization", "AEO", "AI search", "SEO audit", "llms.txt",
     "AI crawlers", "GPTBot", "PerplexityBot", "ClaudeBot", "AI citations", "structured data", "JSON-LD"
@@ -24,9 +39,9 @@ export const metadata: Metadata = {
     apple: "/favicon.svg",
   },
   openGraph: {
-    title: "Crawlspace — Website Visibility Intelligence",
+    title: "Crawlspace — can an AI assistant quote this page?",
     description:
-      "One audit for search engines and AI. See how ready your website is for ChatGPT, Claude, Perplexity, and Google.",
+      "A structural survey of one web page: crawler access, passage by passage citability, and five engine scores that are allowed to disagree.",
     type: "website",
   },
   robots: { index: true, follow: true },
@@ -43,7 +58,7 @@ const JSON_LD = {
       name: "Crawlspace",
       url: BASE,
       description:
-        "The Website Visibility Command Center: audits search fundamentals, AI citability, crawler permissions, and structured data.",
+        "Crawlspace audits how crawlable and citable a web page is to AI assistants, one engine at a time.",
       founder: {
         "@type": "Person",
         name: "Asodi Rohith Reddy",
@@ -76,16 +91,21 @@ const JSON_LD = {
   ],
 };
 
+const HEAD_SCRIPT = `(function(){var d=document.documentElement;d.setAttribute("data-js","");try{if(location.pathname==="/"&&!sessionStorage.getItem("cs-descent")&&!matchMedia("(prefers-reduced-motion: reduce)").matches){d.setAttribute("data-descent","play")}}catch(e){}})();`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+    <html
+      lang="en"
+      className={`${archivo.variable} ${martian.variable}`}
+      suppressHydrationWarning
+    >
       <head>
-        <link
-          rel="stylesheet"
-          href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700,800,900&display=swap"
-        />
+        {/* Runs before first paint: marks JS as present, and opts this visit into the
+            Descent only on the home page, once per session, never with reduced motion. */}
+        <script dangerouslySetInnerHTML={{ __html: HEAD_SCRIPT }} />
       </head>
-      <body className="grain font-geist text-ink antialiased">
+      <body className="text-ink antialiased">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
@@ -95,6 +115,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main className="flex-1">{children}</main>
           <Footer />
         </div>
+        <RevealObserver />
       </body>
     </html>
   );

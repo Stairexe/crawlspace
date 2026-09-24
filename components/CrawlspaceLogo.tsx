@@ -1,37 +1,27 @@
-import React from "react";
+import { CrawlBot } from "./CrawlBot";
 
+/**
+ * The mark is the inspector itself, drawn heavier. In the nav it carries
+ * data-logo-mark: that is where the Descent's crawl-bot lands.
+ */
 export function CrawlspaceMark({
   size = 32,
   className = "",
-  variant = "emerald",
+  landing = false,
 }: {
   size?: number;
   className?: string;
-  variant?: "emerald" | "white" | "pine";
+  /** Set on the one mark the Descent flies into (the nav). */
+  landing?: boolean;
 }) {
-  const outerFill = variant === "white" ? "#FFFFFF" : variant === "pine" ? "#0F5132" : "#3BF48A";
-  const innerFill = variant === "emerald" ? "#10B981" : "#3BF48A";
-
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 100 100"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={`shrink-0 ${className}`}
+    <span
+      data-logo-mark={landing ? "" : undefined}
+      className={`inline-block shrink-0 text-signal transition-opacity duration-200 ${className}`}
+      style={{ width: size }}
     >
-      {/* Hexagonal Open "C" Brand Mark */}
-      <path
-        d="M68 22L40 22L20 50L40 78L68 78L80 62L65 62L56 70L34 70L22 50L34 30L56 30L65 38L80 38L68 22Z"
-        fill={outerFill}
-      />
-      {/* Central Emerald Core Gem */}
-      <polygon
-        points="50,38 60,44 60,56 50,62 40,56 40,44"
-        fill={innerFill}
-      />
-    </svg>
+      <CrawlBot detail="mark" className="block h-auto w-full" />
+    </span>
   );
 }
 
@@ -39,30 +29,24 @@ export function CrawlspaceLogo({
   size = 32,
   showTagline = false,
   className = "",
+  landing = false,
 }: {
   size?: number;
   showTagline?: boolean;
   className?: string;
+  landing?: boolean;
 }) {
   return (
-    <div className={`flex items-center gap-2.5 ${className}`}>
-      <div className="relative flex items-center justify-center">
-        <CrawlspaceMark size={size} variant="emerald" />
-        <span
-          aria-hidden
-          className="absolute inset-0 rounded-full bg-signal/20 blur-md pointer-events-none"
-        />
-      </div>
-      <div className="flex flex-col">
-        <span className="font-satoshi text-[18px] font-bold tracking-[-0.02em] text-ink flex items-center">
-          Crawl<span className="text-signal">Space</span>
-        </span>
+    <span className={`inline-flex items-center gap-2.5 ${className}`}>
+      <CrawlspaceMark size={size} landing={landing} />
+      <span className="flex flex-col">
+        <span className="wordmark text-[17px] leading-none text-ink">Crawlspace</span>
         {showTagline && (
-          <span className="mono text-[9px] uppercase tracking-[0.16em] text-ink-faint">
-            Website Visibility • Search • AI
+          <span className="mono mt-1 text-[9.5px] uppercase tracking-[0.14em] text-ink-faint">
+            Structural survey for AI search
           </span>
         )}
-      </div>
-    </div>
+      </span>
+    </span>
   );
 }

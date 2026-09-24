@@ -155,11 +155,11 @@ export function CrawlerCenter({ evidence }: { evidence: Evidence }) {
                   <td className="px-4 py-3.5 text-ink-dim">{spec.role}</td>
                   <td className="px-4 py-3.5">
                     {allowed ? (
-                      <Pill fg="var(--color-signal)" bg="rgba(59,244,138,0.12)">
+                      <Pill fg="var(--color-signal)" bg="var(--color-tint-good)">
                         Allowed
                       </Pill>
                     ) : (
-                      <Pill fg="var(--color-danger)" bg="rgba(255,107,94,0.14)">
+                      <Pill fg="var(--color-danger)" bg="var(--color-tint-bad)">
                         Blocked
                       </Pill>
                     )}

@@ -268,7 +268,7 @@ export function VisibilityDashboard({
                           {ENGINE_LABELS[engine]}
                         </span>
                         {s.capped && (
-                          <Pill fg="var(--color-danger)" bg="rgba(255,107,94,0.15)">
+                          <Pill fg="var(--color-danger)" bg="var(--color-tint-bad)">
                             Blocked
                           </Pill>
                         )}
@@ -369,7 +369,7 @@ export function VisibilityDashboard({
                             ? "var(--color-warn)"
                             : "var(--color-signal)"
                         }
-                        bg="rgba(255,255,255,0.05)"
+                        bg="var(--color-tint-neutral)"
                       >
                         {f.severity.toUpperCase()}
                       </Pill>

@@ -176,11 +176,11 @@ export function RobotsAnalyzer({ evidence }: { evidence: Evidence }) {
                   </div>
                   <div>
                     {rule.allowed ? (
-                      <Pill fg="var(--color-signal)" bg="rgba(59,244,138,0.12)">
+                      <Pill fg="var(--color-signal)" bg="var(--color-tint-good)">
                         Allow
                       </Pill>
                     ) : (
-                      <Pill fg="var(--color-danger)" bg="rgba(255,107,94,0.14)">
+                      <Pill fg="var(--color-danger)" bg="var(--color-tint-bad)">
                         Disallow
                       </Pill>
                     )}

@@ -112,11 +112,11 @@ export function SchemaAnalyzer({ evidence }: { evidence: Evidence }) {
                   </span>
                 </div>
                 {isPresent ? (
-                  <Pill fg="var(--color-signal)" bg="rgba(59,244,138,0.12)">
+                  <Pill fg="var(--color-signal)" bg="var(--color-tint-good)">
                     Detected
                   </Pill>
                 ) : (
-                  <Pill fg="var(--color-ink-faint)" bg="rgba(107,116,130,0.14)">
+                  <Pill fg="var(--color-ink-faint)" bg="var(--color-tint-neutral)">
                     Missing
                   </Pill>
                 )}

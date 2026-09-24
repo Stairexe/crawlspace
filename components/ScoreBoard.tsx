@@ -68,7 +68,7 @@ function EngineRow({
         <span className="flex items-center gap-2 text-[13px] text-ink">
           {label}
           {capped && (
-            <Pill fg="var(--color-danger)" bg="rgba(255,107,94,0.13)" title={capReason}>
+            <Pill fg="var(--color-danger)" bg="var(--color-tint-bad)" title={capReason}>
               blocked
             </Pill>
           )}

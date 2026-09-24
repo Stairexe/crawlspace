@@ -146,22 +146,22 @@ export function IssuesCenter({
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   {f.severity === "critical" && (
-                    <Pill fg="var(--color-danger)" bg="rgba(255,107,94,0.15)">
+                    <Pill fg="var(--color-danger)" bg="var(--color-tint-bad)">
                       CRITICAL
                     </Pill>
                   )}
                   {f.severity === "high" && (
-                    <Pill fg="var(--color-warn)" bg="rgba(245,181,68,0.15)">
+                    <Pill fg="var(--color-warn)" bg="var(--color-tint-warn)">
                       HIGH
                     </Pill>
                   )}
                   {f.severity === "medium" && (
-                    <Pill fg="var(--color-signal)" bg="rgba(59,244,138,0.12)">
+                    <Pill fg="var(--color-signal)" bg="var(--color-tint-good)">
                       MEDIUM
                     </Pill>
                   )}
                   {f.severity === "low" && (
-                    <Pill fg="var(--color-ink-faint)" bg="rgba(107,116,130,0.15)">
+                    <Pill fg="var(--color-ink-faint)" bg="var(--color-tint-neutral)">
                       RECOMMENDED
                     </Pill>
                   )}

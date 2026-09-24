@@ -18,10 +18,10 @@ export function scoreLabel(score: number): string {
 }
 
 export const SEVERITY_STYLE: Record<Severity, { bg: string; fg: string; label: string }> = {
-  critical: { bg: "rgba(255,107,94,0.13)", fg: "var(--color-danger)", label: "Critical" },
-  high: { bg: "rgba(245,181,68,0.13)", fg: "var(--color-warn)", label: "High" },
-  medium: { bg: "rgba(195,245,60,0.11)", fg: "var(--color-signal)", label: "Medium" },
-  low: { bg: "rgba(163,171,184,0.10)", fg: "var(--color-ink-dim)", label: "Low" },
+  critical: { bg: "var(--color-tint-bad)", fg: "var(--color-danger)", label: "Critical" },
+  high: { bg: "var(--color-tint-warn)", fg: "var(--color-warn)", label: "High" },
+  medium: { bg: "var(--color-tint-signal)", fg: "var(--color-signal)", label: "Medium" },
+  low: { bg: "var(--color-tint-neutral)", fg: "var(--color-ink-dim)", label: "Low" },
 };
 
 export const EFFORT_LABEL: Record<Effort, string> = {
@@ -34,7 +34,7 @@ export const EFFORT_LABEL: Record<Effort, string> = {
 export function Pill({
   children,
   fg = "var(--color-ink-dim)",
-  bg = "rgba(163,171,184,0.10)",
+  bg = "var(--color-tint-neutral)",
   title,
 }: {
   children: React.ReactNode;
