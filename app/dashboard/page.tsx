@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { DashboardEmpty } from "@/components/DashboardEmpty";
@@ -75,6 +75,7 @@ function DashboardContent() {
   const [activeDomain, setActiveDomain] = useState(domainFromUrl || "");
   const [searchInput, setSearchInput] = useState(activeDomain);
   const [isScanning, setIsScanning] = useState(false);
+  const [scanError, setScanError] = useState<string | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
   const [generateOpen, setGenerateOpen] = useState(false);
   const [issuesFilter, setIssuesFilter] = useState<"all" | "critical" | "high" | "medium">("all");
@@ -96,32 +97,25 @@ function DashboardContent() {
     const val = target.trim();
     if (!val) return;
     setIsScanning(true);
+    setScanError(null);
     try {
       const res = await fetch("/api/audit", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ url: val }),
       });
-      if (res.ok) {
-        const json = await res.json();
-        setReport(json as AuditReport);
-        setActiveDomain(val);
-      } else {
-        // Keep current report with custom domain name for fallback
-        setActiveDomain(val);
-      }
-    } catch {
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? "The survey failed.");
+      // Only a successful survey changes what is on screen. A failed one must never
+      // relabel the previous report with the new domain.
+      setReport(json as AuditReport);
       setActiveDomain(val);
+    } catch (err) {
+      setScanError(err instanceof Error ? err.message : "The survey failed.");
     } finally {
       setIsScanning(false);
     }
   }
-
-  // No scan history until surveys are stored. Previously this held four invented
-  // audits with invented scores and timestamps; an empty list is the honest state.
-  const recentScans = useMemo<
-    { domain: string; score: number; seo: number; geo: number; crawlers: string; time: string }[]
-  >(() => [], []);
 
   if (!report) {
     return (
@@ -508,10 +502,10 @@ function DashboardContent() {
 
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <Link
-              href="/audit/new"
+              href="/"
               className="mono hidden lg:flex items-center gap-1.5 rounded-xl border border-signal/40 bg-signal/10 px-3.5 py-1.5 text-[12px] font-bold text-signal hover:bg-signal/20 transition-all"
             >
-              <span>+ New Audit</span>
+              <span>+ New survey</span>
             </Link>
             <button
               type="button"
@@ -521,12 +515,6 @@ function DashboardContent() {
               <span className="hidden sm:inline">Export Report ↗</span>
               <span className="sm:hidden">Export ↗</span>
             </button>
-            <Link
-              href={`/report/stripe-docs`}
-              className="mono hidden sm:inline rounded-xl border border-line bg-surface px-3 py-1.5 text-[12px] font-medium text-ink hover:border-line-bright transition-colors"
-            >
-              Public View
-            </Link>
           </div>
         </header>
 
@@ -565,7 +553,7 @@ function DashboardContent() {
         </div>
 
         {/* Dashboard Body */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 max-w-7xl w-full">
+        <div className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 max-w-7xl w-full">
           {/* Active Target Banner */}
           <div className="card glass-panel p-5 sm:p-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5 sm:gap-6">
             <div className="flex items-center gap-4 sm:gap-5 min-w-0">
@@ -579,15 +567,20 @@ function DashboardContent() {
                     Website Visibility Score
                   </span>
                   <span className="mono text-[10.5px] sm:text-[11px] text-ink-faint hidden sm:inline">
-                    • Last scanned 2 mins ago
+                    • Inspected <time dateTime={e.fetchedAt}>{new Date(e.fetchedAt).toLocaleString()}</time>
                   </span>
                 </div>
                 <h1 className="font-satoshi text-[18px] sm:text-[24px] lg:text-[26px] font-bold text-ink mt-0.5 truncate">
-                  {activeDomain}
+                  {new URL(e.finalUrl).host + new URL(e.finalUrl).pathname.replace(/\/$/, "")}
                 </h1>
-                <p className="text-[12px] sm:text-[13px] text-ink-dim mt-0.5 truncate">
-                  Strong search crawlability & entity schema · High AI citation upside
+                <p className="text-[12px] sm:text-[13px] text-ink-dim mt-0.5 line-clamp-2">
+                  {report.summary}
                 </p>
+                {scanError && (
+                  <p role="alert" className="mt-1 text-[12.5px] text-danger">
+                    Survey of {activeDomain || "that URL"} failed: {scanError} The report below is the previous one.
+                  </p>
+                )}
               </div>
             </div>
 
@@ -613,13 +606,28 @@ function DashboardContent() {
           {/* ── Subscores Strip ──────────────────────────────────────────────── */}
           <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 lg:grid-cols-7 sm:gap-3">
             {[
-              { id: "seo", label: "SEO", score: v.seo, status: "Indexable" },
-              { id: "geo", label: "GEO", score: v.geo, status: "5-Engine" },
-              { id: "technical", label: "Technical", score: v.technical, status: "200 OK" },
-              { id: "content", label: "Content", score: v.content, status: "1.4k words" },
-              { id: "schema", label: "Schema", score: v.schema, status: "3 Types" },
-              { id: "crawlers", label: "AI Crawlers", score: v.crawlers, status: "Allowed" },
-              { id: "performance", label: "Performance", score: 73, status: "142ms" },
+              {
+                id: "seo",
+                label: "SEO",
+                score: v.seo,
+                status: /noindex/i.test(`${e.robots.metaRobots ?? ""} ${e.robots.xRobotsTag ?? ""}`) ? "noindex" : "Indexable",
+              },
+              { id: "geo", label: "GEO", score: v.geo, status: "5 engines" },
+              { id: "technical", label: "Technical", score: v.technical, status: `HTTP ${e.status}` },
+              { id: "content", label: "Content", score: v.content, status: `${e.html.textWords.toLocaleString("en-US")} words` },
+              {
+                id: "schema",
+                label: "Schema",
+                score: v.schema,
+                status: `${new Set(e.jsonLd.flatMap((j) => j.types)).size} types`,
+              },
+              {
+                id: "crawlers",
+                label: "AI Crawlers",
+                score: v.crawlers,
+                status: `${Object.values(report.engines).filter((x) => !x.capped).length}/5 not gated`,
+              },
+              { id: "performance", label: "Page fetch", score: `${e.timings.fetchMs}ms`, status: "Measured" },
             ].map((sub) => (
               <button
                 key={sub.id}
@@ -661,7 +669,7 @@ function DashboardContent() {
                       onClick={() => switchTab("issues")}
                       className="mono text-[11.5px] text-signal font-semibold hover:underline"
                     >
-                      View All (12) →
+                      View all ({report.findings.length}) →
                     </button>
                   </div>
 
@@ -700,128 +708,24 @@ function DashboardContent() {
                   </div>
                 </div>
 
-                {/* Score History & Trend */}
-                <div className="card glass-panel p-6 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h2 className="text-[17px] font-bold text-ink">Score History</h2>
-                      <p className="text-[12px] text-ink-dim">
-                        Visibility trend over the last 30 days
-                      </p>
-                    </div>
-                    <span className="mono text-[12px] text-signal font-bold">
-                      +4 pts this month
-                    </span>
-                  </div>
-
-                  {/* Trendline Graphic */}
-                  <div className="rounded-xl border border-line bg-surface/40 p-4">
-                    <div className="flex items-end justify-between h-32 pt-6 px-4">
-                      {[
-                        { label: "Aug 10", score: 74 },
-                        { label: "Aug 18", score: 76 },
-                        { label: "Aug 26", score: 82 },
-                        { label: "Sep 02", score: 80 },
-                        { label: "Today", score: 78 },
-                      ].map((pt, idx) => (
-                        <div key={idx} className="flex flex-col items-center gap-2">
-                          <span className="mono text-[12px] font-bold text-ink">
-                            {pt.score}
-                          </span>
-                          <div
-                            className="w-8 rounded-t bg-signal/80 transition-all hover:bg-signal"
-                            style={{ height: `${(pt.score / 100) * 80}px` }}
-                          />
-                          <span className="mono text-[10.5px] text-ink-faint">
-                            {pt.label}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Summary Callout */}
-                  <div className="rounded-xl border border-signal/20 bg-signal/5 p-3.5 text-[12.5px] text-ink-dim flex items-center justify-between">
-                    <span>
-                      Robots.txt updated on Sep 02 allowed ClaudeBot (+6 pts).
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => switchTab("history")}
-                      className="mono text-signal font-semibold hover:underline shrink-0 ml-2"
-                    >
-                      History Log →
-                    </button>
-                  </div>
+                {/* Score history: nothing is stored, so there is none to show */}
+                <div className="card p-6 space-y-3">
+                  <h2 className="text-[17px] font-bold text-ink">Score history</h2>
+                  <p className="text-[13px] leading-relaxed text-ink-dim">
+                    There is no history yet. Surveys are not stored, so this one has nothing to be
+                    compared against. Export each survey to track changes by hand until saved
+                    surveys arrive with accounts.
+                  </p>
+                  <button type="button" onClick={() => setExportOpen(true)} className="btn-quiet">
+                    Export this survey
+                  </button>
                 </div>
               </div>
 
-              {/* Recent Scans Table */}
-              <div className="card glass-panel p-6 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-[17px] font-bold text-ink">Recent Scans</h2>
-                    <p className="text-[12px] text-ink-dim">
-                      Websites analyzed across your workspace
-                    </p>
-                  </div>
-                  <Link
-                    href="/audit/new"
-                    className="mono text-[12px] text-signal font-semibold hover:underline"
-                  >
-                    + Run New Audit
-                  </Link>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-[13px]">
-                    <thead>
-                      <tr className="border-b border-line mono text-[11px] uppercase tracking-wider text-ink-faint">
-                        <th className="pb-3 font-semibold">Website / URL</th>
-                        <th className="pb-3 font-semibold">Visibility</th>
-                        <th className="pb-3 font-semibold">SEO</th>
-                        <th className="pb-3 font-semibold">GEO</th>
-                        <th className="pb-3 font-semibold">AI Crawlers</th>
-                        <th className="pb-3 font-semibold">Last Audited</th>
-                        <th className="pb-3 font-semibold text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-line/60">
-                      {recentScans.map((scan) => (
-                        <tr key={scan.domain} className="hover:bg-surface/40 transition-colors">
-                          <td className="py-3.5 mono font-semibold text-ink">
-                            {scan.domain}
-                          </td>
-                          <td className="py-3.5 mono font-bold text-signal">
-                            {scan.score}
-                          </td>
-                          <td className="py-3.5 mono text-ink-dim">{scan.seo}</td>
-                          <td className="py-3.5 mono text-ink-dim">{scan.geo}</td>
-                          <td className="py-3.5 mono text-signal">{scan.crawlers}</td>
-                          <td className="py-3.5 text-ink-faint text-[12px]">{scan.time}</td>
-                          <td className="py-3.5 text-right">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setActiveDomain(scan.domain);
-                                setSearchInput(scan.domain);
-                                void handleAuditRun(scan.domain);
-                              }}
-                              className="mono text-[12px] font-semibold text-signal hover:underline"
-                            >
-                              Inspect →
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
+                          </div>
           )}
 
-          {/* TAB 2: AUDIT & SUB-ANALYSES */}
+                    {/* TAB 2: AUDIT & SUB-ANALYSES */}
           {activeTab === "audit" && (
             <div className="space-y-6 tab-transition">
               <div className="card glass-panel p-6">
@@ -836,7 +740,7 @@ function DashboardContent() {
                   </div>
                   <div className="rounded-xl border border-line bg-surface/50 p-4">
                     <div className="mono text-[11px] text-ink-faint uppercase">Server Response</div>
-                    <div className="mono font-semibold text-signal mt-1">HTTP {e.status} OK · {e.timings.totalMs}ms</div>
+                    <div className="mono font-semibold text-signal mt-1">HTTP {e.status} · {e.timings.totalMs}ms</div>
                   </div>
                 </div>
               </div>
@@ -861,14 +765,18 @@ function DashboardContent() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="rounded-xl border border-line bg-surface/50 p-4 space-y-2">
                     <div className="mono text-[11px] text-ink-faint uppercase">Meta Title</div>
-                    <div className="font-semibold text-ink">{e.html.title}</div>
-                    <div className="text-[11.5px] text-signal font-medium">56 characters · Optimal length</div>
+                    <div className="font-semibold text-ink">{e.html.title ?? "Missing"}</div>
+                    <div className="text-[11.5px] text-ink-dim font-medium">
+                      {e.html.title ? `${e.html.title.length} characters` : "No title tag found"}
+                    </div>
                   </div>
 
                   <div className="rounded-xl border border-line bg-surface/50 p-4 space-y-2">
                     <div className="mono text-[11px] text-ink-faint uppercase">Meta Description</div>
-                    <div className="text-[13px] text-ink-dim">{e.html.metaDescription}</div>
-                    <div className="text-[11.5px] text-signal font-medium">152 characters · Optimal length</div>
+                    <div className="text-[13px] text-ink-dim">{e.html.metaDescription ?? "Missing"}</div>
+                    <div className="text-[11.5px] text-ink-dim font-medium">
+                      {e.html.metaDescription ? `${e.html.metaDescription.length} characters` : "No meta description found"}
+                    </div>
                   </div>
 
                   <div className="rounded-xl border border-line bg-surface/50 p-4 space-y-2">
@@ -876,13 +784,21 @@ function DashboardContent() {
                     <div className="mono text-[13px] text-ink">
                       {e.semantics.h1Count} H1 · {e.headings.filter((h) => h.level === 2).length} H2s · {e.headings.length} Total Headings
                     </div>
-                    <div className="text-[11.5px] text-signal font-medium">Clean single H1 with logical nested subsections</div>
+                    <div className="text-[11.5px] text-ink-dim font-medium">
+                      {e.semantics.h1Count === 1 ? "One H1" : e.semantics.h1Count === 0 ? "No H1" : `${e.semantics.h1Count} H1s — use one`}
+                    </div>
                   </div>
 
                   <div className="rounded-xl border border-line bg-surface/50 p-4 space-y-2">
                     <div className="mono text-[11px] text-ink-faint uppercase">Canonical Tag</div>
-                    <div className="mono text-[12px] text-ink break-all">{e.html.canonical}</div>
-                    <div className="text-[11.5px] text-signal font-medium">Self-referencing canonical confirmed</div>
+                    <div className="mono text-[12px] text-ink break-all">{e.html.canonical ?? "Missing"}</div>
+                    <div className="text-[11.5px] text-ink-dim font-medium">
+                      {!e.html.canonical
+                        ? "No canonical link element"
+                        : e.html.canonical.replace(/\/$/, "") === e.finalUrl.replace(/\/$/, "")
+                          ? "Points at this URL"
+                          : "Points at a different URL"}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -923,12 +839,12 @@ function DashboardContent() {
                     <div className="rounded-lg border border-line bg-surface p-3">
                       <div className="mono text-[11px] text-ink-faint">Citing Sources</div>
                       <div className="mono text-[18px] font-bold text-signal">+40% Lift</div>
-                      <div className="text-[11px] text-ink-dim">Highest correlation to Perplexity citation</div>
+                      <div className="text-[11px] text-ink-dim">Largest single lift in the study</div>
                     </div>
                     <div className="rounded-lg border border-line bg-surface p-3">
                       <div className="mono text-[11px] text-ink-faint">Adding Statistics</div>
                       <div className="mono text-[18px] font-bold text-signal">+37% Lift</div>
-                      <div className="text-[11px] text-ink-dim">Numerical backing rewards Claude & GPT</div>
+                      <div className="text-[11px] text-ink-dim">Specific figures in the passage</div>
                     </div>
                     <div className="rounded-lg border border-line bg-surface p-3">
                       <div className="mono text-[11px] text-ink-faint">Direct Quotations</div>
@@ -986,8 +902,8 @@ function DashboardContent() {
                     <div className="mono text-[20px] font-bold text-ink mt-1">{Math.ceil(e.html.textWords / 220)} min</div>
                   </div>
                   <div className="rounded-xl border border-line bg-surface/50 p-4">
-                    <div className="mono text-[10.5px] uppercase text-ink-faint">Citation Sweet Spot</div>
-                    <div className="mono text-[20px] font-bold text-signal mt-1">40–160 w</div>
+                    <div className="mono text-[10.5px] uppercase text-ink-faint">Best-scoring length</div>
+                    <div className="mono text-[20px] font-bold text-signal mt-1">40–60 w</div>
                   </div>
                   <div className="rounded-xl border border-line bg-surface/50 p-4">
                     <div className="mono text-[10.5px] uppercase text-ink-faint">Weakest Blocks</div>
@@ -1004,7 +920,7 @@ function DashboardContent() {
                           {b.kind} block · {b.words} words
                         </span>
                         <span className="mono text-[12px] font-bold text-signal">
-                          Extractability: {Math.round(b.scores.selfContainment * 100)}/100
+                          Block score: {Math.round(b.scores.total * 100)}/100
                         </span>
                       </div>
                       <p className="text-[13px] text-ink leading-relaxed">&ldquo;{b.text}&rdquo;</p>
@@ -1021,68 +937,26 @@ function DashboardContent() {
           {/* TAB 9: SITEMAP */}
           {activeTab === "sitemap" && (
             <div className="space-y-6 tab-transition">
-              <div className="card glass-panel p-6 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-[18px] font-bold text-ink">XML Sitemap Verification</h2>
-                    <p className="text-[13px] text-ink-dim">
-                      Sitemap presence, indexability, and URL declarations
-                    </p>
-                  </div>
-                  <span className="mono rounded bg-signal/15 text-signal px-2.5 py-1 text-[11.5px] font-bold">
-                    Detected & Valid
-                  </span>
+              <div className="card p-6 space-y-4">
+                <div>
+                  <h2 className="text-[18px] font-bold text-ink">Sitemap</h2>
+                  <p className="text-[13px] text-ink-dim">
+                    What the survey found at /sitemap.xml and in robots.txt. Individual sitemap URLs
+                    are not fetched or checked.
+                  </p>
                 </div>
-
-                <div className="rounded-xl border border-line bg-surface/50 p-4 space-y-2">
-                  <div className="mono text-[11px] text-ink-faint uppercase">Sitemap Status</div>
-                  <div className="mono font-semibold text-ink">{e.sitemap.found ? "Declared in robots.txt" : "Not declared"}</div>
-                  <div className="mono text-[12px] text-signal font-medium">{e.sitemap.urlCount || 412} declared URLs · Status 200 OK</div>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-[12.5px]">
-                    <thead>
-                      <tr className="border-b border-line mono text-[11px] uppercase text-ink-faint">
-                        <th className="pb-2">Sample URL</th>
-                        <th className="pb-2">Status</th>
-                        <th className="pb-2">Canonical Match</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-line/60 mono text-[12px]">
-                      <tr>
-                        <td className="py-2.5 text-ink">/docs/payments</td>
-                        <td className="py-2.5 text-signal">
-                          <span className="inline-flex items-center gap-1.5">
-                            <CheckCircle2 className="h-3.5 w-3.5" />
-                            <span>200 OK</span>
-                          </span>
-                        </td>
-                        <td className="py-2.5 text-signal">Exact Match</td>
-                      </tr>
-                      <tr>
-                        <td className="py-2.5 text-ink">/docs/billing</td>
-                        <td className="py-2.5 text-signal">
-                          <span className="inline-flex items-center gap-1.5">
-                            <CheckCircle2 className="h-3.5 w-3.5" />
-                            <span>200 OK</span>
-                          </span>
-                        </td>
-                        <td className="py-2.5 text-signal">Exact Match</td>
-                      </tr>
-                      <tr>
-                        <td className="py-2.5 text-ink">/docs/connect</td>
-                        <td className="py-2.5 text-signal">
-                          <span className="inline-flex items-center gap-1.5">
-                            <CheckCircle2 className="h-3.5 w-3.5" />
-                            <span>200 OK</span>
-                          </span>
-                        </td>
-                        <td className="py-2.5 text-signal">Exact Match</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+                <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  {[
+                    ["Sitemap file", e.sitemap.found ? "Found" : "Not found"],
+                    ["Declared in robots.txt", e.sitemap.inRobots ? "Yes" : "No"],
+                    ["URLs listed", typeof e.sitemap.urlCount === "number" ? String(e.sitemap.urlCount) : "Not counted"],
+                  ].map(([k, val]) => (
+                    <div key={k} className="rounded-[3px] border border-line bg-surface p-4">
+                      <dt className="tb-label">{k}</dt>
+                      <dd className="mono mt-1 text-[14px] text-ink">{val}</dd>
+                    </div>
+                  ))}
+                </dl>
               </div>
             </div>
           )}
@@ -1104,66 +978,37 @@ function DashboardContent() {
           {/* TAB 10: PAGES */}
           {activeTab === "pages" && (
             <div className="space-y-6 tab-transition">
-              <div className="card glass-panel p-6 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-[18px] font-bold text-ink">Crawled Pages</h2>
-                    <p className="text-[13px] text-ink-dim">
-                      Full crawl table of detected pages with individual pillar metrics
-                    </p>
-                  </div>
-                  <span className="mono text-[12px] text-ink-faint">Showing 4 pages</span>
+              <div className="card p-6 space-y-4">
+                <div>
+                  <h2 className="text-[18px] font-bold text-ink">Pages surveyed</h2>
+                  <p className="text-[13px] text-ink-dim">
+                    Crawlspace surveys one page at a time. Multi-page crawls are not built yet, so
+                    this table has exactly one row.
+                  </p>
                 </div>
-
-                <div className="overflow-x-auto">
+                <div tabIndex={0} role="region" aria-label="Pages table" className="overflow-x-auto">
                   <table className="w-full text-left text-[13px]">
                     <thead>
                       <tr className="border-b border-line mono text-[11px] uppercase tracking-wider text-ink-faint">
-                        <th className="pb-3 font-semibold">URL Path</th>
-                        <th className="pb-3 font-semibold">Status</th>
-                        <th className="pb-3 font-semibold">SEO</th>
-                        <th className="pb-3 font-semibold">GEO</th>
-                        <th className="pb-3 font-semibold">Technical</th>
-                        <th className="pb-3 font-semibold">Content</th>
-                        <th className="pb-3 font-semibold">Issues</th>
+                        <th className="pb-3 pr-4 font-semibold">URL</th>
+                        <th className="pb-3 pr-4 font-semibold">Status</th>
+                        {Object.keys(report.engines).map((eng) => (
+                          <th key={eng} className="pb-3 pr-4 font-semibold">{eng}</th>
+                        ))}
+                        <th className="pb-3 font-semibold">Defects</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-line/60 mono">
-                      <tr className="hover:bg-surface/40 transition-colors">
-                        <td className="py-3 font-semibold text-ink">/docs/payments</td>
-                        <td className="py-3 text-signal">200</td>
-                        <td className="py-3 text-ink">84</td>
-                        <td className="py-3 text-signal font-bold">71</td>
-                        <td className="py-3 text-ink">82</td>
-                        <td className="py-3 text-ink">76</td>
-                        <td className="py-3 text-warn">3 (1 Crit)</td>
-                      </tr>
-                      <tr className="hover:bg-surface/40 transition-colors">
-                        <td className="py-3 font-semibold text-ink">/docs/billing</td>
-                        <td className="py-3 text-signal">200</td>
-                        <td className="py-3 text-ink">88</td>
-                        <td className="py-3 text-signal font-bold">79</td>
-                        <td className="py-3 text-ink">85</td>
-                        <td className="py-3 text-ink">82</td>
-                        <td className="py-3 text-signal">0</td>
-                      </tr>
-                      <tr className="hover:bg-surface/40 transition-colors">
-                        <td className="py-3 font-semibold text-ink">/docs/connect</td>
-                        <td className="py-3 text-signal">200</td>
-                        <td className="py-3 text-ink">80</td>
-                        <td className="py-3 text-signal font-bold">68</td>
-                        <td className="py-3 text-ink">80</td>
-                        <td className="py-3 text-ink">70</td>
-                        <td className="py-3 text-warn">2</td>
-                      </tr>
-                      <tr className="hover:bg-surface/40 transition-colors">
-                        <td className="py-3 font-semibold text-ink">/docs/radar</td>
-                        <td className="py-3 text-signal">200</td>
-                        <td className="py-3 text-ink">86</td>
-                        <td className="py-3 text-signal font-bold">75</td>
-                        <td className="py-3 text-ink">84</td>
-                        <td className="py-3 text-ink">74</td>
-                        <td className="py-3 text-signal">1</td>
+                    <tbody className="mono">
+                      <tr>
+                        <td className="py-3 pr-4 font-semibold text-ink">{e.finalUrl}</td>
+                        <td className="py-3 pr-4 text-ink">{e.status}</td>
+                        {Object.entries(report.engines).map(([eng, data]) => (
+                          <td key={eng} className="py-3 pr-4 text-ink">
+                            {data.score}
+                            {data.capped ? " (gated)" : ""}
+                          </td>
+                        ))}
+                        <td className="py-3 text-ink">{report.findings.length}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -1202,105 +1047,31 @@ function DashboardContent() {
           )}
 
           {/* TAB 12: HISTORY */}
-          {activeTab === "history" && (
+{activeTab === "history" && (
             <div className="space-y-6 tab-transition">
-              <div className="card glass-panel p-6 space-y-4">
-                <h2 className="text-[18px] font-bold text-ink">Score Changes & Changelog</h2>
-                <p className="text-[13px] text-ink-dim">
-                  Historical audit benchmarks and detected configuration adjustments
+              <div className="card p-6 space-y-3">
+                <h2 className="text-[18px] font-bold text-ink">History</h2>
+                <p className="max-w-xl text-[13.5px] leading-relaxed text-ink-dim">
+                  There is no history yet. Surveys are not stored, so no earlier score exists to
+                  compare with. History arrives with accounts.
                 </p>
-
-                <div className="space-y-3 pt-2">
-                  {[
-                    { date: "September 02, 2026", prev: 76, current: 82, note: "Allowed ClaudeBot and OAI-SearchBot in robots.txt (+6)" },
-                    { date: "August 26, 2026", prev: 74, current: 76, note: "Added BreadcrumbList and WebSite JSON-LD structured data (+2)" },
-                    { date: "August 10, 2026", prev: 70, current: 74, note: "Initial website audit crawl completed (+4)" },
-                  ].map((item, i) => (
-                    <div key={i} className="rounded-xl border border-line bg-surface/50 p-4 flex items-center justify-between">
-                      <div>
-                        <div className="mono text-[11px] text-ink-faint">{item.date}</div>
-                        <div className="text-[13.5px] font-semibold text-ink mt-0.5">{item.note}</div>
-                      </div>
-                      <div className="mono text-right">
-                        <span className="text-ink-faint text-[13px]">{item.prev} → </span>
-                        <span className="text-signal font-bold text-[16px]">{item.current}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
               </div>
             </div>
           )}
 
-          {/* TAB 13: REPORTS */}
+                    {/* TAB 13: REPORTS */}
           {activeTab === "reports" && (
             <div className="space-y-6 tab-transition">
-              <div className="card glass-panel p-6 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-[18px] font-bold text-ink">Saved Audit Reports</h2>
-                    <p className="text-[13px] text-ink-dim">
-                      Downloadable deliverables and client share links
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setExportOpen(true)}
-                    className="mono rounded-xl bg-signal px-3.5 py-1.5 text-[12px] font-bold text-void hover:brightness-110"
-                  >
-                    + Export Current Report
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                  <div className="card glass-panel p-5 space-y-3 border-line/80">
-                    <div className="flex items-center justify-between">
-                      <span className="mono text-[13px] font-bold text-ink">stripe.com/docs</span>
-                      <span className="mono text-[18px] font-bold text-signal">78</span>
-                    </div>
-                    <div className="mono text-[11px] text-ink-faint">Saved September 6, 2026 · 142ms latency</div>
-                    <div className="flex gap-2 pt-2 border-t border-line/60">
-                      <Link
-                        href="/report/stripe-docs"
-                        className="mono text-[11.5px] font-semibold text-signal hover:underline"
-                      >
-                        View Client Report
-                      </Link>
-                      <span className="text-ink-faint">•</span>
-                      <button
-                        type="button"
-                        onClick={() => setExportOpen(true)}
-                        className="mono text-[11.5px] text-ink-dim hover:text-ink"
-                      >
-                        Export PDF / Prompts
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="card glass-panel p-5 space-y-3 border-line/80">
-                    <div className="flex items-center justify-between">
-                      <span className="mono text-[13px] font-bold text-ink">linear.app</span>
-                      <span className="mono text-[18px] font-bold text-signal">85</span>
-                    </div>
-                    <div className="mono text-[11px] text-ink-faint">Saved September 5, 2026 · 98ms latency</div>
-                    <div className="flex gap-2 pt-2 border-t border-line/60">
-                      <Link
-                        href="/report/linear-app"
-                        className="mono text-[11.5px] font-semibold text-signal hover:underline"
-                      >
-                        View Client Report
-                      </Link>
-                      <span className="text-ink-faint">•</span>
-                      <button
-                        type="button"
-                        onClick={() => setExportOpen(true)}
-                        className="mono text-[11.5px] text-ink-dim hover:text-ink"
-                      >
-                        Export PDF / Prompts
-                      </button>
-                    </div>
-                  </div>
-                </div>
+              <div className="card p-6 space-y-4">
+                <h2 className="text-[18px] font-bold text-ink">Saved surveys</h2>
+                <p className="max-w-xl text-[13.5px] leading-relaxed text-ink-dim">
+                  Nothing is saved yet. Crawlspace has no accounts or storage, so a survey lives only
+                  in this tab. Saved and shareable surveys arrive with accounts. Until then, export
+                  this one to keep it.
+                </p>
+                <button type="button" onClick={() => setExportOpen(true)} className="btn-primary">
+                  Export this survey
+                </button>
               </div>
             </div>
           )}
@@ -1308,47 +1079,13 @@ function DashboardContent() {
           {/* TAB 14: SETTINGS */}
           {activeTab === "settings" && (
             <div className="space-y-6 tab-transition">
-              <div className="card glass-panel p-6 space-y-6">
-                <div>
-                  <h2 className="text-[18px] font-bold text-ink">Workspace Settings</h2>
-                  <p className="text-[13px] text-ink-dim">
-                    Manage team domains, notifications, and LLM rewrite credentials
-                  </p>
-                </div>
-
-                <div className="space-y-4 max-w-xl">
-                  <div>
-                    <label className="mono block text-[11px] uppercase tracking-wider text-ink-faint mb-1.5 font-medium">
-                      Primary Monitored Domain
-                    </label>
-                    <input
-                      type="text"
-                      defaultValue="stripe.com"
-                      className="mono h-11 w-full rounded-xl border border-line bg-surface px-3.5 text-[13px] text-ink"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="mono block text-[11px] uppercase tracking-wider text-ink-faint mb-1.5 font-medium">
-                      Crawl Alert Frequency
-                    </label>
-                    <select className="mono h-11 w-full rounded-xl border border-line bg-surface px-3.5 text-[13px] text-ink">
-                      <option>Weekly on Mondays</option>
-                      <option>Daily Digest</option>
-                      <option>Real-Time on Critical Regression</option>
-                    </select>
-                  </div>
-
-                  <div className="pt-2">
-                    <button
-                      type="button"
-                      onClick={() => alert("Settings updated successfully.")}
-                      className="mono rounded-xl bg-signal px-5 py-2.5 text-[12.5px] font-bold text-void hover:brightness-110 shadow-[0_0_14px_var(--color-signal-glow)]"
-                    >
-                      Save Changes
-                    </button>
-                  </div>
-                </div>
+              <div className="card p-6 space-y-4">
+                <h2 className="text-[18px] font-bold text-ink">Settings</h2>
+                <p className="max-w-xl text-[13.5px] leading-relaxed text-ink-dim">
+                  There is nothing to configure yet. Monitoring, alerts and saved domains need
+                  accounts, which are not built. The only setting today is the optional rewrite key,
+                  entered on the home page and kept in your browser tab.
+                </p>
               </div>
             </div>
           )}
@@ -1381,7 +1118,7 @@ function DashboardContent() {
             </div>
           )}
           </div>
-        </main>
+        </div>
       </div>
 
       {/* Export Modal */}

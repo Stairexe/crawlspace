@@ -10,13 +10,13 @@ export function reportToMarkdown(r: AuditReport): string {
   L.push("");
   L.push(`**URL:** ${e.finalUrl}`);
   L.push(`**Audited:** ${new Date(e.fetchedAt).toUTCString()}`);
-  L.push(`**Overall Visibility Score:** ${r.visibility?.overall ?? r.composite}/100`);
-  L.push(`- SEO: ${r.visibility?.seo ?? 0}/100`);
-  L.push(`- GEO / AI Search: ${r.visibility?.geo ?? r.composite}/100`);
-  L.push(`- AI Crawlers: ${r.visibility?.crawlers ?? 0}/100`);
-  L.push(`- Technical: ${r.visibility?.technical ?? 0}/100`);
-  L.push(`- Content: ${r.visibility?.content ?? 0}/100`);
-  L.push(`- Schema: ${r.visibility?.schema ?? 0}/100`);
+  L.push(`**Overall Visibility Score:** ${r.visibility.overall}/100`);
+  L.push(`- SEO: ${r.visibility.seo}/100`);
+  L.push(`- GEO / AI Search: ${r.visibility.geo}/100`);
+  L.push(`- AI Crawlers: ${r.visibility.crawlers}/100`);
+  L.push(`- Technical: ${r.visibility.technical}/100`);
+  L.push(`- Content: ${r.visibility.content}/100`);
+  L.push(`- Schema: ${r.visibility.schema}/100`);
   L.push("");
   L.push(`**Composite GEO:** ${r.composite}/100 · **Spread:** ${r.spread} points`);
   L.push("");
@@ -42,7 +42,7 @@ export function reportToMarkdown(r: AuditReport): string {
   for (const c of Object.keys(CATEGORY_LABELS) as (keyof typeof CATEGORY_LABELS)[]) {
     const relevant = r.checks.filter((x) => x.category === c && x.weight > 0 && x.status !== "na");
     const tw = relevant.reduce((n, x) => n + x.weight, 0);
-    const v = tw ? Math.round((relevant.reduce((n, x) => n + x.value * x.weight, 0) / tw) * 100) : 0;
+    const v = tw ? Math.round((relevant.reduce((n, x) => n + x.value * x.weight, 0) / tw) * 100) : "n/a";
     L.push(`| ${CATEGORY_LABELS[c]} | ${v} |`);
   }
   L.push("");
@@ -126,13 +126,13 @@ export function reportToLLMPrompt(r: AuditReport): string {
   L.push(`- Page Title: ${e.html.title ?? "(missing)"}`);
   L.push(`- Final URL: ${e.finalUrl}`);
   L.push(`- Word Count: ${e.html.textWords} words (${e.html.htmlBytes} bytes HTML)`);
-  L.push(`- Overall Visibility Score: ${r.visibility?.overall ?? r.composite}/100`);
-  L.push(`  * SEO Score: ${r.visibility?.seo ?? 0}/100`);
-  L.push(`  * GEO / AI Search: ${r.visibility?.geo ?? r.composite}/100`);
-  L.push(`  * AI Crawler Access: ${r.visibility?.crawlers ?? 0}/100`);
-  L.push(`  * Technical Health: ${r.visibility?.technical ?? 0}/100`);
-  L.push(`  * Content Intelligence: ${r.visibility?.content ?? 0}/100`);
-  L.push(`  * Structured Data (Schema): ${r.visibility?.schema ?? 0}/100`);
+  L.push(`- Overall Visibility Score: ${r.visibility.overall}/100`);
+  L.push(`  * SEO Score: ${r.visibility.seo}/100`);
+  L.push(`  * GEO / AI Search: ${r.visibility.geo}/100`);
+  L.push(`  * AI Crawler Access: ${r.visibility.crawlers}/100`);
+  L.push(`  * Technical Health: ${r.visibility.technical}/100`);
+  L.push(`  * Content Intelligence: ${r.visibility.content}/100`);
+  L.push(`  * Structured Data (Schema): ${r.visibility.schema}/100`);
   L.push("");
   L.push(`Composite Engine Citability Scores:`);
   for (const engine of ENGINES) {

@@ -11,6 +11,12 @@ export function RobotsAnalyzer({ evidence }: { evidence: Evidence }) {
 
   const robots = evidence.robots;
   const explained = robots.explainedRules;
+  // /sitemap.xml is probed on the audited origin (lib/extract.ts), so this URL is real when found.
+  const origin = new URL(evidence.finalUrl).origin;
+  const indexDirectives = [
+    robots.metaRobots && `meta robots: ${robots.metaRobots}`,
+    robots.xRobotsTag && `X-Robots-Tag: ${robots.xRobotsTag}`,
+  ].filter(Boolean) as string[];
 
   function copyRaw() {
     if (!robots.rawText) return;
@@ -69,7 +75,9 @@ export function RobotsAnalyzer({ evidence }: { evidence: Evidence }) {
           <p className="mt-1 text-[12px] text-ink-faint">
             {evidence.sitemap.inRobots
               ? "Sitemap URL declared in robots.txt"
-              : "Add 'Sitemap: https://domain/sitemap.xml'"}
+              : evidence.sitemap.found
+                ? `Add 'Sitemap: ${origin}/sitemap.xml' to robots.txt`
+                : "No sitemap found at /sitemap.xml. Add a Sitemap: line pointing at your sitemap's full URL"}
           </p>
         </div>
 
@@ -84,11 +92,17 @@ export function RobotsAnalyzer({ evidence }: { evidence: Evidence }) {
               }`}
             />
             <span className="text-[18px] font-semibold text-ink">
-              {robots.metaRobots ? "Meta Tagged" : "Standard"}
+              {robots.metaRobots && robots.xRobotsTag
+                ? "Meta + Header"
+                : robots.metaRobots
+                  ? "Meta Tagged"
+                  : robots.xRobotsTag
+                    ? "Header Tagged"
+                    : "Standard"}
             </span>
           </div>
           <p className="mt-1 text-[12px] text-ink-faint">
-            {robots.metaRobots || robots.xRobotsTag || "No noindex restrictions found"}
+            {indexDirectives.length ? indexDirectives.join(" · ") : "No noindex restrictions found"}
           </p>
         </div>
       </div>
@@ -136,7 +150,7 @@ export function RobotsAnalyzer({ evidence }: { evidence: Evidence }) {
 
         <div className="p-4">
           {showRaw ? (
-            <pre className="mono thin-scroll max-h-96 overflow-auto rounded-lg bg-base p-3 text-[11.5px] leading-relaxed text-ink-dim">
+            <pre tabIndex={0} className="mono thin-scroll max-h-96 overflow-auto rounded-lg bg-base p-3 text-[11.5px] leading-relaxed text-ink-dim">
               {robots.rawText || "// No robots.txt found."}
             </pre>
           ) : explained.length > 0 ? (

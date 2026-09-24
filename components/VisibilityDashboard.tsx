@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { AuditReport } from "@/lib/types";
 import { ENGINES, ENGINE_LABELS } from "@/lib/types";
-import { Pill, scoreColor, useCountUp } from "./primitives";
+import { Pill, scoreColor, scoreLabel, useCountUp } from "./primitives";
 import { CrawlerCenter } from "./CrawlerCenter";
 import { SchemaAnalyzer } from "./SchemaAnalyzer";
 import { RobotsAnalyzer } from "./RobotsAnalyzer";
@@ -88,7 +88,7 @@ export function VisibilityDashboard({
             <div>
               <div className="flex items-center gap-2">
                 <span className="mono text-[11px] uppercase tracking-wider text-signal font-semibold">
-                  Website Visibility Intelligence
+                  Survey result
                 </span>
                 <span className="mono text-[11px] text-ink-faint">
                   • {new Date(e.fetchedAt).toLocaleDateString()}
@@ -107,7 +107,7 @@ export function VisibilityDashboard({
                   {e.finalUrl}
                 </a>
                 <span>•</span>
-                <span>{e.timings.fetchMs}ms load</span>
+                <span>{e.timings.fetchMs}ms fetch</span>
                 <span>•</span>
                 <span>{e.html.textWords.toLocaleString()} words</span>
               </div>
@@ -285,7 +285,7 @@ export function VisibilityDashboard({
                         />
                       </div>
                       <p className="mt-2 text-[11px] leading-relaxed text-ink-faint">
-                        {s.capped ? s.capReason : s.score >= 75 ? "High citation likelihood" : "Moderate extraction barriers"}
+                        {s.capped ? s.capReason : scoreLabel(s.score)}
                       </p>
                     </div>
                   </div>
@@ -502,7 +502,7 @@ export function VisibilityDashboard({
               </span>
               <div className="mt-3 rounded-lg border border-line bg-surface/80 p-3.5 space-y-2">
                 <div className="mono text-[11px] text-ink-faint">
-                  Card format: <strong className="text-ink">{e.twitter?.card || "summary"}</strong>
+                  Card format: <strong className="text-ink">{e.twitter?.card || "Missing"}</strong>
                 </div>
                 <div className="text-[13px] font-semibold text-ink">
                   {e.twitter?.title || e.html.title || "No Twitter Title"}

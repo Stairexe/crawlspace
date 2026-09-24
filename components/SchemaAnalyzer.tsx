@@ -5,14 +5,16 @@ import type { Evidence } from "@/lib/types";
 import { Pill } from "./primitives";
 import { AlertTriangle, Copy, Check } from "lucide-react";
 
+// `match` covers every type named in `label`, using the same patterns as lib/extract.ts and
+// lib/scoring/score.ts, so "Detected" here agrees with detectedTypes and the schema score.
 const STANDARD_SCHEMAS = [
-  { type: "Organization", label: "Organization", purpose: "Entity authority, logo, sameAs profiles" },
-  { type: "WebSite", label: "WebSite", purpose: "Site search, core identity" },
-  { type: "WebPage", label: "WebPage", purpose: "Page metadata, author, dateModified" },
-  { type: "Article", label: "Article / BlogPosting", purpose: "Editorial byline, freshness timestamps" },
-  { type: "FAQPage", label: "FAQPage", purpose: "Question & answer pairs for search snippets" },
-  { type: "BreadcrumbList", label: "BreadcrumbList", purpose: "Site structure & navigation hierarchy" },
-  { type: "Product", label: "Product / Service", purpose: "Offers, pricing, review markup" },
+  { type: "Organization", label: "Organization", match: /Organization|Corporation/i, purpose: "Entity authority, logo, sameAs profiles" },
+  { type: "WebSite", label: "WebSite", match: /WebSite/i, purpose: "Site search, core identity" },
+  { type: "WebPage", label: "WebPage", match: /WebPage/i, purpose: "Page metadata, author, dateModified" },
+  { type: "Article", label: "Article / BlogPosting", match: /Article|BlogPosting/i, purpose: "Editorial byline, freshness timestamps" },
+  { type: "FAQPage", label: "FAQPage", match: /FAQPage/i, purpose: "Question & answer pairs for search snippets" },
+  { type: "BreadcrumbList", label: "BreadcrumbList", match: /BreadcrumbList/i, purpose: "Site structure & navigation hierarchy" },
+  { type: "Product", label: "Product / Service", match: /Product|Service/i, purpose: "Offers, pricing, review markup" },
 ];
 
 export function SchemaAnalyzer({ evidence }: { evidence: Evidence }) {
@@ -75,12 +77,14 @@ export function SchemaAnalyzer({ evidence }: { evidence: Evidence }) {
               }`}
             />
             <span className="text-[18px] font-medium text-ink">
-              {issues.length === 0 ? "Clean Schema" : `${issues.length} Issues Found`}
+              {issues.length === 0
+                ? "No issues found"
+                : `${issues.length} ${issues.length === 1 ? "Issue" : "Issues"} Found`}
             </span>
           </div>
           <p className="mt-1 text-[12px] text-ink-faint">
             {issues.length === 0
-              ? "All declared entity properties conform to best practices."
+              ? "In the checks Crawlspace runs: Organization present with sameAs and logo; page schema (if any) has a date and an author."
               : "Recommended properties or entity connections missing."}
           </p>
         </div>
@@ -95,9 +99,7 @@ export function SchemaAnalyzer({ evidence }: { evidence: Evidence }) {
 
         <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
           {STANDARD_SCHEMAS.map((item) => {
-            const isPresent = detected.some((t) =>
-              new RegExp(item.type, "i").test(t),
-            );
+            const isPresent = detected.some((t) => item.match.test(t));
             return (
               <div
                 key={item.type}
@@ -191,7 +193,7 @@ export function SchemaAnalyzer({ evidence }: { evidence: Evidence }) {
 
         <div className="p-4">
           {snippets.length > 0 ? (
-            <pre className="mono thin-scroll max-h-96 overflow-auto rounded-lg bg-base p-3 text-[11.5px] leading-relaxed text-ink-dim">
+            <pre tabIndex={0} className="mono thin-scroll max-h-96 overflow-auto rounded-lg bg-base p-3 text-[11.5px] leading-relaxed text-ink-dim">
               {(() => {
                 try {
                   return JSON.stringify(JSON.parse(snippets[selectedSnippet]), null, 2);

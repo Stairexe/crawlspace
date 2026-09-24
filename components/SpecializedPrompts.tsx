@@ -14,7 +14,9 @@ export function SpecializedPrompts({ report }: SpecializedPromptsProps) {
 
   const e = report.evidence;
   const targetUrl = e.finalUrl;
-  const siteTitle = e.html.title || "Target Website";
+  const host = new URL(e.finalUrl).hostname;
+  const origin = new URL(e.finalUrl).origin;
+  const siteTitle = e.html.title || host;
   const weakBlock = report.weakestBlocks[0];
 
   const prompts = [
@@ -27,22 +29,18 @@ export function SpecializedPrompts({ report }: SpecializedPromptsProps) {
       generate: () => `You are an expert in Generative Engine Optimization (GEO) and AI content extractability.
 I am optimizing the content on "${siteTitle}" (${targetUrl}) to maximize citation probability across ChatGPT, Claude, and Perplexity.
 
-According to Princeton GEO empirical research:
-1. Direct assertions without deixis increase citation rate by +40%.
-2. Adding numerical evidence and statistics increases citations by +37%.
-3. Authoritative quotations lift citation by +30%.
-4. Vague antecedent references ("As discussed above", "this tool", "our solution") trigger truncation penalties.
+Background (Aggarwal et al., "GEO: Generative Engine Optimization", KDD 2024): citing sources, adding statistics and adding quotations each raised visibility in generative engine answers. Passages that open by pointing at earlier text ("As discussed above", "this tool") cannot be quoted on their own.
 
-Here is an extract from our page that currently suffers from extractability penalties:
+${weakBlock ? `Here is the passage from our page that Crawlspace scored weakest (${Math.round(weakBlock.scores.total * 100)}/100):
 """
-${weakBlock ? weakBlock.text : "Our modern platform provides integrated solutions for businesses seeking high reliability and automated workflows."}
-"""
+${weakBlock.text}
+"""` : "Crawlspace found no passage scoring below 75 on this page, so there is nothing specific to rewrite. Review the page's longest paragraphs using the rules below."}
 
 TASK:
-1. Rewrite this passage in 2 variations (one concise 50-word answer, one comprehensive 120-word explanation).
-2. Ensure the entity subject is explicitly declared in the first 7 words.
-3. Remove all ambiguous pronouns and passive relational phrasing.
-4. Integrate realistic factual anchor hooks and clear quotation-friendly framing.`,
+1. Rewrite this passage in 2 variations (one concise 40–60-word answer, one fuller explanation of up to 160 words).
+2. Name the subject explicitly in the first sentence and state the main claim first.
+3. Replace pronouns and references that point outside the passage with the thing they refer to.
+4. Use ONLY facts already stated in the passage. Do not add statistics, citations, quotes, names or claims that are not there. If a figure or source would help, mark the spot with [SOURCE NEEDED] instead of inventing one.`,
     },
     {
       id: "schema-generator",
@@ -59,12 +57,13 @@ Detected Headings: ${e.headings.slice(0, 5).map((h) => h.text).join(" | ")}
 
 REQUIREMENTS:
 1. Use an @graph array containing:
-   - "Organization": with name, url, logo, and sameAs social verification links.
-   - "WebSite": with url, name, and SearchAction potentialAction.
-   - "BreadcrumbList": reflecting a logical 2-level hierarchy for ${targetUrl}.
-   - "FAQPage": extracting 3 common user questions based on the page topic.
-2. Return ONLY the JSON-LD inside a <script type="application/ld+json"> tag without explanation.
-3. Validate that no syntax errors exist and all property names follow schema.org standard.`,
+   - "Organization": with name, url, logo and sameAs. Use a clearly marked placeholder such as "https://REPLACE-WITH-YOUR-LOGO-URL" for any URL not given here; never guess one.
+   - "WebSite": with url and name.
+   - "BreadcrumbList": only for path segments actually present in ${targetUrl}.
+   - "FAQPage": only if the page already shows visible questions with answers; use those exact questions and answers, never invented ones.
+2. Use only facts given above. Do not invent names, dates, ratings, prices or authors.
+3. Return ONLY the JSON-LD inside a <script type="application/ld+json"> tag without explanation.
+4. Validate that no syntax errors exist and all property names follow the schema.org standard.`,
     },
     {
       id: "robots-crawler-policy",
@@ -76,20 +75,23 @@ REQUIREMENTS:
 Write an optimal, enterprise-ready robots.txt file for "${targetUrl}".
 
 OBJECTIVE:
-We want to allow AI Search Assistants to index and cite our content, while controlling brute-force training scrapers.
+We want AI assistants to be able to read and cite our content.
 
 RULES TO ENFORCE:
-1. Search Crawlers to explicitly ALLOW:
-   - Googlebot (Google traditional & AI Overviews)
-   - OAI-SearchBot (ChatGPT Search engine)
-   - ClaudeBot (Anthropic search & citations)
-   - PerplexityBot (Perplexity real-time indexing)
-   - Bingbot (Microsoft Copilot & Bing search)
-2. Training Scrapers to RESTRICT:
-   - GPTBot (OpenAI training dataset ingestion)
-   - CCBot (Common Crawl archive scraper)
-3. Protect private directory endpoints: /admin/, /api/private/, /drafts/
-4. Declare sitemap: ${e.sitemap.found ? "https://" + new URL(targetUrl).hostname + "/sitemap.xml" : "https://domain.com/sitemap.xml"}
+1. Explicitly ALLOW the crawlers AI assistants use to find and cite pages:
+   - Googlebot and Google-Extended (Google Search and its AI features)
+   - OAI-SearchBot, ChatGPT-User and GPTBot (ChatGPT)
+   - ClaudeBot, Claude-User and Claude-SearchBot (Claude)
+   - PerplexityBot and Perplexity-User (Perplexity)
+   - Bingbot (Bing and Microsoft Copilot)
+2. CCBot (Common Crawl) may be disallowed: it feeds model training datasets, not live citations.
+3. Keep every existing Disallow rule from our current robots.txt unless it blocks one of the crawlers above from public content.
+4. ${e.sitemap.found ? `Declare the sitemap: ${origin}/sitemap.xml` : "We have no sitemap at /sitemap.xml yet; leave a commented placeholder line for it rather than inventing a URL."}
+
+Our current robots.txt:
+"""
+${e.robots.rawText ?? "(none found)"}
+"""
 
 Provide the exact robots.txt file contents with explanatory comments for our DevOps team.`,
     },
@@ -107,7 +109,7 @@ AUDIT BENCHMARK DATA:
 - Overall Visibility Score: ${report.visibility.overall} / 100
 - Traditional SEO Score: ${report.visibility.seo} / 100
 - Generative Engine (GEO) Score: ${report.visibility.geo} / 100
-- AI Search Crawler Status: ${report.visibility.crawlers}% Allowed
+- AI crawler access score: ${report.visibility.crawlers} / 100
 - Critical Findings Detected: ${report.findings.filter((f) => f.severity === "critical").length}
 - Recommended Remediations: ${report.findings.slice(0, 3).map((f) => f.label).join("; ")}
 
@@ -117,7 +119,7 @@ MEMO STRUCTURE:
 3. Risk Assessment: What traffic and brand presence is at stake if competitors are cited instead.
 4. Immediate 30-Day Action Plan: 3 high-leverage technical and content initiatives to execute immediately.
 
-Keep the tone professional, urgent, data-grounded, and concise.`,
+Keep the tone professional and concise. Use only the audit data above: do not invent traffic, revenue, competitor names or percentages.`,
     },
   ];
 
@@ -217,7 +219,7 @@ Keep the tone professional, urgent, data-grounded, and concise.`,
           </div>
         </div>
 
-        <pre className="mono text-[12px] text-ink-dim leading-relaxed whitespace-pre-wrap max-h-80 overflow-y-auto thin-scroll p-3 bg-surface/40 rounded-xl border border-line/50">
+        <pre tabIndex={0} className="mono text-[12px] text-ink-dim leading-relaxed whitespace-pre-wrap max-h-80 overflow-y-auto thin-scroll p-3 bg-surface/40 rounded-xl border border-line/50">
           {activePrompt.generate()}
         </pre>
 

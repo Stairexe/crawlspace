@@ -114,9 +114,13 @@ function glanceFacts(report: AuditReport): [string, string, boolean | null][] {
     ["schema", schemaTypes.size ? `${schemaTypes.size} types` : "none", schemaTypes.size > 0],
     ["author", e.author.name ? "named" : "anonymous", !!e.author.name],
     [
-      "last updated",
-      e.dates.modified ? e.dates.modified.slice(0, 10) : e.dates.published ? e.dates.published.slice(0, 10) : "undated",
-      !!(e.dates.modified || e.dates.published),
+      e.dates.modified ? "last updated" : e.dates.published ? "published" : "date",
+      e.dates.modified
+        ? e.dates.modified.slice(0, 10)
+        : e.dates.published
+          ? e.dates.published.slice(0, 10)
+          : e.dates.visibleDate ?? "undated",
+      !!(e.dates.modified || e.dates.published || e.dates.visibleDate),
     ],
     ["renders w/o JS", e.renderedWithoutJs ? "yes" : "no", e.renderedWithoutJs],
   ];
@@ -133,9 +137,10 @@ export function ScoreBoard({ report }: { report: AuditReport }) {
         (x) => x.category === c && x.weight > 0 && x.status !== "na",
       );
       const tw = relevant.reduce((n, x) => n + x.weight, 0);
-      return [c, tw ? Math.round((relevant.reduce((n, x) => n + x.value * x.weight, 0) / tw) * 100) : 0];
+      // null = no applicable checks: not measured, never shown as a failing 0.
+      return [c, tw ? Math.round((relevant.reduce((n, x) => n + x.value * x.weight, 0) / tw) * 100) : null];
     }),
-  ) as Record<(typeof CATEGORIES)[number], number>;
+  ) as Record<(typeof CATEGORIES)[number], number | null>;
 
   return (
     <section className="space-y-4">
@@ -224,7 +229,8 @@ export function ScoreBoard({ report }: { report: AuditReport }) {
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {CATEGORIES.map((c, i) => {
-          const v = categoryValues[c];
+          const measured = categoryValues[c];
+          const v = measured ?? 0;
           return (
             <div
               key={c}
@@ -233,8 +239,11 @@ export function ScoreBoard({ report }: { report: AuditReport }) {
             >
               <div className="flex items-baseline justify-between gap-2">
                 <span className="text-[13px] font-medium">{CATEGORY_LABELS[c]}</span>
-                <span className="mono text-[15px] font-semibold" style={{ color: scoreColor(v) }}>
-                  {v}
+                <span
+                  className="mono text-[15px] font-semibold"
+                  style={{ color: measured === null ? "var(--color-ink-faint)" : scoreColor(v) }}
+                >
+                  {measured === null ? "n/a" : v}
                 </span>
               </div>
               <div className="mt-2.5 h-[4px] overflow-hidden rounded-full bg-line">

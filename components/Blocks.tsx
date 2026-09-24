@@ -188,8 +188,9 @@ export function WeakBlocks({
         <h2 className="text-[16px] font-semibold tracking-tight">The passages</h2>
         <div className="card p-6">
           <p className="text-[14px] leading-relaxed text-ink-dim">
-            Every block on this page scores above 75. There is nothing here an assistant would
-            struggle to lift.
+            {report.evidence.blocks.length === 0
+              ? "No content blocks long enough to score were found in the served HTML. If the page has text, it may be rendered by JavaScript, which crawlers do not run."
+              : "Every block on this page scores 75 or above. There is nothing here an assistant would struggle to lift."}
           </p>
         </div>
       </section>
