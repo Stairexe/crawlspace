@@ -79,12 +79,14 @@ We want AI assistants to be able to read and cite our content.
 
 RULES TO ENFORCE:
 1. Explicitly ALLOW the crawlers AI assistants use to find and cite pages:
-   - Googlebot and Google-Extended (Google Search and its AI features)
-   - OAI-SearchBot, ChatGPT-User and GPTBot (ChatGPT)
-   - ClaudeBot, Claude-User and Claude-SearchBot (Claude)
+   - Googlebot (Google Search and AI Overviews)
+   - OAI-SearchBot and ChatGPT-User (ChatGPT)
+   - Claude-SearchBot and Claude-User (Claude)
    - PerplexityBot and Perplexity-User (Perplexity)
    - Bingbot (Bing and Microsoft Copilot)
-2. CCBot (Common Crawl) may be disallowed: it feeds model training datasets, not live citations.
+2. Training crawlers are our choice to allow or block; blocking them does not remove us from answers:
+   GPTBot, ClaudeBot, Google-Extended, Applebot-Extended, meta-externalagent, Bytespider, CCBot.
+   Add a clearly commented section for them and leave the decision to us (default: allow).
 3. Keep every existing Disallow rule from our current robots.txt unless it blocks one of the crawlers above from public content.
 4. ${e.sitemap.found ? `Declare the sitemap: ${origin}/sitemap.xml` : "We have no sitemap at /sitemap.xml yet; leave a commented placeholder line for it rather than inventing a URL."}
 

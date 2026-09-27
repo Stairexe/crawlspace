@@ -1,31 +1,57 @@
 import type { Engine, RobotRule, RobotsRuleExplanation } from "./types";
 
 /**
- * The AI user agents that matter, and which engine each one gates.
- * Source: research/SUMMARY.md §Per-engine crawler map and ref/guides.txt §6.
+ * The AI user agents that matter, what each one is for, and which engine it gates.
+ *
+ * Only crawlers that fetch pages for an engine's *answers* can gate that engine:
+ * its search indexer and its user-triggered fetcher. Training crawlers (GPTBot,
+ * ClaudeBot, Google-Extended, CCBot, …) are reported but never gate or penalise an
+ * engine — each operator documents that blocking them does not remove a site from
+ * its search or answers. Assistants Crawlspace does not score (Apple, Meta, DuckDuckGo,
+ * Mistral, …) are reported as "other" so the robots.txt picture is complete.
+ * Tokens as published by each operator; cross-checked Sep 2026.
  */
 export interface AgentSpec {
   agent: string;
-  engine: Engine | "training";
+  operator: string;
+  engine: Engine | "training" | "other";
   crawlerType: "search" | "training" | "browsing";
   role: string;
 }
 
 export const AI_AGENTS: AgentSpec[] = [
-  { agent: "Googlebot", engine: "google-aio", crawlerType: "search", role: "Google Search index — core Googlebot" },
-  { agent: "OAI-SearchBot", engine: "chatgpt", crawlerType: "search", role: "ChatGPT search index — citations" },
-  { agent: "GPTBot", engine: "chatgpt", crawlerType: "training", role: "OpenAI crawler — training & general index" },
-  { agent: "ClaudeBot", engine: "claude", crawlerType: "search", role: "Anthropic crawler — Claude citations" },
-  { agent: "Claude-SearchBot", engine: "claude", crawlerType: "search", role: "Claude search index" },
-  { agent: "Claude-User", engine: "claude", crawlerType: "browsing", role: "Claude live browser fetch" },
-  { agent: "PerplexityBot", engine: "perplexity", crawlerType: "search", role: "Perplexity search & citation index" },
-  { agent: "Perplexity-User", engine: "perplexity", crawlerType: "browsing", role: "Perplexity live fetch" },
-  { agent: "Google-Extended", engine: "google-aio", crawlerType: "training", role: "Gemini / AI Overviews training & grounding control" },
-  { agent: "Bingbot", engine: "copilot", crawlerType: "search", role: "Bing index — powers Microsoft Copilot" },
-  { agent: "ChatGPT-User", engine: "chatgpt", crawlerType: "browsing", role: "ChatGPT live web browsing" },
-  { agent: "anthropic-ai", engine: "claude", crawlerType: "search", role: "Anthropic legacy agent" },
-  { agent: "CCBot", engine: "training", crawlerType: "training", role: "Common Crawl — training only (safe to block)" },
+  // Scored engines: the agents whose access decides citation.
+  { agent: "Googlebot", operator: "Google", engine: "google-aio", crawlerType: "search", role: "Google Search index — the only index AI Overviews draw on" },
+  { agent: "OAI-SearchBot", operator: "OpenAI", engine: "chatgpt", crawlerType: "search", role: "ChatGPT search index — citations" },
+  { agent: "ChatGPT-User", operator: "OpenAI", engine: "chatgpt", crawlerType: "browsing", role: "ChatGPT fetching a page a user asked about" },
+  { agent: "Claude-SearchBot", operator: "Anthropic", engine: "claude", crawlerType: "search", role: "Claude search index — citations" },
+  { agent: "Claude-User", operator: "Anthropic", engine: "claude", crawlerType: "browsing", role: "Claude fetching a page a user asked about" },
+  { agent: "PerplexityBot", operator: "Perplexity", engine: "perplexity", crawlerType: "search", role: "Perplexity search index — citations" },
+  { agent: "Perplexity-User", operator: "Perplexity", engine: "perplexity", crawlerType: "browsing", role: "Perplexity fetching a page a user asked about" },
+  { agent: "Bingbot", operator: "Microsoft", engine: "copilot", crawlerType: "search", role: "Bing index — powers Microsoft Copilot answers" },
+  // Training crawlers: reported, never gate an engine.
+  { agent: "GPTBot", operator: "OpenAI", engine: "training", crawlerType: "training", role: "Model training — blocking it does not affect ChatGPT search" },
+  { agent: "ClaudeBot", operator: "Anthropic", engine: "training", crawlerType: "training", role: "Model training — blocking it does not affect Claude search" },
+  { agent: "anthropic-ai", operator: "Anthropic", engine: "training", crawlerType: "training", role: "Legacy Anthropic training token" },
+  { agent: "Google-Extended", operator: "Google", engine: "training", crawlerType: "training", role: "Gemini training control — does not affect Search or AI Overviews" },
+  { agent: "Applebot-Extended", operator: "Apple", engine: "training", crawlerType: "training", role: "Apple Intelligence training control" },
+  { agent: "meta-externalagent", operator: "Meta", engine: "training", crawlerType: "training", role: "Meta model training" },
+  { agent: "Bytespider", operator: "ByteDance", engine: "training", crawlerType: "training", role: "ByteDance model training" },
+  { agent: "Amazonbot", operator: "Amazon", engine: "training", crawlerType: "training", role: "Alexa and Amazon AI services" },
+  { agent: "CCBot", operator: "Common Crawl", engine: "training", crawlerType: "training", role: "Open web archive used for training — safe to block" },
+  // Other assistants: reported, not scored.
+  { agent: "Gemini-Deep-Research", operator: "Google", engine: "other", crawlerType: "browsing", role: "Gemini Deep Research agent" },
+  { agent: "Google-CloudVertexBot", operator: "Google", engine: "other", crawlerType: "browsing", role: "Vertex AI agents built by site owners" },
+  { agent: "Meta-WebIndexer", operator: "Meta", engine: "other", crawlerType: "search", role: "Meta AI search and citations" },
+  { agent: "Applebot", operator: "Apple", engine: "other", crawlerType: "search", role: "Siri and Spotlight results" },
+  { agent: "DuckAssistBot", operator: "DuckDuckGo", engine: "other", crawlerType: "search", role: "DuckDuckGo AI answers" },
+  { agent: "MistralAI-User", operator: "Mistral", engine: "other", crawlerType: "browsing", role: "Le Chat fetching pages for citations" },
 ];
+
+/** Agents whose access gates a scored engine. */
+export function isCitationAgent(spec: AgentSpec): spec is AgentSpec & { engine: Engine } {
+  return spec.engine !== "training" && spec.engine !== "other" && spec.crawlerType !== "training";
+}
 
 export function explainRobotsFile(raw: string | null): RobotsRuleExplanation[] {
   if (!raw) return [];
@@ -203,7 +229,7 @@ export function resolveAllAgents(
 export function blockedEngines(rules: Record<string, RobotRule>): Engine[] {
   const byEngine = new Map<Engine, boolean[]>();
   for (const spec of AI_AGENTS) {
-    if (spec.engine === "training") continue;
+    if (!isCitationAgent(spec)) continue;
     const rule = rules[spec.agent];
     if (!rule) continue;
     const list = byEngine.get(spec.engine) ?? [];

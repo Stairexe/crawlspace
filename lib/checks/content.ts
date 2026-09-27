@@ -1,3 +1,4 @@
+import { measureStuffing } from "../stuffing";
 import type { CheckResult, Evidence } from "../types";
 import { pageExtractability } from "../blocks";
 
@@ -234,6 +235,37 @@ export function contentChecks(e: Evidence): CheckResult[] {
             detail:
               "Citing sources was the highest-lift tactic in the Princeton GEO study (+40%), and up to +115% for lower-authority domains. " +
               "Link the original research, not a blog post summarising it.",
+            effort: "small",
+            rewritable: true,
+          }
+        : undefined,
+  });
+
+  // ---- Negative signal: keyword stuffing -------------------------------------
+  const stuffing = measureStuffing(blocks.map((b) => b.text));
+  const stuffed = stuffing.count >= 10 && stuffing.rate >= 10;
+  const repetitive = !stuffed && stuffing.count >= 6 && stuffing.rate >= 6;
+  checks.push({
+    id: "keyword-stuffing",
+    category: "evidence-density",
+    label: "No keyword stuffing",
+    status: stuffing.words < 200 ? "na" : stuffed ? "fail" : repetitive ? "warn" : "pass",
+    value: stuffed ? 0 : repetitive ? 0.5 : 1,
+    weight: 4,
+    engines: ["perplexity", "chatgpt", "claude"],
+    evidence:
+      stuffing.words < 200
+        ? `Only ${stuffing.words} words of content — too little to judge repetition.`
+        : stuffing.phrase
+          ? `Most repeated phrase: "${stuffing.phrase}" ×${stuffing.count} (${stuffing.rate.toFixed(1)} per 1,000 words).`
+          : "No repeated phrases.",
+    fix:
+      stuffed || repetitive
+        ? {
+            summary: "Stop repeating the target phrase",
+            detail:
+              "Keyword stuffing was the one tactic that lowered visibility in the Princeton GEO study (about −10%). " +
+              "Say the phrase where it is the natural subject of a sentence and use the specific thing you mean everywhere else.",
             effort: "small",
             rewritable: true,
           }

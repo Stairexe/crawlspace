@@ -35,7 +35,7 @@ export const FAQ: FaqEntry[] = [
   },
   {
     q: "Does blocking AI crawlers affect whether you get cited?",
-    a: "Blocking an engine's crawler is a complete block on being cited by it. If robots.txt disallows GPTBot, PerplexityBot or ClaudeBot, that engine cannot use the page at all — no amount of schema or structure compensates. CCBot is the exception: it feeds Common Crawl, which is used for model training rather than citation, so blocking it costs no AI visibility.",
+    a: "Blocking an engine's search crawler is a complete block on being cited by it. If robots.txt disallows OAI-SearchBot, PerplexityBot or Claude-SearchBot, that engine cannot use the page at all — no amount of schema or structure compensates. Training crawlers are different: OpenAI, Anthropic and Google each document that blocking GPTBot, ClaudeBot or Google-Extended does not remove a site from their search or answers, so you can refuse training and still be cited.",
   },
   {
     q: "How long should a paragraph be to get quoted?",

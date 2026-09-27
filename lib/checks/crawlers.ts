@@ -1,5 +1,5 @@
 import type { CheckResult, Engine, Evidence } from "../types";
-import { AI_AGENTS, blockedEngines } from "../robots";
+import { AI_AGENTS, blockedEngines, isCitationAgent } from "../robots";
 
 /**
  * Gate checks. A failed gate hard-caps the affected engines at 25 — see
@@ -12,7 +12,7 @@ export function crawlerChecks(e: Evidence): CheckResult[] {
   // One gate check per engine, so a report can say exactly which engine is shut out.
   const byEngine = new Map<Engine, string[]>();
   for (const spec of AI_AGENTS) {
-    if (spec.engine === "training") continue;
+    if (!isCitationAgent(spec)) continue;
     const rule = e.robots.rules[spec.agent];
     if (rule && !rule.allowed) {
       byEngine.set(spec.engine, [...(byEngine.get(spec.engine) ?? []), `${spec.agent} (${rule.matchedLine ?? "blocked"})`]);
@@ -44,7 +44,8 @@ export function crawlerChecks(e: Evidence): CheckResult[] {
             detail:
               "Blocking the crawler is not a partial penalty — that engine literally cannot cite a page it cannot fetch. " +
               "Add an allow group in robots.txt for the agents above. If the concern is model training rather than citation, " +
-              "block CCBot (Common Crawl) instead: it is training-only and blocking it costs you no citations.",
+              "block the training crawlers instead (GPTBot, ClaudeBot, Google-Extended, CCBot): each operator documents that " +
+              "blocking them does not remove a site from its search or answers.",
             effort: "trivial",
           }
         : undefined,

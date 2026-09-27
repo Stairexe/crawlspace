@@ -10,8 +10,10 @@ Rohith Reddy (github.com/Stairexe).
 ## What it does
 
 - Fetches a page as a crawler receives it — server HTML only, no JavaScript execution.
-- Resolves robots.txt against 12 named AI user agents (GPTBot, PerplexityBot, ClaudeBot,
-  Google-Extended, Bingbot and others) and reports which engines are shut out.
+- Resolves robots.txt against 23 named AI user agents and separates the ones that decide
+  citation (OAI-SearchBot, Claude-SearchBot, PerplexityBot, Googlebot, Bingbot and their
+  user-fetch agents) from training crawlers (GPTBot, ClaudeBot, Google-Extended, CCBot…),
+  which never count against a page.
 - Scores six categories: extractability (30), answer structure (18), evidence density (16),
   machine readability (14), authority signals (12), retrievability (10).
 - Applies five different weight vectors — one per engine — to the same evidence, because

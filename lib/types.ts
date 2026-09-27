@@ -258,6 +258,26 @@ export interface EngineScore {
   categories: Record<Category, number>;
 }
 
+/**
+ * What the model says fixing things is worth. Each step is the composite score after
+ * that fix and every fix above it is done completely — a projection of this tool's own
+ * scoring, not a promise about citations.
+ */
+export interface FixPlanStep {
+  checkId: string;
+  label: string;
+  summary: string;
+  effort: Effort;
+  gain: number;
+  after: number;
+}
+
+export interface FixPlan {
+  from: number;
+  to: number;
+  steps: FixPlanStep[];
+}
+
 export interface AuditReport {
   version: string;
   evidence: Evidence;
@@ -270,6 +290,8 @@ export interface AuditReport {
   weakestBlocks: ContentBlock[];
   strongestBlock: ContentBlock | null;
   summary: string;
+  /** Optional so surveys exported before it existed still load. */
+  plan?: FixPlan;
 }
 
 export interface RewriteResult {

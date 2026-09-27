@@ -82,14 +82,15 @@ export default function Methodology() {
 
       <H id="gates">The three gates</H>
       <p className="mt-3 text-[14px] leading-relaxed text-ink-dim">
-        Three failures are not deductions. If robots.txt shuts out every agent an engine uses,
-        that engine cannot cite the page at all — averaging that into a 70 would be a lie. A
+        Three failures are not deductions. If robots.txt shuts out every agent an engine uses to
+        fetch pages for its answers (its search indexer and its user-triggered fetcher), that
+        engine cannot cite the page at all — averaging that into a 70 would be a lie. A
         failed gate caps the affected score at <strong className="text-ink">{GATE_CAP}</strong>{" "}
         and leads the report.
       </p>
       <ul className="mt-4 space-y-2.5">
         {[
-          ["Crawler access", "robots.txt disallows every agent that engine uses", "that engine only"],
+          ["Crawler access", "robots.txt disallows every citation agent that engine uses (training crawlers never count)", "that engine only"],
           ["Reachability", "the page does not return a 2xx", "all five"],
           ["Renders without JavaScript", "under 200 words in the server HTML, with signs of client-side rendering", "all five"],
         ].map(([a, b, c]) => (
@@ -215,7 +216,7 @@ export default function Methodology() {
                 <td className="py-2 pr-4 text-ink">{a.agent}</td>
                 <td className="py-2 pr-4 text-ink-faint">{a.role}</td>
                 <td className="py-2 text-right text-ink-dim">
-                  {a.engine === "training" ? "training only" : ENGINE_LABELS[a.engine]}
+                  {a.engine === "training" ? "training only — never gates" : a.engine === "other" ? `${a.operator} — reported, not scored` : ENGINE_LABELS[a.engine]}
                 </td>
               </tr>
             ))}
@@ -223,9 +224,12 @@ export default function Methodology() {
         </table>
       </div>
       <p className="mt-4 text-[14px] leading-relaxed text-ink-dim">
-        Blocking CCBot is not penalised. It feeds Common Crawl, which is used for training rather
-        than citation, so blocking it costs you nothing in AI answers — it is the one clean way to
-        opt out of training while staying quotable.
+        Blocking a training crawler is never penalised. GPTBot, ClaudeBot, Google-Extended,
+        Applebot-Extended, meta-externalagent, Bytespider, Amazonbot and CCBot collect training
+        data; OpenAI, Anthropic and Google each document that blocking their training crawler
+        does not remove a site from their search or answers. You can refuse training and stay
+        quotable. Assistants Crawlspace does not score are listed so the robots.txt picture is
+        complete, but they do not change any number.
       </p>
 
       <H id="rewrite">The rewrite layer</H>

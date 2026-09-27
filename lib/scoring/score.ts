@@ -2,10 +2,13 @@ import type {
   AuditReport,
   Category,
   CheckResult,
+  Effort,
   Engine,
   EngineScore,
   Evidence,
   Finding,
+  FixPlan,
+  FixPlanStep,
   Severity,
   VisibilityScores,
 } from "../types";
@@ -79,7 +82,8 @@ export function calculateVisibilityScores(
   if (e.media.images === 0 || e.media.withAlt / Math.max(1, e.media.images) >= 0.7) seo += 5;
 
   // 2. Crawler Score (0..100)
-  const searchAgents = ["Googlebot", "OAI-SearchBot", "ClaudeBot", "PerplexityBot", "Bingbot"];
+  // The search indexers that decide citation (training crawlers never count).
+  const searchAgents = ["Googlebot", "OAI-SearchBot", "Claude-SearchBot", "PerplexityBot", "Bingbot"];
   let allowedCount = 0;
   for (const agent of searchAgents) {
     const rule = e.robots.rules[agent];
@@ -148,7 +152,8 @@ export function calculateVisibilityScores(
   };
 }
 
-export function scoreReport(evidence: Evidence, checks: CheckResult[]): AuditReport {
+/** Per-engine scores and the composite, from checks alone. Shared by the report and the fix plan. */
+function engineScores(checks: CheckResult[]): { engines: Record<Engine, EngineScore>; composite: number } {
   const categories = Object.fromEntries(
     CATEGORIES.map((c) => [c, categoryScore(checks, c)]),
   ) as Record<Category, number>;
@@ -181,8 +186,56 @@ export function scoreReport(evidence: Evidence, checks: CheckResult[]): AuditRep
     }),
   ) as Record<Engine, EngineScore>;
 
+  const composite = Math.round(ENGINES.reduce((n, e) => n + engines[e].score, 0) / ENGINES.length);
+  return { engines, composite };
+}
+
+/**
+ * The fix plan: greedily apply the fix worth the most composite points, re-score, repeat.
+ * A fix counts as done completely (the check passes and any gate it holds is lifted).
+ * Deterministic — the same survey always yields the same plan.
+ */
+export function buildFixPlan(checks: CheckResult[], maxSteps = 6): FixPlan {
+  const from = engineScores(checks).composite;
+  let current = checks;
+  let score = from;
+  const steps: FixPlanStep[] = [];
+  const effortRank: Record<Effort, number> = { trivial: 0, small: 1, medium: 2, large: 3 };
+  const fixed = (list: CheckResult[], id: string) =>
+    list.map((c) => (c.id === id ? { ...c, status: "pass" as const, value: 1, gate: undefined } : c));
+
+  for (let i = 0; i < maxSteps; i++) {
+    let best: { check: CheckResult; after: number; next: CheckResult[] } | null = null;
+    for (const c of current) {
+      if (!c.fix || (c.status !== "fail" && c.status !== "warn")) continue;
+      const next = fixed(current, c.id);
+      const after = engineScores(next).composite;
+      if (
+        !best ||
+        after > best.after ||
+        (after === best.after && effortRank[c.fix.effort] < effortRank[best.check.fix!.effort])
+      ) {
+        best = { check: c, after, next };
+      }
+    }
+    if (!best || best.after <= score) break;
+    steps.push({
+      checkId: best.check.id,
+      label: best.check.label,
+      summary: best.check.fix!.summary,
+      effort: best.check.fix!.effort,
+      gain: best.after - score,
+      after: best.after,
+    });
+    score = best.after;
+    current = best.next;
+  }
+  return { from, to: score, steps };
+}
+
+export function scoreReport(evidence: Evidence, checks: CheckResult[]): AuditReport {
+  const { engines, composite } = engineScores(checks);
   const scores = ENGINES.map((e) => engines[e].score);
-  const composite = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
   const spread = Math.max(...scores) - Math.min(...scores);
   const visibility = calculateVisibilityScores(evidence, checks, composite);
 
@@ -226,6 +279,7 @@ export function scoreReport(evidence: Evidence, checks: CheckResult[]): AuditRep
     weakestBlocks,
     strongestBlock,
     summary: buildSummary(evidence, engines, composite, spread, findings),
+    plan: buildFixPlan(checks),
   };
 }
 
