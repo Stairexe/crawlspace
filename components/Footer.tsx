@@ -11,6 +11,10 @@ const COLUMNS: { title: string; links: { href: string; label: string; external?:
     title: "Survey",
     links: [
       { href: "/", label: "Run a survey" },
+      { href: "/site", label: "Site survey" },
+      { href: "/compare", label: "Compare surveys" },
+      { href: "/logs", label: "Crawler log analyser" },
+      { href: "/developers", label: "API, MCP & CLI" },
       { href: "/dashboard", label: "Dashboard" },
       { href: "/methodology", label: "Methodology" },
       { href: "/#faq", label: "Questions" },

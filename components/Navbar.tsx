@@ -8,7 +8,8 @@ import { CrawlspaceLogo } from "./CrawlspaceLogo";
 const LINKS = [
   { href: "/#method", label: "Method" },
   { href: "/#specimen", label: "Specimen" },
-  { href: "/#schedule", label: "What is inspected" },
+  { href: "/tools", label: "Tools" },
+  { href: "/developers", label: "Developers" },
   { href: "/methodology", label: "Methodology" },
 ];
 

@@ -200,6 +200,12 @@ export function HomeClient({ children }: { children: React.ReactNode }) {
                 ))}
               </div>
             </div>
+            <div className="flex items-baseline justify-between gap-3">
+              <span className="tb-label">Whole site?</span>
+              <a href="/site" className="mono text-[11.5px] text-signal underline underline-offset-4">
+                Survey up to 20 pages →
+              </a>
+            </div>
             {!ai.enabled && (
               <div>
                 <button

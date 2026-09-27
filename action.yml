@@ -1,0 +1,41 @@
+name: "Crawlspace — AI citability survey"
+description: "Survey a page for AI citability (ChatGPT, Claude, Perplexity, Copilot, Google AI Overviews) and fail the build below a score."
+author: "Rohith Reddy"
+branding:
+  icon: "search"
+  color: "blue"
+inputs:
+  url:
+    description: "Page to survey, e.g. https://example.com/pricing"
+    required: true
+  min-score:
+    description: "Fail if the composite score is below this (0–100). Leave empty to never fail on the composite."
+    required: false
+    default: ""
+  engine-min:
+    description: "Fail if any single engine scores below this. Leave empty to skip."
+    required: false
+    default: ""
+  sarif-file:
+    description: "Also write a SARIF report to this path (for github/codeql-action/upload-sarif)."
+    required: false
+    default: ""
+runs:
+  using: "composite"
+  steps:
+    - name: Survey
+      shell: bash
+      env:
+        CS_URL: ${{ inputs.url }}
+        CS_MIN: ${{ inputs.min-score }}
+        CS_ENGINE_MIN: ${{ inputs.engine-min }}
+        CS_SARIF: ${{ inputs.sarif-file }}
+        CS_BIN: ${{ github.action_path }}/cli/dist/crawlspace.mjs
+      run: |
+        set -o pipefail
+        node "$CS_BIN" "$CS_URL" --format markdown >> "$GITHUB_STEP_SUMMARY" || true
+        if [ -n "$CS_SARIF" ]; then node "$CS_BIN" "$CS_URL" --format sarif > "$CS_SARIF" || true; fi
+        ARGS=()
+        [ -n "$CS_MIN" ] && ARGS+=(--min-score "$CS_MIN")
+        [ -n "$CS_ENGINE_MIN" ] && ARGS+=(--engine-min "$CS_ENGINE_MIN")
+        node "$CS_BIN" "$CS_URL" "${ARGS[@]}"

@@ -63,7 +63,7 @@ const SCHEDULES: { name: string; note: string; items: { label: string; gate?: bo
     name: "Access",
     note: "9 checks",
     items: [
-      { label: "Crawler access, per engine (×5)", gate: true },
+      { label: "Search-crawler access, per engine (×5)", gate: true },
       { label: "Page responds", gate: true },
       { label: "Content renders without JavaScript", gate: true },
       { label: "Page is indexable" },
@@ -72,7 +72,7 @@ const SCHEDULES: { name: string; note: string; items: { label: string; gate?: bo
   },
   {
     name: "Passages",
-    note: "11 checks",
+    note: "12 checks",
     items: [
       { label: "Blocks survive being lifted out of the page" },
       { label: "Paragraphs name their own subject" },
@@ -85,6 +85,7 @@ const SCHEDULES: { name: string; note: string; items: { label: string; gate?: bo
       { label: "Specific figures in the copy" },
       { label: "Sources cited and linked" },
       { label: "Attributed quotes" },
+      { label: "No keyword stuffing" },
     ],
   },
   {
@@ -207,7 +208,7 @@ export function LandingSections({ specimen }: { specimen: React.ReactNode }) {
           id="schedule"
           mark="§ 04 — Schedule"
           title={<span id="schedule-h">What is inspected.</span>}
-          lede="The survey is thirty-four checks in three schedules. Each has a permanent id, a stated weight per engine, and a line of literal evidence in the report."
+          lede="The survey is thirty-five checks in three schedules. Each has a permanent id, a stated weight per engine, and a line of literal evidence in the report. Robots.txt is read for twenty-three AI crawlers."
         />
         <div className="mt-10 grid border-l border-t border-line md:grid-cols-3">
           {SCHEDULES.map((s, n) => (
