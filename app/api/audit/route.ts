@@ -9,7 +9,9 @@ export const maxDuration = 30;
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
-  const limit = rateLimit(req, "audit", 12, 10 * 60_000);
+  // Site surveys send up to 20 page audits in a row, so they get their own bucket.
+  const site = req.headers.get("x-crawlspace-mode") === "site";
+  const limit = site ? rateLimit(req, "audit-site", 60, 10 * 60_000) : rateLimit(req, "audit", 12, 10 * 60_000);
   if (!limit.ok) {
     return NextResponse.json(
       { error: `Rate limit reached. Try again in ${limit.retryInSeconds}s.`, code: "RATE_LIMITED" },
