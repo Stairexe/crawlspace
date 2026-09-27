@@ -96,6 +96,7 @@ export const GATE_CAP = 25;
  * changes; a date that moves without a change is a false freshness signal.
  * 2026-09-24: text extraction now treats block-element boundaries as word boundaries.
  * 2026-09-27: training crawlers (GPTBot, ClaudeBot, Google-Extended…) no longer count
- *             against an engine; 23 agents checked; keyword-stuffing check added.
+ *             against an engine; 23 agents checked; keyword-stuffing check added;
+ *             entity-presence check (Wikidata lookup by domain) added to authority.
  */
 export const MODEL_REVISED = "2026-09-27";

@@ -150,6 +150,26 @@ export interface VisibilityScores {
   schema: number;
 }
 
+/**
+ * Whether the organisation behind the domain is a known entity in the open knowledge
+ * graph. Looked up by domain (Wikidata's official-website property), never by name.
+ */
+export interface EntityEvidence {
+  /** False when the lookup could not complete or was skipped; the check is then n/a. */
+  checked: boolean;
+  /** The registrable domain looked up, e.g. stripe.com for docs.stripe.com. */
+  domain: string;
+  /** Set when the domain is a shared platform (medium.com, vercel.app…) — not looked up. */
+  platform: string | null;
+  wikidata: { id: string; label: string | null; description: string | null; url: string } | null;
+  /** The English Wikipedia article for the entity, when it has one. */
+  wikipedia: string | null;
+  /** Every sameAs URL the page's JSON-LD declares. */
+  sameAs: string[];
+  /** True when a sameAs points at the matched Wikidata item or Wikipedia article. */
+  linkedFromPage: boolean;
+}
+
 export interface Evidence {
   url: string;
   finalUrl: string;
@@ -216,6 +236,8 @@ export interface Evidence {
   };
   renderedWithoutJs: boolean;
   frameworkHint: string | null;
+  /** Optional so surveys exported before it existed still load. */
+  entity?: EntityEvidence;
 }
 
 export interface CheckFix {

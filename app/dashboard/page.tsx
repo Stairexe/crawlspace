@@ -11,7 +11,7 @@ import type { AuditReport } from "@/lib/types";
 import { CrawlerCenter } from "@/components/CrawlerCenter";
 import { SchemaAnalyzer } from "@/components/SchemaAnalyzer";
 import { RobotsAnalyzer } from "@/components/RobotsAnalyzer";
-import { IssuesCenter } from "@/components/IssuesCenter";
+import { DefectSchedule } from "@/components/DefectSchedule";
 import { PerformanceAnalyzer } from "@/components/PerformanceAnalyzer";
 import { SpecializedPrompts } from "@/components/SpecializedPrompts";
 import { ExportModal } from "@/components/ExportModal";
@@ -98,7 +98,6 @@ function DashboardContent() {
   const [scanError, setScanError] = useState<string | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
   const [generateOpen, setGenerateOpen] = useState(false);
-  const [issuesFilter, setIssuesFilter] = useState<"all" | "critical" | "high" | "medium">("all");
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
   // The URL is the source of truth for the tab. This effect must depend on the URL only:
@@ -196,9 +195,9 @@ function DashboardContent() {
               <button
                 type="button"
                 onClick={() => switchTab("overview")}
-                className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left font-medium transition-colors ${
+                className={`flex w-full items-center gap-2.5 rounded-[3px] px-3 py-2 text-left font-medium transition-colors ${
                   activeTab === "overview"
-                    ? "bg-signal text-void font-bold shadow-[0_0_14px_var(--color-signal-glow)]"
+                    ? "bg-signal text-void font-bold"
                     : "text-ink-dim hover:text-ink hover:bg-surface/50"
                 }`}
               >
@@ -223,7 +222,7 @@ function DashboardContent() {
                   key={id}
                   type="button"
                   onClick={() => switchTab(id as SidebarTab)}
-                  className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-1.5 text-left font-medium transition-colors ${
+                  className={`flex w-full items-center gap-2.5 rounded-[3px] px-3 py-1.5 text-left font-medium transition-colors ${
                     activeTab === id
                       ? "bg-signal/15 text-signal font-bold"
                       : "text-ink-dim hover:text-ink hover:bg-surface/50"
@@ -258,7 +257,7 @@ function DashboardContent() {
                   key={id}
                   type="button"
                   onClick={() => switchTab(id as SidebarTab)}
-                  className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-1.5 text-left font-medium transition-colors ${
+                  className={`flex w-full items-center gap-2.5 rounded-[3px] px-3 py-1.5 text-left font-medium transition-colors ${
                     activeTab === id
                       ? "bg-signal/15 text-signal font-bold"
                       : "text-ink-dim hover:text-ink hover:bg-surface/50"
@@ -284,7 +283,7 @@ function DashboardContent() {
                   key={id}
                   type="button"
                   onClick={() => switchTab(id as SidebarTab)}
-                  className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-1.5 text-left font-medium transition-colors ${
+                  className={`flex w-full items-center gap-2.5 rounded-[3px] px-3 py-1.5 text-left font-medium transition-colors ${
                     activeTab === id
                       ? "bg-signal/15 text-signal font-bold"
                       : "text-ink-dim hover:text-ink hover:bg-surface/50"
@@ -304,7 +303,7 @@ function DashboardContent() {
               <button
                 type="button"
                 onClick={() => switchTab("reports")}
-                className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-1.5 text-left font-medium transition-colors ${
+                className={`flex w-full items-center gap-2.5 rounded-[3px] px-3 py-1.5 text-left font-medium transition-colors ${
                   activeTab === "reports"
                     ? "bg-signal/15 text-signal font-bold"
                     : "text-ink-dim hover:text-ink hover:bg-surface/50"
@@ -322,7 +321,7 @@ function DashboardContent() {
           <button
             type="button"
             onClick={() => switchTab("settings")}
-            className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left transition-colors ${
+            className={`flex w-full items-center gap-2.5 rounded-[3px] px-3 py-2 text-left transition-colors ${
               activeTab === "settings"
                 ? "bg-signal/15 text-signal font-bold"
                 : "text-ink-dim hover:text-ink hover:bg-surface/50"
@@ -334,7 +333,7 @@ function DashboardContent() {
           <button
             type="button"
             onClick={() => switchTab("help")}
-            className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left transition-colors ${
+            className={`flex w-full items-center gap-2.5 rounded-[3px] px-3 py-2 text-left transition-colors ${
               activeTab === "help"
                 ? "bg-signal/15 text-signal font-bold"
                 : "text-ink-dim hover:text-ink hover:bg-surface/50"
@@ -362,7 +361,7 @@ function DashboardContent() {
                 <button
                   type="button"
                   onClick={() => setMobileDrawerOpen(false)}
-                  className="rounded-xl p-2 text-ink-dim hover:text-ink hover:bg-surface border border-line/50 transition-colors"
+                  className="rounded-[3px] p-2 text-ink-dim hover:text-ink hover:bg-surface border border-line/50 transition-colors"
                   aria-label="Close navigation drawer"
                 >
                   <X className="h-5 w-5" />
@@ -375,9 +374,9 @@ function DashboardContent() {
                 <button
                   type="button"
                   onClick={() => switchTab("overview")}
-                  className={`flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-left font-medium transition-all ${
+                  className={`flex w-full items-center gap-3 rounded-[3px] px-3.5 py-2.5 text-left font-medium transition-all ${
                     activeTab === "overview"
-                      ? "bg-signal text-void font-bold shadow-[0_0_14px_var(--color-signal-glow)]"
+                      ? "bg-signal text-void font-bold"
                       : "text-ink-dim hover:text-ink hover:bg-surface"
                   }`}
                 >
@@ -401,7 +400,7 @@ function DashboardContent() {
                       key={id}
                       type="button"
                       onClick={() => switchTab(id as SidebarTab)}
-                      className={`flex w-full items-center gap-3 rounded-xl px-3.5 py-2 text-left font-medium transition-all ${
+                      className={`flex w-full items-center gap-3 rounded-[3px] px-3.5 py-2 text-left font-medium transition-all ${
                         activeTab === id
                           ? "bg-signal/15 text-signal font-bold"
                           : "text-ink-dim hover:text-ink hover:bg-surface"
@@ -436,7 +435,7 @@ function DashboardContent() {
                       key={id}
                       type="button"
                       onClick={() => switchTab(id as SidebarTab)}
-                      className={`flex w-full items-center gap-3 rounded-xl px-3.5 py-2 text-left font-medium transition-all ${
+                      className={`flex w-full items-center gap-3 rounded-[3px] px-3.5 py-2 text-left font-medium transition-all ${
                         activeTab === id
                           ? "bg-signal/15 text-signal font-bold"
                           : "text-ink-dim hover:text-ink hover:bg-surface"
@@ -463,7 +462,7 @@ function DashboardContent() {
                       key={id}
                       type="button"
                       onClick={() => switchTab(id as SidebarTab)}
-                      className={`flex w-full items-center gap-3 rounded-xl px-3.5 py-2 text-left font-medium transition-all ${
+                      className={`flex w-full items-center gap-3 rounded-[3px] px-3.5 py-2 text-left font-medium transition-all ${
                         activeTab === id
                           ? "bg-signal/15 text-signal font-bold"
                           : "text-ink-dim hover:text-ink hover:bg-surface"
@@ -481,7 +480,7 @@ function DashboardContent() {
               <button
                 type="button"
                 onClick={() => switchTab("settings")}
-                className={`flex w-full items-center gap-3 rounded-xl px-3.5 py-2 text-left transition-colors ${
+                className={`flex w-full items-center gap-3 rounded-[3px] px-3.5 py-2 text-left transition-colors ${
                   activeTab === "settings"
                     ? "bg-signal/15 text-signal font-bold"
                     : "text-ink-dim hover:text-ink"
@@ -493,7 +492,7 @@ function DashboardContent() {
               <button
                 type="button"
                 onClick={() => switchTab("help")}
-                className={`flex w-full items-center gap-3 rounded-xl px-3.5 py-2 text-left transition-colors ${
+                className={`flex w-full items-center gap-3 rounded-[3px] px-3.5 py-2 text-left transition-colors ${
                   activeTab === "help"
                     ? "bg-signal/15 text-signal font-bold"
                     : "text-ink-dim hover:text-ink"
@@ -516,7 +515,7 @@ function DashboardContent() {
             <button
               type="button"
               onClick={() => setMobileDrawerOpen(true)}
-              className="md:hidden flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-line bg-surface text-ink hover:border-line-bright"
+              className="md:hidden flex h-10 w-10 shrink-0 items-center justify-center rounded-[3px] border border-line bg-surface text-ink hover:border-line-bright"
               aria-label="Open mobile navigation menu"
             >
               <Menu className="h-5 w-5" />
@@ -534,14 +533,14 @@ function DashboardContent() {
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 placeholder="Audit URL or domain..."
-                className="mono h-10 w-full rounded-xl border border-line bg-surface px-3 sm:px-3.5 text-[12px] sm:text-[13px] text-ink placeholder:text-ink-faint/60 transition-all focus:border-signal focus:shadow-[0_0_15px_var(--color-signal-glow)] truncate"
+                className="mono h-10 w-full rounded-[3px] border border-line bg-surface px-3 sm:px-3.5 text-[12px] sm:text-[13px] text-ink placeholder:text-ink-faint/60 transition-all focus:border-signal focus: truncate"
               />
             </form>
             <button
               type="button"
               onClick={() => void handleAuditRun(searchInput)}
               disabled={isScanning}
-              className="mono h-10 rounded-xl bg-signal px-3.5 sm:px-4 text-[12px] sm:text-[12.5px] font-bold text-void hover:brightness-110 disabled:opacity-50 shrink-0"
+              className="mono h-10 rounded-[3px] bg-signal px-3.5 sm:px-4 text-[12px] sm:text-[12.5px] font-bold text-void hover:brightness-110 disabled:opacity-50 shrink-0"
             >
               {isScanning ? "Scanning…" : "Scan"}
             </button>
@@ -550,22 +549,22 @@ function DashboardContent() {
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <Link
               href="/"
-              className="mono hidden lg:flex items-center gap-1.5 rounded-xl border border-signal/40 bg-signal/10 px-3.5 py-1.5 text-[12px] font-bold text-signal hover:bg-signal/20 transition-all"
+              className="mono hidden lg:flex items-center gap-1.5 rounded-[3px] border border-signal/40 bg-signal/10 px-3.5 py-1.5 text-[12px] font-bold text-signal hover:bg-signal/20 transition-all"
             >
               <span>+ New survey</span>
             </Link>
             <button
               type="button"
               onClick={() => setExportOpen(true)}
-              className="mono rounded-xl border border-line bg-surface px-2.5 sm:px-3 py-1.5 text-[11.5px] sm:text-[12px] font-medium text-ink hover:border-line-bright transition-colors"
+              className="mono rounded-[3px] border border-line bg-surface px-2.5 sm:px-3 py-1.5 text-[11.5px] sm:text-[12px] font-medium text-ink hover:border-line-bright transition-colors"
             >
               <span className="hidden sm:inline">Export Report ↗</span>
               <span className="sm:hidden">Export ↗</span>
             </button>
-            <PrintButton report={report} className="mono hidden sm:inline rounded-xl border border-line bg-surface px-3 py-1.5 text-[12px] font-medium text-ink hover:border-line-bright transition-colors" />
+            <PrintButton report={report} className="mono hidden sm:inline rounded-[3px] border border-line bg-surface px-3 py-1.5 text-[12px] font-medium text-ink hover:border-line-bright transition-colors" />
             <a
               href="/compare"
-              className="mono hidden sm:inline rounded-xl border border-line bg-surface px-3 py-1.5 text-[12px] font-medium text-ink hover:border-line-bright transition-colors"
+              className="mono hidden sm:inline rounded-[3px] border border-line bg-surface px-3 py-1.5 text-[12px] font-medium text-ink hover:border-line-bright transition-colors"
             >
               Compare
             </a>
@@ -595,9 +594,9 @@ function DashboardContent() {
               key={tab.id}
               type="button"
               onClick={() => switchTab(tab.id as SidebarTab)}
-              className={`tab-btn whitespace-nowrap rounded-lg px-3 py-1 text-[12px] font-semibold transition-all shrink-0 ${
+              className={`tab-btn whitespace-nowrap rounded-[3px] px-3 py-1 text-[12px] font-semibold transition-all shrink-0 ${
                 activeTab === tab.id
-                  ? "bg-signal text-void shadow-[0_0_10px_var(--color-signal-glow)]"
+                  ? "bg-signal text-void"
                   : "bg-surface border border-line text-ink-dim hover:text-ink"
               }`}
             >
@@ -612,7 +611,7 @@ function DashboardContent() {
           <div className="card glass-panel p-5 sm:p-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5 sm:gap-6">
             <div className="flex items-center gap-4 sm:gap-5 min-w-0">
               {/* Huge Overall Score */}
-              <div className="flex h-16 w-16 sm:h-20 sm:w-20 shrink-0 items-center justify-center rounded-2xl border border-signal/40 bg-signal/15 text-[28px] sm:text-[34px] font-bold text-signal num shadow-[0_0_24px_var(--color-signal-glow)]">
+              <div className="flex h-16 w-16 sm:h-20 sm:w-20 shrink-0 items-center justify-center rounded-[3px] border border-signal/40 bg-signal/15 text-[28px] sm:text-[34px] font-bold text-signal num">
                 {v.overall}
               </div>
               <div className="min-w-0">
@@ -643,14 +642,14 @@ function DashboardContent() {
                 type="button"
                 onClick={() => void handleAuditRun(activeDomain)}
                 disabled={isScanning}
-                className="mono flex-1 sm:flex-initial rounded-xl bg-signal px-3.5 sm:px-4 py-2 text-[12px] sm:text-[12.5px] font-bold text-void hover:brightness-110 shadow-[0_0_14px_var(--color-signal-glow)] text-center"
+                className="mono flex-1 sm:flex-initial rounded-[3px] bg-signal px-3.5 sm:px-4 py-2 text-[12px] sm:text-[12.5px] font-bold text-void hover:brightness-110 text-center"
               >
                 {isScanning ? "Scanning…" : "Scan Again"}
               </button>
               <button
                 type="button"
                 onClick={() => setGenerateOpen(true)}
-                className="mono flex-1 sm:flex-initial rounded-xl border border-line bg-surface px-3.5 sm:px-4 py-2 text-[12px] sm:text-[12.5px] font-medium text-ink hover:border-line-bright text-center"
+                className="mono flex-1 sm:flex-initial rounded-[3px] border border-line bg-surface px-3.5 sm:px-4 py-2 text-[12px] sm:text-[12.5px] font-medium text-ink hover:border-line-bright text-center"
               >
                 Generate llms.txt & Fixes
               </button>
@@ -687,7 +686,7 @@ function DashboardContent() {
                 key={sub.id}
                 type="button"
                 onClick={() => switchTab(sub.id as SidebarTab)}
-                className="card glass-panel p-3.5 sm:p-4 text-left transition-all hover:border-signal/50 hover:shadow-[0_0_16px_var(--color-signal-glow)]"
+                className="card glass-panel p-3.5 sm:p-4 text-left transition-all hover:border-signal/50"
               >
                 <div className="mono text-[10px] sm:text-[10.5px] uppercase tracking-wider text-ink-faint truncate">
                   {sub.label}
@@ -707,78 +706,40 @@ function DashboardContent() {
           {/* TAB 1: OVERVIEW */}
           {activeTab === "overview" && (
             <div className="space-y-8 tab-transition">
-              <FixPlan report={report} />
-
-              {/* Priority Issues & Recommended Actions */}
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                {/* Priority Issues */}
-                <div className="card glass-panel p-6 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h2 className="text-[17px] font-bold text-ink">Priority Issues</h2>
-                      <p className="text-[12px] text-ink-dim">
-                        Ranked by impact on search indexing and AI citability
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => switchTab("issues")}
-                      className="mono text-[11.5px] text-signal font-semibold hover:underline"
-                    >
-                      View all ({report.findings.length}) →
-                    </button>
-                  </div>
-
-                  <div className="space-y-2.5">
-                    {report.findings.slice(0, 4).map((f) => (
-                      <div
-                        key={f.checkId}
-                        className="rounded-xl border border-line bg-surface/50 p-3.5 flex items-start justify-between gap-3"
-                      >
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span
-                              className={`mono rounded px-2 py-0.5 text-[10px] font-bold uppercase ${
-                                f.severity === "critical"
-                                  ? "bg-danger/15 text-danger"
-                                  : f.severity === "high"
-                                  ? "bg-warn/15 text-warn"
-                                  : "bg-signal/15 text-signal"
-                              }`}
-                            >
-                              {f.severity}
-                            </span>
-                            <span className="mono text-[11px] text-ink-faint">
-                              {f.effort} effort
-                            </span>
-                          </div>
-                          <h4 className="text-[13.5px] font-semibold text-ink mt-1">
-                            {f.label}
-                          </h4>
-                          <p className="text-[12px] text-ink-dim mt-0.5">
-                            {f.evidence}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+              <div className="grid gap-6 lg:grid-cols-12">
+                <div className="lg:col-span-7">
+                  <DefectSchedule
+                    findings={report.findings}
+                    limit={6}
+                    onShowAll={() => switchTab("issues")}
+                    onRewrite={() => switchTab("geo")}
+                    onGenerate={() => setGenerateOpen(true)}
+                  />
                 </div>
-
-                {/* Score history: nothing is stored, so there is none to show */}
-                <div className="card p-6 space-y-3">
-                  <h2 className="text-[17px] font-bold text-ink">Score history</h2>
-                  <p className="text-[13px] leading-relaxed text-ink-dim">
-                    There is no history yet. Surveys are not stored, so this one has nothing to be
-                    compared against. Export each survey to track changes by hand until saved
-                    surveys arrive with accounts.
-                  </p>
-                  <button type="button" onClick={() => setExportOpen(true)} className="btn-quiet">
-                    Export this survey
-                  </button>
+                <div className="lg:col-span-5">
+                  <FixPlan report={report} />
                 </div>
               </div>
 
-                          </div>
+              {/* Score history: nothing is stored, so there is none to show */}
+              <div className="title-block">
+                <div className="tb-label">Score history</div>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-[13px] leading-relaxed text-ink-dim">
+                    Surveys are not stored, so there is nothing to compare this one against yet.
+                    Export it, and load two exports into Compare to see what changed.
+                  </p>
+                  <div className="flex shrink-0 gap-2">
+                    <button type="button" onClick={() => setExportOpen(true)} className="btn-quiet">
+                      Export
+                    </button>
+                    <a href="/compare" className="btn-quiet">
+                      Compare
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
           )}
 
                     {/* TAB 2: AUDIT & SUB-ANALYSES */}
@@ -790,17 +751,21 @@ function DashboardContent() {
                   Inspecting {activeDomain} across all 6 diagnostic pillars.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="rounded-xl border border-line bg-surface/50 p-4">
+                  <div className="rounded-[3px] border border-line bg-surface/50 p-4">
                     <div className="mono text-[11px] text-ink-faint uppercase">Target URL</div>
                     <div className="mono font-semibold text-ink mt-1 break-all">{e.finalUrl}</div>
                   </div>
-                  <div className="rounded-xl border border-line bg-surface/50 p-4">
+                  <div className="rounded-[3px] border border-line bg-surface/50 p-4">
                     <div className="mono text-[11px] text-ink-faint uppercase">Server Response</div>
                     <div className="mono font-semibold text-signal mt-1">HTTP {e.status} · {e.timings.totalMs}ms</div>
                   </div>
                 </div>
               </div>
-              <IssuesCenter findings={report.findings} />
+              <DefectSchedule
+                findings={report.findings}
+                onRewrite={() => switchTab("geo")}
+                onGenerate={() => setGenerateOpen(true)}
+              />
             </div>
           )}
 
@@ -819,7 +784,7 @@ function DashboardContent() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="rounded-xl border border-line bg-surface/50 p-4 space-y-2">
+                  <div className="rounded-[3px] border border-line bg-surface/50 p-4 space-y-2">
                     <div className="mono text-[11px] text-ink-faint uppercase">Meta Title</div>
                     <div className="font-semibold text-ink">{e.html.title ?? "Missing"}</div>
                     <div className="text-[11.5px] text-ink-dim font-medium">
@@ -827,7 +792,7 @@ function DashboardContent() {
                     </div>
                   </div>
 
-                  <div className="rounded-xl border border-line bg-surface/50 p-4 space-y-2">
+                  <div className="rounded-[3px] border border-line bg-surface/50 p-4 space-y-2">
                     <div className="mono text-[11px] text-ink-faint uppercase">Meta Description</div>
                     <div className="text-[13px] text-ink-dim">{e.html.metaDescription ?? "Missing"}</div>
                     <div className="text-[11.5px] text-ink-dim font-medium">
@@ -835,7 +800,7 @@ function DashboardContent() {
                     </div>
                   </div>
 
-                  <div className="rounded-xl border border-line bg-surface/50 p-4 space-y-2">
+                  <div className="rounded-[3px] border border-line bg-surface/50 p-4 space-y-2">
                     <div className="mono text-[11px] text-ink-faint uppercase">Heading Hierarchy</div>
                     <div className="mono text-[13px] text-ink">
                       {e.semantics.h1Count} H1 · {e.headings.filter((h) => h.level === 2).length} H2s · {e.headings.length} Total Headings
@@ -845,7 +810,7 @@ function DashboardContent() {
                     </div>
                   </div>
 
-                  <div className="rounded-xl border border-line bg-surface/50 p-4 space-y-2">
+                  <div className="rounded-[3px] border border-line bg-surface/50 p-4 space-y-2">
                     <div className="mono text-[11px] text-ink-faint uppercase">Canonical Tag</div>
                     <div className="mono text-[12px] text-ink break-all">{e.html.canonical ?? "Missing"}</div>
                     <div className="text-[11.5px] text-ink-dim font-medium">
@@ -878,7 +843,7 @@ function DashboardContent() {
                 {/* 5 Engines Breakdown */}
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
                   {Object.entries(report.engines).map(([eng, data]) => (
-                    <div key={eng} className="rounded-xl border border-line bg-surface/50 p-4 text-center">
+                    <div key={eng} className="rounded-[3px] border border-line bg-surface/50 p-4 text-center">
                       <div className="mono text-[11px] uppercase tracking-wider text-ink-faint">
                         {eng.toUpperCase()}
                       </div>
@@ -889,20 +854,20 @@ function DashboardContent() {
                 </div>
 
                 {/* Princeton GEO Factors */}
-                <div className="rounded-xl border border-line bg-surface/40 p-5 space-y-3">
+                <div className="rounded-[3px] border border-line bg-surface/40 p-5 space-y-3">
                   <h3 className="text-[15px] font-bold text-ink">Princeton GEO Uplift Benchmarks</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="rounded-lg border border-line bg-surface p-3">
+                    <div className="rounded-[3px] border border-line bg-surface p-3">
                       <div className="mono text-[11px] text-ink-faint">Citing Sources</div>
                       <div className="mono text-[18px] font-bold text-signal">+40% Lift</div>
                       <div className="text-[11px] text-ink-dim">Largest single lift in the study</div>
                     </div>
-                    <div className="rounded-lg border border-line bg-surface p-3">
+                    <div className="rounded-[3px] border border-line bg-surface p-3">
                       <div className="mono text-[11px] text-ink-faint">Adding Statistics</div>
                       <div className="mono text-[18px] font-bold text-signal">+37% Lift</div>
                       <div className="text-[11px] text-ink-dim">Specific figures in the passage</div>
                     </div>
-                    <div className="rounded-lg border border-line bg-surface p-3">
+                    <div className="rounded-[3px] border border-line bg-surface p-3">
                       <div className="mono text-[11px] text-ink-faint">Direct Quotations</div>
                       <div className="mono text-[18px] font-bold text-signal">+30% Lift</div>
                       <div className="text-[11px] text-ink-dim">Authoritative quotes provide clean extraction</div>
@@ -949,19 +914,19 @@ function DashboardContent() {
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <div className="rounded-xl border border-line bg-surface/50 p-4">
+                  <div className="rounded-[3px] border border-line bg-surface/50 p-4">
                     <div className="mono text-[10.5px] uppercase text-ink-faint">Total Words</div>
                     <div className="mono text-[20px] font-bold text-ink mt-1">{e.html.textWords}</div>
                   </div>
-                  <div className="rounded-xl border border-line bg-surface/50 p-4">
+                  <div className="rounded-[3px] border border-line bg-surface/50 p-4">
                     <div className="mono text-[10.5px] uppercase text-ink-faint">Reading Time</div>
                     <div className="mono text-[20px] font-bold text-ink mt-1">{Math.ceil(e.html.textWords / 220)} min</div>
                   </div>
-                  <div className="rounded-xl border border-line bg-surface/50 p-4">
+                  <div className="rounded-[3px] border border-line bg-surface/50 p-4">
                     <div className="mono text-[10.5px] uppercase text-ink-faint">Best-scoring length</div>
                     <div className="mono text-[20px] font-bold text-signal mt-1">40–60 w</div>
                   </div>
-                  <div className="rounded-xl border border-line bg-surface/50 p-4">
+                  <div className="rounded-[3px] border border-line bg-surface/50 p-4">
                     <div className="mono text-[10.5px] uppercase text-ink-faint">Weakest Blocks</div>
                     <div className="mono text-[20px] font-bold text-warn mt-1">{report.weakestBlocks.length}</div>
                   </div>
@@ -970,7 +935,7 @@ function DashboardContent() {
                 {/* Blocks Breakdown */}
                 <div className="space-y-3 pt-2">
                   {report.weakestBlocks.map((b) => (
-                    <div key={b.id} className="rounded-xl border border-line bg-surface/40 p-4 space-y-2">
+                    <div key={b.id} className="rounded-[3px] border border-line bg-surface/40 p-4 space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="mono text-[11px] uppercase tracking-wider text-signal font-semibold">
                           {b.kind} block · {b.words} words
@@ -1108,28 +1073,10 @@ function DashboardContent() {
           {/* TAB 11: ISSUES */}
           {activeTab === "issues" && (
             <div className="space-y-6 tab-transition">
-              <div className="flex items-center gap-2 mb-2">
-                {(["all", "critical", "high", "medium"] as const).map((filter) => (
-                  <button
-                    key={filter}
-                    type="button"
-                    onClick={() => setIssuesFilter(filter)}
-                    className={`mono rounded-xl px-3 py-1.5 text-[12px] uppercase font-semibold transition-all ${
-                      issuesFilter === filter
-                        ? "bg-signal text-void shadow-[0_0_12px_var(--color-signal-glow)]"
-                        : "border border-line bg-surface text-ink-dim hover:text-ink"
-                    }`}
-                  >
-                    {filter}
-                  </button>
-                ))}
-              </div>
-              <IssuesCenter
-                findings={
-                  issuesFilter === "all"
-                    ? report.findings
-                    : report.findings.filter((f) => f.severity === issuesFilter)
-                }
+              <DefectSchedule
+                findings={report.findings}
+                onRewrite={() => switchTab("geo")}
+                onGenerate={() => setGenerateOpen(true)}
               />
             </div>
           )}
@@ -1188,14 +1135,14 @@ function DashboardContent() {
                 </p>
 
                 <div className="space-y-3 pt-2">
-                  <div className="rounded-xl border border-line bg-surface/50 p-4">
+                  <div className="rounded-[3px] border border-line bg-surface/50 p-4">
                     <h3 className="font-semibold text-ink">Why five engine weights?</h3>
                     <p className="text-[12.5px] text-ink-dim mt-1 leading-relaxed">
                       Google statements emphasize traditional content quality without requiring special AI files. Conversely, ChatGPT, Claude, and Perplexity reward structured extractability and llms.txt files. Crawlspace evaluates your URL through five separate weight vectors to avoid misleading averages.
                     </p>
                   </div>
 
-                  <div className="rounded-xl border border-line bg-surface/50 p-4">
+                  <div className="rounded-[3px] border border-line bg-surface/50 p-4">
                     <h3 className="font-semibold text-ink">Zero-Key Guarantee</h3>
                     <p className="text-[12.5px] text-ink-dim mt-1 leading-relaxed">
                       All audit reports, robots analysis, schema validation, and citation scoring run entirely without needing an API key. API keys are only required if you choose to trigger real-time AI passage rewriting.

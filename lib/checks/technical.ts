@@ -229,6 +229,8 @@ export function technicalChecks(e: Evidence): CheckResult[] {
       : undefined,
   });
 
+  checks.push(entityPresence(e));
+
   // ---- Retrievability -------------------------------------------------------
   const titleLen = e.html.title?.length ?? 0;
   checks.push({
@@ -339,4 +341,85 @@ export function technicalChecks(e: Evidence): CheckResult[] {
   });
 
   return checks;
+}
+
+/**
+ * Knowledge-graph presence of the publisher, looked up by domain on Wikidata. A signal,
+ * not a gate, and deliberately light: most honest small sites have no entry and cannot
+ * simply make one. The cheap, fully in-your-control part is the sameAs link back.
+ */
+function entityPresence(e: Evidence): CheckResult {
+  const base = {
+    id: "entity-presence",
+    category: "authority" as const,
+    label: "Known entity (Wikidata / Wikipedia)",
+    weight: 4,
+    engines: ["google-aio", "chatgpt", "claude", "copilot"] as CheckResult["engines"],
+  };
+  const en = e.entity;
+  if (!en || en.platform) {
+    return {
+      ...base,
+      status: "na",
+      value: 0,
+      evidence: en?.platform
+        ? `Hosted on ${en.platform}, a shared platform — its knowledge-graph entry belongs to the platform, not to this publisher, so it was not scored.`
+        : "Not measured in this survey.",
+    };
+  }
+  if (!en.checked) {
+    return {
+      ...base,
+      status: "na",
+      value: 0,
+      evidence: "Wikidata did not answer during this survey, so entity presence was not scored rather than guessed.",
+    };
+  }
+  const profiles = en.sameAs.filter((s) => !/wikidata\.org|wikipedia\.org/i.test(s)).length;
+  if (en.wikidata) {
+    const name = en.wikidata.label ?? en.wikidata.id;
+    const found =
+      `Wikidata ${en.wikidata.id} (“${name}”${en.wikidata.description ? `, ${en.wikidata.description}` : ""}) lists ${en.domain} as its official website` +
+      (en.wikipedia ? `, and has an English Wikipedia article.` : `; no English Wikipedia article.`);
+    if (en.linkedFromPage) {
+      return { ...base, status: "pass", value: 1, evidence: `${found} The page's sameAs links back to it.` };
+    }
+    return {
+      ...base,
+      status: "warn",
+      value: 0.7,
+      evidence: `${found} But nothing in this page's structured data links to it, so a machine has to guess the two are the same.`,
+      fix: {
+        summary: "Link the Wikidata item from your Organization sameAs",
+        detail:
+          `Add "${en.wikidata.url}"${en.wikipedia ? ` and "${en.wikipedia}"` : ""} to the sameAs array of the Organization JSON-LD. ` +
+          "That closes the loop: the knowledge graph already points at your domain, and your page then points back at the entity, " +
+          "which is how Google and the assistants reconcile a brand mentioned on the page with the one they already know.",
+        effort: "trivial",
+        generates: "jsonld",
+      },
+    };
+  }
+  return {
+    ...base,
+    status: profiles >= 2 ? "warn" : "fail",
+    value: profiles >= 2 ? 0.35 : 0,
+    evidence:
+      `No Wikidata item names ${en.domain} as its official website.` +
+      (profiles > 0
+        ? ` The page's sameAs does link ${profiles} other profile${profiles === 1 ? "" : "s"}.`
+        : " The page declares no sameAs profiles either."),
+    fix: {
+      summary: profiles >= 2 ? "Become a known entity where you qualify" : "Declare your profiles with sameAs",
+      detail:
+        (profiles >= 2
+          ? ""
+          : "Start with what you control: list your LinkedIn, GitHub, Crunchbase and similar profiles in the Organization schema's sameAs, so a machine can tie this domain to the same brand elsewhere. ") +
+        "A Wikidata item with an 'official website' (P856) of this domain is what connects it to the open knowledge graph. " +
+        "Create one only if the organisation meets Wikidata's notability policy — describable from serious, public references such as press coverage. " +
+        "An item made for a brand that does not qualify gets deleted, and a paid Wikipedia article breaks Wikipedia's rules.",
+      effort: profiles >= 2 ? "large" : "trivial",
+      generates: profiles >= 2 ? undefined : "jsonld",
+    },
+  };
 }

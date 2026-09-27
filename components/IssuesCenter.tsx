@@ -94,7 +94,7 @@ export function IssuesCenter({
           <button
             type="button"
             onClick={() => setCatFilter("all")}
-            className={`mono rounded-md px-2.5 py-1 text-[11.5px] transition-colors ${
+            className={`mono rounded-[3px] px-2.5 py-1 text-[11.5px] transition-colors ${
               catFilter === "all"
                 ? "bg-signal text-void font-bold"
                 : "bg-surface text-ink-dim hover:text-ink"
@@ -119,7 +119,7 @@ export function IssuesCenter({
                 key={cat}
                 type="button"
                 onClick={() => setCatFilter((c) => (c === cat ? "all" : cat))}
-                className={`mono rounded-md px-2.5 py-1 text-[11.5px] transition-colors ${
+                className={`mono rounded-[3px] px-2.5 py-1 text-[11.5px] transition-colors ${
                   catFilter === cat
                     ? "bg-signal text-void font-bold"
                     : "bg-surface text-ink-dim hover:text-ink"
@@ -178,7 +178,7 @@ export function IssuesCenter({
               </div>
 
               {/* Evidence Bar */}
-              <div className="mt-3 rounded-lg border border-line bg-surface/60 p-3">
+              <div className="mt-3 rounded-[3px] border border-line bg-surface/60 p-3">
                 <div className="mono text-[11px] uppercase tracking-wider text-ink-faint">
                   Evidence on page
                 </div>
@@ -201,7 +201,7 @@ export function IssuesCenter({
                   <button
                     type="button"
                     onClick={onSelectRewritable}
-                    className="mono inline-flex items-center gap-1.5 rounded-md border border-signal/30 bg-signal/10 px-3 py-1 text-[11.5px] font-semibold text-signal hover:bg-signal/20"
+                    className="mono inline-flex items-center gap-1.5 rounded-[3px] border border-signal/30 bg-signal/10 px-3 py-1 text-[11.5px] font-semibold text-signal hover:bg-signal/20"
                   >
                     Open Passage in AI Rewriter →
                   </button>

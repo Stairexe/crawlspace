@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Tools",
-  description: "Every Crawlspace tool: page survey, site survey, compare two surveys, AI crawler log analyser, and the API, MCP server, CLI and GitHub Action.",
+  description: "Every Crawlspace tool: page survey, site survey, compare two surveys, AI crawler log analyser, the API, MCP server, CLI and GitHub Action, and a sample report.",
   alternates: { canonical: "/tools" },
 };
 
@@ -13,7 +13,10 @@ const TOOLS = [
   { href: "/compare", name: "Compare", body: "Load two surveys and see what improved, what regressed, and by how much per engine." },
   { href: "/logs", name: "Crawler log analyser", body: "Drop an access log and see which AI crawlers actually visit — read in your browser, never uploaded." },
   { href: "/developers", name: "API, MCP, CLI, Action", body: "Run surveys from code, from Claude or Cursor, from the terminal, or as a CI gate." },
+  { href: "/sample", name: "Sample report", body: "A full survey of a real page, re-run daily and shown unedited." },
   { href: "/methodology", name: "Methodology", body: "Every weight, gate and rule the scores come from." },
+  { href: "/glossary", name: "Glossary", body: "The terms of AI search, each defined in a sentence you could quote." },
+  { href: "/alternatives", name: "Alternatives", body: "What the other audits and trackers do, and where each is stronger." },
 ];
 
 export default function ToolsPage() {

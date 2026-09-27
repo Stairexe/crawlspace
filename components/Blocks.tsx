@@ -18,7 +18,7 @@ function RewritePanel({ result }: { result: RewriteResult }) {
   const gain = afterPct - beforePct;
 
   return (
-    <div className="rise mt-3 space-y-3 rounded-lg border border-signal/25 bg-signal/[0.035] p-4">
+    <div className="rise mt-3 space-y-3 rounded-[3px] border border-signal/25 bg-signal/[0.035] p-4">
       <div className="flex flex-wrap items-center gap-2.5">
         <span className="mono text-[10px] uppercase tracking-[0.14em] text-signal">rewritten</span>
         <span className="mono flex items-center gap-1.5 text-[12px]">
@@ -38,7 +38,7 @@ function RewritePanel({ result }: { result: RewriteResult }) {
         </span>
       </div>
 
-      <p className="rounded-md border border-line bg-base px-3.5 py-3 text-[13.5px] leading-relaxed text-ink">
+      <p className="rounded-[3px] border border-line bg-base px-3.5 py-3 text-[13.5px] leading-relaxed text-ink">
         {result.rewritten}
       </p>
 
@@ -130,7 +130,7 @@ function BlockCard({
         <span className="mono ml-auto truncate text-[10px] text-ink-faint/70">{block.domPath}</span>
       </div>
 
-      <p className="mt-3 rounded-md border border-line bg-base px-3.5 py-3 text-[13.5px] leading-relaxed text-ink-dim">
+      <p className="mt-3 rounded-[3px] border border-line bg-base px-3.5 py-3 text-[13.5px] leading-relaxed text-ink-dim">
         {block.text.length > 480 ? block.text.slice(0, 480) + "…" : block.text}
       </p>
 
@@ -157,7 +157,7 @@ function BlockCard({
             type="button"
             onClick={rewrite}
             disabled={busy || !canRewrite}
-            className="mono rounded-md bg-signal px-3.5 py-1.5 text-[12px] font-semibold text-void transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-faint"
+            className="mono rounded-[3px] bg-signal px-3.5 py-1.5 text-[12px] font-semibold text-void transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-faint"
           >
             {busy ? "rewriting…" : "rewrite this block"}
           </button>

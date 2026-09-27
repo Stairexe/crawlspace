@@ -16,13 +16,16 @@ const COLUMNS: { title: string; links: { href: string; label: string; external?:
       { href: "/logs", label: "Crawler log analyser" },
       { href: "/developers", label: "API, MCP & CLI" },
       { href: "/dashboard", label: "Dashboard" },
-      { href: "/methodology", label: "Methodology" },
       { href: "/#faq", label: "Questions" },
     ],
   },
   {
     title: "Record",
     links: [
+      { href: "/sample", label: "Sample report" },
+      { href: "/methodology", label: "Methodology" },
+      { href: "/glossary", label: "Glossary" },
+      { href: "/alternatives", label: "Alternatives" },
       { href: "https://github.com/Stairexe/crawlspace", label: "Source on GitHub", external: true },
       { href: "/terms", label: "Terms" },
       { href: "/privacy", label: "Privacy" },

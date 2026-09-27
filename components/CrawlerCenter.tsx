@@ -74,7 +74,7 @@ export function CrawlerCenter({ evidence }: { evidence: Evidence }) {
       </div>
 
       {/* Pro Strategy Callout */}
-      <div className="rounded-xl border border-line bg-surface/40 p-4">
+      <div className="rounded-[3px] border border-line bg-surface/40 p-4">
         <div className="flex items-start gap-3">
           <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-signal/15 text-[11px] font-bold text-signal">
             i
@@ -104,7 +104,7 @@ export function CrawlerCenter({ evidence }: { evidence: Evidence }) {
               key={val}
               type="button"
               onClick={() => setFilter(val)}
-              className={`mono rounded-md px-3 py-1 text-[12px] transition-colors ${
+              className={`mono rounded-[3px] px-3 py-1 text-[12px] transition-colors ${
                 filter === val
                   ? "bg-signal text-void font-semibold"
                   : "bg-surface text-ink-dim hover:text-ink"
@@ -120,7 +120,7 @@ export function CrawlerCenter({ evidence }: { evidence: Evidence }) {
       </div>
 
       {/* Crawler Table */}
-      <div tabIndex={0} role="region" aria-label="Crawler access table" className="overflow-x-auto rounded-xl border border-line bg-surface">
+      <div tabIndex={0} role="region" aria-label="Crawler access table" className="overflow-x-auto rounded-[3px] border border-line bg-surface">
         <table className="w-full text-left text-[13px]">
           <thead className="border-b border-line bg-surface/80 text-[11px] uppercase tracking-wider text-ink-faint">
             <tr>

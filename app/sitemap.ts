@@ -9,7 +9,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     { url: BASE, lastModified: new Date(), changeFrequency: "daily", priority: 1 },
     { url: `${BASE}/methodology`, lastModified: MODEL_REVISED, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE}/sample`, lastModified: new Date(), changeFrequency: "daily", priority: 0.7 },
     { url: `${BASE}/tools`, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE}/glossary`, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${BASE}/alternatives`, lastModified: "2026-09-27", changeFrequency: "monthly", priority: 0.6 },
     { url: `${BASE}/site`, changeFrequency: "monthly", priority: 0.7 },
     { url: `${BASE}/logs`, changeFrequency: "monthly", priority: 0.6 },
     { url: `${BASE}/compare`, changeFrequency: "monthly", priority: 0.5 },

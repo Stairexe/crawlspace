@@ -56,12 +56,12 @@ export function DashboardEmpty({
             autoComplete="off"
             spellCheck={false}
             aria-label="URL to audit"
-            className="mono h-11 flex-1 rounded-lg border border-line bg-surface px-4 text-[13px] text-ink placeholder:text-ink-faint/60 focus:border-line-bright"
+            className="mono h-11 flex-1 rounded-[3px] border border-line bg-surface px-4 text-[13px] text-ink placeholder:text-ink-faint/60 focus:border-line-bright"
           />
           <button
             type="submit"
             disabled={isScanning || !value.trim()}
-            className="mono h-11 shrink-0 rounded-lg bg-signal px-6 text-[12.5px] font-semibold text-void transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-55"
+            className="mono h-11 shrink-0 rounded-[3px] bg-signal px-6 text-[12.5px] font-semibold text-void transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-55"
           >
             {isScanning ? "inspecting…" : "Run survey"}
           </button>

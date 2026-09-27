@@ -74,7 +74,9 @@ export default function Methodology() {
         execution. That fetch produces <em>evidence</em>: facts about the page. Checks read the
         evidence and return a normalised value. Scoring reads the check results and applies five
         different weight vectors. No stage reaches backwards, and no check performs its own
-        network request, so the same evidence always produces the same score.
+        network request, so the same evidence always produces the same score. Alongside the page
+        the survey reads robots.txt, llms.txt and sitemap.xml, and makes one lookup in Wikidata
+        for the domain.
       </p>
       <pre tabIndex={0} className="mono mt-4 overflow-x-auto rounded-lg border border-line bg-surface p-4 text-[12px] leading-relaxed text-ink-dim">
         {`fetch → evidence → checks → 5 engine scores → findings`}
@@ -232,6 +234,24 @@ export default function Methodology() {
         complete, but they do not change any number.
       </p>
 
+      <H id="entity">Known-entity presence</H>
+      <p className="mt-3 text-[14px] leading-relaxed text-ink-dim">
+        Assistants cite organisations they can recognise. Wikidata is the open knowledge graph
+        that search engines and model builders draw on, and its &ldquo;official website&rdquo;
+        property is the one link from an entity to a domain that the site owner does not write.
+        So the lookup is by domain, never by name: a name search for &ldquo;Linear&rdquo; returns
+        linear algebra, and a match that cannot be tied to the domain proves nothing.
+      </p>
+      <p className="mt-3 text-[14px] leading-relaxed text-ink-dim">
+        A domain that a Wikidata item claims, and whose page links that item back through{" "}
+        <code className="mono text-[12.5px]">sameAs</code>, passes. Claimed but not linked is a
+        warning with a one-line fix. Not claimed at all is a small deduction, weight 4 inside
+        authority — most honest small sites have no entry, and the report says to create one
+        only where the organisation meets Wikidata&apos;s notability policy. Pages on shared
+        platforms (medium.com, vercel.app and the like) and lookups Wikidata does not answer are
+        scored n/a, never guessed.
+      </p>
+
       <H id="rewrite">The rewrite layer</H>
       <p className="mt-3 text-[14px] leading-relaxed text-ink-dim">
         Rewrites are instructed from the Princeton GEO study (KDD 2024), which measured visibility
@@ -268,10 +288,10 @@ export default function Methodology() {
       <ul className="mt-4 space-y-2.5">
         {[
           ["Whether you are actually cited.", "Crawlspace models citability. Confirming citation means querying five engines repeatedly over time — a monitoring product, not an audit."],
-          ["Everything off your own domain.", "Brands are cited roughly 6.5x more often through third-party sources than their own site; Wikipedia alone is about 7.8% of ChatGPT citations. A single-domain audit is structurally incomplete, and no amount of on-page work substitutes for presence elsewhere."],
+          ["Most of what happens off your own domain.", "Brands are cited roughly 6.5x more often through third-party sources than their own site; Wikipedia alone is about 7.8% of ChatGPT citations. The survey checks one off-site fact — whether the knowledge graph knows the domain — and nothing about reviews, forums or press. No amount of on-page work substitutes for presence elsewhere."],
           ["Backlinks and domain authority.", "Real data here requires a paid provider. Crawlspace has no paid dependency, so it does not guess."],
           ["JavaScript-rendered content.", "The page is read as a crawler receives it. That is the point — but it means a client-rendered page scores what a crawler would actually see, not what you see."],
-          ["More than one page.", "v1 audits a single URL plus robots.txt, llms.txt and sitemap.xml. Site-wide crawling was deliberately cut rather than half-built."],
+          ["A whole site.", "A survey is one URL. The site survey samples up to 20 pages from the sitemap, spread across sections — a sample, not a crawl, and it says so."],
         ].map(([a, b]) => (
           <li key={a} className="card p-3.5">
             <span className="block text-[13.5px] font-medium">{a}</span>
@@ -294,6 +314,7 @@ export default function Methodology() {
         {[
           ["Google — AI features and your website", "https://developers.google.com/search/docs/fundamentals/ai-optimization-guide"],
           ["Princeton GEO study (KDD 2024)", "https://arxiv.org/abs/2311.09735"],
+          ["Wikidata — notability policy", "https://www.wikidata.org/wiki/Wikidata:Notability"],
           ["llmstxt.org — the llms.txt proposal", "https://llmstxt.org"],
           ["State of AI Search 2026 — OrganiKPI", "https://organikpi.com/blog/geo-ai-search/state-of-ai-search/"],
           ["State of llms.txt 2026 — Presenc AI", "https://presenc.ai/research/state-of-llms-txt-2026"],

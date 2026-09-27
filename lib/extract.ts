@@ -4,6 +4,7 @@ import type { ContentBlock, Evidence, BlockKind } from "./types";
 import { countWords, scoreBlockText } from "./blocks";
 import { guardedFetch, softFetch, normaliseUrl } from "./fetcher";
 import { resolveAllAgents, explainRobotsFile } from "./robots";
+import { collectSameAs, lookupEntity } from "./entity";
 
 const MIN_BLOCK_WORDS = 12;
 const MAX_BLOCKS = 120;
@@ -199,21 +200,6 @@ export async function gatherEvidence(inputUrl: string): Promise<Evidence> {
   const origin = finalUrl.origin;
   const path = finalUrl.pathname || "/";
 
-  const [robotsRes, llmsRes, sitemapRes] = await Promise.all([
-    softFetch(`${origin}/robots.txt`, { accept: "text/plain", timeoutMs: 6000, maxBytes: 256 * 1024 }),
-    softFetch(`${origin}/llms.txt`, { accept: "text/plain", timeoutMs: 6000, maxBytes: 256 * 1024 }),
-    softFetch(`${origin}/sitemap.xml`, { accept: "application/xml", timeoutMs: 6000, maxBytes: 256 * 1024 }),
-  ]);
-
-  const robotsRaw =
-    robotsRes && robotsRes.status === 200 && !/<html/i.test(robotsRes.body.slice(0, 200))
-      ? robotsRes.body
-      : null;
-
-  const llmsFound =
-    !!llmsRes && llmsRes.status === 200 && llmsRes.body.trim().length > 0 &&
-    !/<html/i.test(llmsRes.body.slice(0, 200));
-  const llmsCheck = llmsFound ? validateLlmsTxt(llmsRes!.body) : { valid: false, issues: [] };
 
   const $ = cheerio.load(page.body);
   const bodyText = (() => {
@@ -233,6 +219,24 @@ export async function gatherEvidence(inputUrl: string): Promise<Evidence> {
 
   const blocks = extractBlocks($);
   const jsonLd = collectJsonLd($);
+
+  // The root files and the knowledge-graph lookup are independent, so they run together.
+  const [robotsRes, llmsRes, sitemapRes, entity] = await Promise.all([
+    softFetch(`${origin}/robots.txt`, { accept: "text/plain", timeoutMs: 6000, maxBytes: 256 * 1024 }),
+    softFetch(`${origin}/llms.txt`, { accept: "text/plain", timeoutMs: 6000, maxBytes: 256 * 1024 }),
+    softFetch(`${origin}/sitemap.xml`, { accept: "application/xml", timeoutMs: 6000, maxBytes: 256 * 1024 }),
+    lookupEntity(page.finalUrl, collectSameAs(jsonLd)),
+  ]);
+
+  const robotsRaw =
+    robotsRes && robotsRes.status === 200 && !/<html/i.test(robotsRes.body.slice(0, 200))
+      ? robotsRes.body
+      : null;
+
+  const llmsFound =
+    !!llmsRes && llmsRes.status === 200 && llmsRes.body.trim().length > 0 &&
+    !/<html/i.test(llmsRes.body.slice(0, 200));
+  const llmsCheck = llmsFound ? validateLlmsTxt(llmsRes!.body) : { valid: false, issues: [] };
 
   let internal = 0;
   let external = 0;
@@ -449,5 +453,6 @@ export async function gatherEvidence(inputUrl: string): Promise<Evidence> {
     },
     renderedWithoutJs: textWords >= 200,
     frameworkHint: detectFramework(page.body),
+    entity,
   };
 }

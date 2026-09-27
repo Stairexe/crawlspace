@@ -104,7 +104,7 @@ export function Generated({
           <button
             type="button"
             onClick={() => load(active)}
-            className="mono rounded-lg bg-signal px-4 py-2 text-[12.5px] font-semibold text-void transition-colors hover:brightness-110"
+            className="mono rounded-[3px] bg-signal px-4 py-2 text-[12.5px] font-semibold text-void transition-colors hover:brightness-110"
           >
             Generate {tab.label}
           </button>
@@ -112,7 +112,7 @@ export function Generated({
         {busy && <p className="mono text-[12px] text-ink-faint">generating…</p>}
         {error && <p className="text-[12.5px] text-danger">{error}</p>}
         {content && (
-          <pre tabIndex={0} className="thin-scroll max-h-96 overflow-auto rounded-md border border-line bg-base p-3.5 text-[11.5px] leading-relaxed text-ink-dim">
+          <pre tabIndex={0} className="thin-scroll max-h-96 overflow-auto rounded-[3px] border border-line bg-base p-3.5 text-[11.5px] leading-relaxed text-ink-dim">
             <code>{content}</code>
           </pre>
         )}

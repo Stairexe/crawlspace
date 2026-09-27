@@ -65,6 +65,14 @@ export function generateJsonLd(e: Evidence): string {
   const present = new Set(e.jsonLd.flatMap((n) => n.types));
   const graph: Record<string, unknown>[] = [];
 
+  // Known-entity links first: the Wikidata item and Wikipedia article that already name
+  // this domain as their official website, then whatever profiles the page declares.
+  const entity = e.entity;
+  const entityLinks = [entity?.wikidata?.url, entity?.wikipedia ?? undefined].filter((x): x is string => !!x);
+  const declared = entity?.sameAs ?? [];
+  const sameAs = [...new Set([...entityLinks, ...declared])];
+  let note = "";
+
   if (!present.has("Organization")) {
     graph.push({
       "@type": "Organization",
@@ -72,11 +80,13 @@ export function generateJsonLd(e: Evidence): string {
       name,
       url: url.origin,
       logo: `${url.origin}/logo.png`,
-      sameAs: [
-        "https://www.linkedin.com/company/TODO",
-        "https://github.com/TODO",
-      ],
+      sameAs: sameAs.length
+        ? sameAs
+        : ["https://www.linkedin.com/company/TODO", "https://github.com/TODO"],
     });
+  } else if (entityLinks.length && entity && !entity.linkedFromPage) {
+    note = "// Merge these sameAs entries into your existing Organization node.\n";
+    graph.push({ "@type": "Organization", name, url: url.origin, sameAs });
   }
 
   if (!present.has("WebPage") && !present.has("Article") && !present.has("BlogPosting")) {
@@ -119,31 +129,33 @@ export function generateJsonLd(e: Evidence): string {
     return "// This page already declares Organization, WebPage and FAQ schema. Nothing to add.";
   }
 
-  return `<script type="application/ld+json">
+  return `${note}<script type="application/ld+json">
 ${JSON.stringify({ "@context": "https://schema.org", "@graph": graph }, null, 2)}
 </script>`;
 }
 
 export function generateRobotsSnippet(): string {
-  return `# Allow the AI crawlers you want citations from.
-# Blocking any of these means that engine cannot cite you at all.
+  return `# Search and answer crawlers: blocking any of these stops that engine citing you.
 
-User-agent: GPTBot
+User-agent: Googlebot
+User-agent: Bingbot
 User-agent: OAI-SearchBot
 User-agent: ChatGPT-User
+User-agent: Claude-SearchBot
+User-agent: Claude-User
 User-agent: PerplexityBot
 User-agent: Perplexity-User
-User-agent: ClaudeBot
-User-agent: Claude-User
-User-agent: Claude-SearchBot
-User-agent: anthropic-ai
-User-agent: Google-Extended
-User-agent: Bingbot
 Allow: /
 
-# CCBot is training-only. Blocking it costs you no citations.
-User-agent: CCBot
-Disallow: /
+# Training crawlers: your choice. Blocking these does not remove you from
+# ChatGPT, Claude or Google answers — each vendor documents that separately.
+# Uncomment to opt out of model training.
+# User-agent: GPTBot
+# User-agent: ClaudeBot
+# User-agent: Google-Extended
+# User-agent: Applebot-Extended
+# User-agent: CCBot
+# Disallow: /
 
 Sitemap: https://YOUR-DOMAIN/sitemap.xml`;
 }

@@ -90,10 +90,11 @@ const SCHEDULES: { name: string; note: string; items: { label: string; gate?: bo
   },
   {
     name: "Structure & signals",
-    note: "14 checks",
+    note: "15 checks",
     items: [
       { label: "Structured data (JSON-LD)" },
       { label: "Organisation entity defined" },
+      { label: "Known entity in Wikidata / Wikipedia" },
       { label: "Named author" },
       { label: "Freshness signal" },
       { label: "llms.txt" },
@@ -208,7 +209,7 @@ export function LandingSections({ specimen }: { specimen: React.ReactNode }) {
           id="schedule"
           mark="§ 04 — Schedule"
           title={<span id="schedule-h">What is inspected.</span>}
-          lede="The survey is thirty-five checks in three schedules. Each has a permanent id, a stated weight per engine, and a line of literal evidence in the report. Robots.txt is read for twenty-three AI crawlers."
+          lede="The survey is thirty-six checks in three schedules. Each has a permanent id, a stated weight per engine, and a line of literal evidence in the report. Robots.txt is read for twenty-three AI crawlers."
         />
         <div className="mt-10 grid border-l border-t border-line md:grid-cols-3">
           {SCHEDULES.map((s, n) => (

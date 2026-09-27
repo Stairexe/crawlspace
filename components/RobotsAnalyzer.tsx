@@ -150,7 +150,7 @@ export function RobotsAnalyzer({ evidence }: { evidence: Evidence }) {
 
         <div className="p-4">
           {showRaw ? (
-            <pre tabIndex={0} className="mono thin-scroll max-h-96 overflow-auto rounded-lg bg-base p-3 text-[11.5px] leading-relaxed text-ink-dim">
+            <pre tabIndex={0} className="mono thin-scroll max-h-96 overflow-auto rounded-[3px] bg-base p-3 text-[11.5px] leading-relaxed text-ink-dim">
               {robots.rawText || "// No robots.txt found."}
             </pre>
           ) : explained.length > 0 ? (
@@ -158,7 +158,7 @@ export function RobotsAnalyzer({ evidence }: { evidence: Evidence }) {
               {explained.map((rule, idx) => (
                 <div
                   key={idx}
-                  className="flex flex-col gap-2 rounded-lg border border-line bg-surface/50 p-3 sm:flex-row sm:items-center sm:justify-between"
+                  className="flex flex-col gap-2 rounded-[3px] border border-line bg-surface/50 p-3 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div className="flex items-start gap-3">
                     <span

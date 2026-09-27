@@ -26552,8 +26552,8 @@ var require_cache3 = __commonJS({
        * @returns {requestResponseList}
        */
       #batchCacheOperations(operations) {
-        const cache = this.#relevantRequestResponseList;
-        const backupCache = [...cache];
+        const cache2 = this.#relevantRequestResponseList;
+        const backupCache = [...cache2];
         const addedItems = [];
         const resultList = [];
         try {
@@ -26580,9 +26580,9 @@ var require_cache3 = __commonJS({
                 return [];
               }
               for (const requestResponse of requestResponses) {
-                const idx = cache.indexOf(requestResponse);
+                const idx = cache2.indexOf(requestResponse);
                 assert(idx !== -1);
-                cache.splice(idx, 1);
+                cache2.splice(idx, 1);
               }
             } else if (operation.type === "put") {
               if (operation.response == null) {
@@ -26612,11 +26612,11 @@ var require_cache3 = __commonJS({
               }
               requestResponses = this.#queryCache(operation.request);
               for (const requestResponse of requestResponses) {
-                const idx = cache.indexOf(requestResponse);
+                const idx = cache2.indexOf(requestResponse);
                 assert(idx !== -1);
-                cache.splice(idx, 1);
+                cache2.splice(idx, 1);
               }
-              cache.push([operation.request, operation.response]);
+              cache2.push([operation.request, operation.response]);
               addedItems.push([operation.request, operation.response]);
             }
             resultList.push([operation.request, operation.response]);
@@ -26793,13 +26793,13 @@ var require_cachestorage = __commonJS({
         if (options.cacheName != null) {
           if (this.#caches.has(options.cacheName)) {
             const cacheList = this.#caches.get(options.cacheName);
-            const cache = new Cache(kConstruct, cacheList);
-            return await cache.match(request, options);
+            const cache2 = new Cache(kConstruct, cacheList);
+            return await cache2.match(request, options);
           }
         } else {
           for (const cacheList of this.#caches.values()) {
-            const cache = new Cache(kConstruct, cacheList);
-            const response = await cache.match(request, options);
+            const cache2 = new Cache(kConstruct, cacheList);
+            const response = await cache2.match(request, options);
             if (response !== void 0) {
               return response;
             }
@@ -26829,12 +26829,12 @@ var require_cachestorage = __commonJS({
         webidl.argumentLengthCheck(arguments, 1, prefix);
         cacheName = webidl.converters.DOMString(cacheName, prefix, "cacheName");
         if (this.#caches.has(cacheName)) {
-          const cache2 = this.#caches.get(cacheName);
-          return new Cache(kConstruct, cache2);
+          const cache3 = this.#caches.get(cacheName);
+          return new Cache(kConstruct, cache3);
         }
-        const cache = [];
-        this.#caches.set(cacheName, cache);
-        return new Cache(kConstruct, cache);
+        const cache2 = [];
+        this.#caches.set(cacheName, cache2);
+        return new Cache(kConstruct, cache2);
       }
       /**
        * @see https://w3c.github.io/ServiceWorker/#cache-storage-delete
@@ -45850,6 +45850,148 @@ function blockedEngines(rules) {
   return blocked;
 }
 
+// ../lib/entity.ts
+var API = "https://www.wikidata.org/w/api.php";
+var TIMEOUT_MS2 = 4e3;
+var MAX_BYTES2 = 256 * 1024;
+var CACHE_TTL_MS = 24 * 60 * 60 * 1e3;
+var cache = /* @__PURE__ */ new Map();
+var SHARED_PLATFORMS = /* @__PURE__ */ new Set([
+  "medium.com",
+  "substack.com",
+  "github.io",
+  "gitlab.io",
+  "vercel.app",
+  "netlify.app",
+  "pages.dev",
+  "workers.dev",
+  "wordpress.com",
+  "blogspot.com",
+  "wixsite.com",
+  "notion.site",
+  "webflow.io",
+  "framer.website",
+  "herokuapp.com",
+  "gitbook.io",
+  "tumblr.com",
+  "ghost.io",
+  "hashnode.dev",
+  "dev.to",
+  "squarespace.com",
+  "carrd.co",
+  "linktr.ee"
+]);
+var TWO_PART_SUFFIX = /\.(co|com|org|net|ac|gov|edu|ne|or)\.[a-z]{2}$/;
+function registrableDomain(host) {
+  const h = host.toLowerCase().replace(/^www\./, "").replace(/\.$/, "");
+  const parts = h.split(".");
+  const keep = TWO_PART_SUFFIX.test(h) ? 3 : 2;
+  return parts.slice(-keep).join(".");
+}
+function collectSameAs(jsonLd) {
+  const out = /* @__PURE__ */ new Set();
+  const visit = (node, depth) => {
+    if (!node || typeof node !== "object" || depth > 6) return;
+    if (Array.isArray(node)) {
+      for (const n of node) visit(n, depth + 1);
+      return;
+    }
+    const rec = node;
+    const same = rec.sameAs;
+    for (const s of Array.isArray(same) ? same : [same]) {
+      if (typeof s === "string" && /^https?:\/\//i.test(s)) out.add(s.trim());
+    }
+    for (const [k, v] of Object.entries(rec)) if (k !== "sameAs") visit(v, depth + 1);
+  };
+  for (const n of jsonLd) visit(n.raw, 0);
+  return [...out].slice(0, 40);
+}
+var WIKIDATA_ID = /wikidata\.org\/(?:wiki|entity)\/(Q\d+)/i;
+function variants(domain) {
+  const out = [];
+  for (const scheme of ["https", "http"]) {
+    for (const host of [domain, `www.${domain}`]) {
+      out.push(`P856=${scheme}://${host}/`, `P856=${scheme}://${host}`);
+    }
+  }
+  return out;
+}
+async function getJson(params) {
+  const qs = new URLSearchParams({ ...params, format: "json", origin: "*" });
+  const res = await softFetch(`${API}?${qs}`, {
+    accept: "application/json",
+    timeoutMs: TIMEOUT_MS2,
+    maxBytes: MAX_BYTES2
+  });
+  if (!res || res.status !== 200) return null;
+  try {
+    return JSON.parse(res.body);
+  } catch {
+    return null;
+  }
+}
+function hostOf(url) {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return null;
+  }
+}
+async function lookupEntity(pageUrl, sameAs) {
+  const host = hostOf(pageUrl) ?? "";
+  const domain = registrableDomain(host);
+  const linkedIds = sameAs.map((s) => s.match(WIKIDATA_ID)?.[1]).filter((x) => !!x);
+  const finish = (base) => {
+    const wd = base.wikidata;
+    const linkedFromPage = !!wd && sameAs.some(
+      (s) => s.match(WIKIDATA_ID)?.[1] === wd.id || !!base.wikipedia && decodeURIComponent(s).replace(/^http:/, "https:") === decodeURIComponent(base.wikipedia)
+    );
+    return { ...base, sameAs, linkedFromPage };
+  };
+  const cached = cache.get(domain);
+  if (cached && Date.now() - cached.at < CACHE_TTL_MS && linkedIds.length === 0) return finish(cached.value);
+  const unchecked = { checked: false, domain, platform: null, wikidata: null, wikipedia: null };
+  if (SHARED_PLATFORMS.has(domain)) return finish({ ...unchecked, platform: domain });
+  const search = await getJson({
+    action: "query",
+    list: "search",
+    srsearch: `haswbstatement:${variants(domain).join("|")}`,
+    srlimit: "3",
+    srnamespace: "0"
+  });
+  if (!search?.query) return finish(unchecked);
+  const byDomain = (search.query.search ?? []).map((r) => r.title).filter((t) => !!t && /^Q\d+$/.test(t));
+  if (byDomain.length === 0) {
+    const value2 = { checked: true, domain, platform: null, wikidata: null, wikipedia: null };
+    cache.set(domain, { at: Date.now(), value: value2 });
+    return finish(value2);
+  }
+  const got = await getJson({
+    action: "wbgetentities",
+    ids: byDomain.join("|"),
+    props: "labels|descriptions|sitelinks/urls",
+    languages: "en",
+    sitefilter: "enwiki"
+  });
+  if (!got?.entities) return finish(unchecked);
+  const items = byDomain.map((id) => got.entities[id]).filter((e) => !!e && !e.missing);
+  const match = items.find((e) => linkedIds.includes(e.id ?? "")) ?? items.find((e) => e.sitelinks?.enwiki?.url) ?? items[0];
+  const value = match ? {
+    checked: true,
+    domain,
+    platform: null,
+    wikidata: {
+      id: match.id,
+      label: match.labels?.en?.value ?? null,
+      description: match.descriptions?.en?.value ?? null,
+      url: `https://www.wikidata.org/wiki/${match.id}`
+    },
+    wikipedia: match.sitelinks?.enwiki?.url ?? null
+  } : { checked: true, domain, platform: null, wikidata: null, wikipedia: null };
+  cache.set(domain, { at: Date.now(), value });
+  return finish(value);
+}
+
 // ../lib/extract.ts
 var MIN_BLOCK_WORDS = 12;
 var MAX_BLOCKS = 120;
@@ -46070,14 +46212,6 @@ async function gatherEvidence(inputUrl) {
   const finalUrl = new URL(page.finalUrl);
   const origin = finalUrl.origin;
   const path = finalUrl.pathname || "/";
-  const [robotsRes, llmsRes, sitemapRes] = await Promise.all([
-    softFetch(`${origin}/robots.txt`, { accept: "text/plain", timeoutMs: 6e3, maxBytes: 256 * 1024 }),
-    softFetch(`${origin}/llms.txt`, { accept: "text/plain", timeoutMs: 6e3, maxBytes: 256 * 1024 }),
-    softFetch(`${origin}/sitemap.xml`, { accept: "application/xml", timeoutMs: 6e3, maxBytes: 256 * 1024 })
-  ]);
-  const robotsRaw = robotsRes && robotsRes.status === 200 && !/<html/i.test(robotsRes.body.slice(0, 200)) ? robotsRes.body : null;
-  const llmsFound = !!llmsRes && llmsRes.status === 200 && llmsRes.body.trim().length > 0 && !/<html/i.test(llmsRes.body.slice(0, 200));
-  const llmsCheck = llmsFound ? validateLlmsTxt(llmsRes.body) : { valid: false, issues: [] };
   const $2 = load(page.body);
   const bodyText = (() => {
     const c = $2("body").clone();
@@ -46090,6 +46224,15 @@ async function gatherEvidence(inputUrl) {
   })).get().filter((h) => h.text.length > 0).slice(0, 80);
   const blocks = extractBlocks($2);
   const jsonLd = collectJsonLd($2);
+  const [robotsRes, llmsRes, sitemapRes, entity] = await Promise.all([
+    softFetch(`${origin}/robots.txt`, { accept: "text/plain", timeoutMs: 6e3, maxBytes: 256 * 1024 }),
+    softFetch(`${origin}/llms.txt`, { accept: "text/plain", timeoutMs: 6e3, maxBytes: 256 * 1024 }),
+    softFetch(`${origin}/sitemap.xml`, { accept: "application/xml", timeoutMs: 6e3, maxBytes: 256 * 1024 }),
+    lookupEntity(page.finalUrl, collectSameAs(jsonLd))
+  ]);
+  const robotsRaw = robotsRes && robotsRes.status === 200 && !/<html/i.test(robotsRes.body.slice(0, 200)) ? robotsRes.body : null;
+  const llmsFound = !!llmsRes && llmsRes.status === 200 && llmsRes.body.trim().length > 0 && !/<html/i.test(llmsRes.body.slice(0, 200));
+  const llmsCheck = llmsFound ? validateLlmsTxt(llmsRes.body) : { valid: false, issues: [] };
   let internal = 0;
   let external = 0;
   const citationDomains = /* @__PURE__ */ new Set();
@@ -46265,7 +46408,8 @@ async function gatherEvidence(inputUrl) {
       questionHeadings
     },
     renderedWithoutJs: textWords >= 200,
-    frameworkHint: detectFramework(page.body)
+    frameworkHint: detectFramework(page.body),
+    entity
   };
 }
 
@@ -46842,6 +46986,7 @@ function technicalChecks(e) {
       generates: "jsonld"
     } : void 0
   });
+  checks.push(entityPresence(e));
   const titleLen = e.html.title?.length ?? 0;
   checks.push({
     id: "title-tag",
@@ -46926,6 +47071,64 @@ function technicalChecks(e) {
     fix: !e.html.lang ? { summary: "Set the lang attribute", detail: 'Add lang="en" (or your language) to the <html> element.', effort: "trivial" } : void 0
   });
   return checks;
+}
+function entityPresence(e) {
+  const base = {
+    id: "entity-presence",
+    category: "authority",
+    label: "Known entity (Wikidata / Wikipedia)",
+    weight: 4,
+    engines: ["google-aio", "chatgpt", "claude", "copilot"]
+  };
+  const en = e.entity;
+  if (!en || en.platform) {
+    return {
+      ...base,
+      status: "na",
+      value: 0,
+      evidence: en?.platform ? `Hosted on ${en.platform}, a shared platform \u2014 its knowledge-graph entry belongs to the platform, not to this publisher, so it was not scored.` : "Not measured in this survey."
+    };
+  }
+  if (!en.checked) {
+    return {
+      ...base,
+      status: "na",
+      value: 0,
+      evidence: "Wikidata did not answer during this survey, so entity presence was not scored rather than guessed."
+    };
+  }
+  const profiles = en.sameAs.filter((s) => !/wikidata\.org|wikipedia\.org/i.test(s)).length;
+  if (en.wikidata) {
+    const name = en.wikidata.label ?? en.wikidata.id;
+    const found = `Wikidata ${en.wikidata.id} (\u201C${name}\u201D${en.wikidata.description ? `, ${en.wikidata.description}` : ""}) lists ${en.domain} as its official website` + (en.wikipedia ? `, and has an English Wikipedia article.` : `; no English Wikipedia article.`);
+    if (en.linkedFromPage) {
+      return { ...base, status: "pass", value: 1, evidence: `${found} The page's sameAs links back to it.` };
+    }
+    return {
+      ...base,
+      status: "warn",
+      value: 0.7,
+      evidence: `${found} But nothing in this page's structured data links to it, so a machine has to guess the two are the same.`,
+      fix: {
+        summary: "Link the Wikidata item from your Organization sameAs",
+        detail: `Add "${en.wikidata.url}"${en.wikipedia ? ` and "${en.wikipedia}"` : ""} to the sameAs array of the Organization JSON-LD. That closes the loop: the knowledge graph already points at your domain, and your page then points back at the entity, which is how Google and the assistants reconcile a brand mentioned on the page with the one they already know.`,
+        effort: "trivial",
+        generates: "jsonld"
+      }
+    };
+  }
+  return {
+    ...base,
+    status: profiles >= 2 ? "warn" : "fail",
+    value: profiles >= 2 ? 0.35 : 0,
+    evidence: `No Wikidata item names ${en.domain} as its official website.` + (profiles > 0 ? ` The page's sameAs does link ${profiles} other profile${profiles === 1 ? "" : "s"}.` : " The page declares no sameAs profiles either."),
+    fix: {
+      summary: profiles >= 2 ? "Become a known entity where you qualify" : "Declare your profiles with sameAs",
+      detail: (profiles >= 2 ? "" : "Start with what you control: list your LinkedIn, GitHub, Crunchbase and similar profiles in the Organization schema's sameAs, so a machine can tie this domain to the same brand elsewhere. ") + "A Wikidata item with an 'official website' (P856) of this domain is what connects it to the open knowledge graph. Create one only if the organisation meets Wikidata's notability policy \u2014 describable from serious, public references such as press coverage. An item made for a brand that does not qualify gets deleted, and a paid Wikipedia article breaks Wikipedia's rules.",
+      effort: profiles >= 2 ? "large" : "trivial",
+      generates: profiles >= 2 ? void 0 : "jsonld"
+    }
+  };
 }
 
 // ../lib/scoring/score.ts

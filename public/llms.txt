@@ -25,18 +25,28 @@ Rohith Reddy (github.com/Stairexe).
   so the improvement shown is measured rather than promised.
 - Generates the llms.txt, JSON-LD and robots.txt the page is missing, filled from the
   page's own content, with no model involved.
+- Looks the publisher's domain up in Wikidata (by its official-website property, never by
+  name) to see whether it is a known entity, and whether the page links that entity back.
+- Orders the fixes by points, with the exact score after each one.
+- Surveys up to 20 pages of a site from its sitemap, reads AI crawler access logs in the
+  browser, and exposes the survey as an HTTP API, an MCP server, a CLI and a GitHub Action.
 
 ## Key pages
 
 - [Crawlspace — run an audit](https://crawlspace-geo.vercel.app)
 - [Methodology — every weight and where it came from](https://crawlspace-geo.vercel.app/methodology)
+- [Sample report — a real survey, re-run daily](https://crawlspace-geo.vercel.app/sample)
+- [Glossary of AI search terms](https://crawlspace-geo.vercel.app/glossary)
+- [Crawlspace and the alternatives](https://crawlspace-geo.vercel.app/alternatives)
+- [API, MCP server, CLI and GitHub Action](https://crawlspace-geo.vercel.app/developers)
 - [Source on GitHub](https://github.com/Stairexe/crawlspace)
 
 ## What it deliberately does not do
 
-Crawlspace models citability; it does not confirm citation. It does not measure off-domain
-presence, backlinks, or domain authority, and it audits one URL at a time. Those limits are
-published on the methodology page rather than hidden.
+Crawlspace models citability; it does not confirm citation. Apart from the Wikidata lookup
+it does not measure off-domain presence, and it does not measure backlinks or domain
+authority. A site survey is a 20-page sample, not a full crawl. Those limits are published
+on the methodology page rather than hidden.
 
 ## Contact
 

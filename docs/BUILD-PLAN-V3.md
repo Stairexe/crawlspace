@@ -80,5 +80,5 @@ Each feature gets 1–5 on five criteria. Weighted sum × 20 = score out of 100.
 | 9 — CLI + GitHub Action (J) | **Built** — Action works from the repo; npm publish waits on an npm account |
 | 10 — rewriter live (C) | Waiting on Anthropic key in Vercel |
 | 11 — live citation check → study (D, K) | Waiting on Perplexity/OpenAI key + budget |
-| 12 — report redesign, entity presence, trust pages (N, P, R) | Next without keys |
+| 12 — report redesign, entity presence, trust pages (N, P, R) | **Shipped** 27 Sep — survey-sheet report with a numbered defect schedule; `entity-presence` check (Wikidata by official-website domain, n/a on shared platforms or when Wikidata does not answer); /sample, /glossary, /alternatives. Byline bio still waits on Rohith's own words |
 | 13 — accounts, share links, history (U, V) | Waiting on Firebase config |

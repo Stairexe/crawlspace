@@ -169,9 +169,9 @@ Keep the tone professional and concise. Use only the audit data above: do not in
               key={p.id}
               type="button"
               onClick={() => setActiveTab(p.id)}
-              className={`rounded-xl border p-4 text-left transition-all ${
+              className={`rounded-[3px] border p-4 text-left transition-all ${
                 isSelected
-                  ? "border-signal bg-signal/10 shadow-[0_0_15px_var(--color-signal-glow)]"
+                  ? "border-signal bg-signal/10"
                   : "border-line bg-surface/50 hover:border-line-bright"
               }`}
             >
@@ -191,7 +191,7 @@ Keep the tone professional and concise. Use only the audit data above: do not in
       </div>
 
       {/* Active Prompt Code Inspector */}
-      <div className="rounded-2xl border border-line bg-void/90 p-5 space-y-4">
+      <div className="rounded-[3px] border border-line bg-void/90 p-5 space-y-4">
         <div className="flex items-center justify-between border-b border-line/60 pb-3">
           <div className="flex items-center gap-2">
             <span className="h-2.5 w-2.5 rounded-full bg-signal" />
@@ -204,7 +204,7 @@ Keep the tone professional and concise. Use only the audit data above: do not in
             <button
               type="button"
               onClick={() => copyPrompt(activePrompt.id, activePrompt.generate())}
-              className="mono flex items-center gap-1.5 rounded-xl bg-signal px-4 py-2 text-[12px] font-bold text-void hover:brightness-110 shadow-[0_0_12px_var(--color-signal-glow)] transition-all"
+              className="mono flex items-center gap-1.5 rounded-[3px] bg-signal px-4 py-2 text-[12px] font-bold text-void hover:brightness-110 transition-all"
             >
               {copiedId === activePrompt.id ? (
                 <>
@@ -221,7 +221,7 @@ Keep the tone professional and concise. Use only the audit data above: do not in
           </div>
         </div>
 
-        <pre tabIndex={0} className="mono text-[12px] text-ink-dim leading-relaxed whitespace-pre-wrap max-h-80 overflow-y-auto thin-scroll p-3 bg-surface/40 rounded-xl border border-line/50">
+        <pre tabIndex={0} className="mono text-[12px] text-ink-dim leading-relaxed whitespace-pre-wrap max-h-80 overflow-y-auto thin-scroll p-3 bg-surface/40 rounded-[3px] border border-line/50">
           {activePrompt.generate()}
         </pre>
 

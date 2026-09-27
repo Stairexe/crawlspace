@@ -61,7 +61,7 @@ export function ExportModal({
             type="button"
             onClick={onClose}
             aria-label="Close export modal"
-            className="mono flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-surface text-ink-faint hover:text-ink transition-colors"
+            className="mono flex h-8 w-8 items-center justify-center rounded-[3px] border border-line bg-surface text-ink-faint hover:text-ink transition-colors"
           >
             <X className="h-4 w-4" />
           </button>
@@ -72,7 +72,7 @@ export function ExportModal({
           {/* Quick Export Cards Grid */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             {/* LLM Remediation Prompt */}
-            <div className="flex flex-col justify-between rounded-xl border border-signal/30 bg-signal/5 p-4">
+            <div className="flex flex-col justify-between rounded-[3px] border border-signal/30 bg-signal/5 p-4">
               <div>
                 <span className="mono text-[10.5px] uppercase tracking-wider text-signal font-bold">
                   Recommended for AI
@@ -88,7 +88,7 @@ export function ExportModal({
                 <button
                   type="button"
                   onClick={copyPrompt}
-                  className="mono inline-flex items-center justify-center gap-1.5 h-9 rounded-md bg-signal px-3 text-[12px] font-semibold text-void transition-colors hover:brightness-110"
+                  className="mono inline-flex items-center justify-center gap-1.5 h-9 rounded-[3px] bg-signal px-3 text-[12px] font-semibold text-void transition-colors hover:brightness-110"
                 >
                   {copiedPrompt ? (
                     <>
@@ -105,7 +105,7 @@ export function ExportModal({
                 <button
                   type="button"
                   onClick={() => download(`${baseName}-llm-prompt.md`, llmPrompt, "text/markdown")}
-                  className="mono inline-flex items-center justify-center gap-1.5 h-8 rounded-md border border-line bg-surface px-3 text-[11px] text-ink-dim hover:text-ink"
+                  className="mono inline-flex items-center justify-center gap-1.5 h-8 rounded-[3px] border border-line bg-surface px-3 text-[11px] text-ink-dim hover:text-ink"
                 >
                   <FileDown className="h-3 w-3" />
                   <span>Download .md</span>
@@ -114,7 +114,7 @@ export function ExportModal({
             </div>
 
             {/* Markdown Audit Report */}
-            <div className="flex flex-col justify-between rounded-xl border border-line bg-surface/50 p-4">
+            <div className="flex flex-col justify-between rounded-[3px] border border-line bg-surface/50 p-4">
               <div>
                 <span className="mono text-[10.5px] uppercase tracking-wider text-ink-faint">
                   Documentation
@@ -130,7 +130,7 @@ export function ExportModal({
                 <button
                   type="button"
                   onClick={copyMarkdown}
-                  className="mono inline-flex items-center justify-center gap-1.5 h-9 rounded-md border border-line bg-surface px-3 text-[12px] font-medium text-ink transition-colors hover:border-line-bright"
+                  className="mono inline-flex items-center justify-center gap-1.5 h-9 rounded-[3px] border border-line bg-surface px-3 text-[12px] font-medium text-ink transition-colors hover:border-line-bright"
                 >
                   {copiedMd ? (
                     <>
@@ -147,7 +147,7 @@ export function ExportModal({
                 <button
                   type="button"
                   onClick={() => download(`${baseName}-report.md`, markdownReport, "text/markdown")}
-                  className="mono inline-flex items-center justify-center gap-1.5 h-8 rounded-md border border-line bg-surface px-3 text-[11px] text-ink-dim hover:text-ink"
+                  className="mono inline-flex items-center justify-center gap-1.5 h-8 rounded-[3px] border border-line bg-surface px-3 text-[11px] text-ink-dim hover:text-ink"
                 >
                   <FileDown className="h-3 w-3" />
                   <span>Download .md</span>
@@ -156,7 +156,7 @@ export function ExportModal({
             </div>
 
             {/* Structured JSON Payload */}
-            <div className="flex flex-col justify-between rounded-xl border border-line bg-surface/50 p-4">
+            <div className="flex flex-col justify-between rounded-[3px] border border-line bg-surface/50 p-4">
               <div>
                 <span className="mono text-[10.5px] uppercase tracking-wider text-ink-faint">
                   API & Automation
@@ -172,7 +172,7 @@ export function ExportModal({
                 <button
                   type="button"
                   onClick={copyJson}
-                  className="mono inline-flex items-center justify-center gap-1.5 h-9 rounded-md border border-line bg-surface px-3 text-[12px] font-medium text-ink transition-colors hover:border-line-bright"
+                  className="mono inline-flex items-center justify-center gap-1.5 h-9 rounded-[3px] border border-line bg-surface px-3 text-[12px] font-medium text-ink transition-colors hover:border-line-bright"
                 >
                   {copiedJson ? (
                     <>
@@ -189,7 +189,7 @@ export function ExportModal({
                 <button
                   type="button"
                   onClick={() => download(`${baseName}-audit.json`, jsonReport, "application/json")}
-                  className="mono inline-flex items-center justify-center gap-1.5 h-8 rounded-md border border-line bg-surface px-3 text-[11px] text-ink-dim hover:text-ink"
+                  className="mono inline-flex items-center justify-center gap-1.5 h-8 rounded-[3px] border border-line bg-surface px-3 text-[11px] text-ink-dim hover:text-ink"
                 >
                   <FileDown className="h-3 w-3" />
                   <span>Download .json</span>
@@ -199,7 +199,7 @@ export function ExportModal({
           </div>
 
           {/* Live Preview Panel */}
-          <div className="rounded-xl border border-line bg-surface/60 overflow-hidden">
+          <div className="rounded-[3px] border border-line bg-surface/60 overflow-hidden">
             <div className="flex items-center justify-between border-b border-line bg-surface px-4 py-2.5">
               <div className="flex items-center gap-2">
                 <span className="mono text-[11.5px] font-semibold text-ink">Preview Format:</span>
@@ -228,7 +228,7 @@ export function ExportModal({
               </div>
             </div>
             <div className="p-4">
-              <pre tabIndex={0} className="mono thin-scroll max-h-64 overflow-auto rounded-lg bg-base p-3 text-[11.5px] leading-relaxed text-ink-dim">
+              <pre tabIndex={0} className="mono thin-scroll max-h-64 overflow-auto rounded-[3px] bg-base p-3 text-[11.5px] leading-relaxed text-ink-dim">
                 {activePreview === "prompt"
                   ? llmPrompt
                   : activePreview === "markdown"
@@ -244,7 +244,7 @@ export function ExportModal({
           <button
             type="button"
             onClick={onClose}
-            className="mono rounded-lg bg-raised px-4 py-1.5 text-[12px] font-medium text-ink hover:text-ink"
+            className="mono rounded-[3px] bg-raised px-4 py-1.5 text-[12px] font-medium text-ink hover:text-ink"
           >
             Close
           </button>
