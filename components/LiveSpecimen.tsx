@@ -125,6 +125,18 @@ export function LiveSpecimen({ specimen }: { specimen: Specimen }) {
           </p>
         </div>
 
+        {r.plan && r.plan.steps.length > 0 && (
+          <div className="border-t border-line px-5 py-4">
+            <div className="mono text-[10px] uppercase tracking-[0.14em] text-ink-faint">Fix first</div>
+            <p className="mt-2 text-[13.5px] leading-relaxed text-ink-dim">
+              {r.plan.steps.length} fixes take this page from{" "}
+              <span className="num text-ink">{r.plan.from}</span> to{" "}
+              <span className="num text-ink">{r.plan.to}</span> on Crawlspace&apos;s own scale. The biggest:{" "}
+              {r.plan.steps[0].summary.charAt(0).toLowerCase() + r.plan.steps[0].summary.slice(1)} (+{r.plan.steps[0].gain}).
+            </p>
+          </div>
+        )}
+
         {/* Defect schedule */}
         {topFindings.length > 0 && (
           <div className="border-t border-line">

@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { FixPlan } from "./FixPlan";
+import { PrintButton } from "./PrintReport";
+import { CrawlerView } from "./CrawlerView";
 import type { AuditReport } from "@/lib/types";
 import { ENGINES, ENGINE_LABELS } from "@/lib/types";
 import { Pill, scoreColor, scoreLabel, useCountUp } from "./primitives";
@@ -20,6 +23,7 @@ type Tab =
   | "content"
   | "schema"
   | "robots"
+  | "view"
   | "issues";
 
 function VisibilityDial({ score }: { score: number }) {
@@ -130,6 +134,13 @@ export function VisibilityDashboard({
             >
               Generate Files
             </button>
+            <PrintButton report={report} className="mono inline-flex h-10 items-center rounded-lg border border-line bg-surface px-4 text-[12.5px] font-medium text-ink transition-colors hover:border-line-bright" />
+            <a
+              href="/compare"
+              className="mono inline-flex h-10 items-center rounded-lg border border-line bg-surface px-4 text-[12.5px] font-medium text-ink transition-colors hover:border-line-bright"
+            >
+              Compare
+            </a>
             <button
               type="button"
               onClick={onReset}
@@ -215,6 +226,7 @@ export function VisibilityDashboard({
           { id: "content", label: "Content Quality" },
           { id: "schema", label: "Structured Data" },
           { id: "robots", label: "Robots.txt" },
+          { id: "view", label: "Crawler's view" },
           { id: "issues", label: `Issues (${report.findings.length})` },
         ].map((t) => (
           <button
@@ -237,6 +249,8 @@ export function VisibilityDashboard({
       {/* 1. OVERVIEW TAB */}
       {tab === "overview" && (
         <div className="space-y-6">
+          <FixPlan report={report} />
+
           {/* Engine Scores Breakdown */}
           <div className="card p-6">
             <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-line pb-4">
@@ -610,6 +624,8 @@ export function VisibilityDashboard({
 
       {/* 7. ROBOTS.TXT TAB */}
       {tab === "robots" && <RobotsAnalyzer evidence={e} />}
+
+      {tab === "view" && <CrawlerView evidence={e} />}
 
       {/* 8. ISSUES CENTER TAB */}
       {tab === "issues" && (

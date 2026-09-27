@@ -740,3 +740,35 @@ html[data-js] [data-draw][data-inview] .callout-pin {
 [data-n]::before {
   content: attr(data-n);
 }
+
+/* ── Print: the survey on paper ─────────────────────────────────────── */
+.print-root {
+  display: none;
+}
+@media print {
+  body.printing > *:not(.print-root) {
+    display: none !important;
+  }
+  body.printing .print-root {
+    display: block;
+  }
+  @page {
+    margin: 14mm;
+  }
+  html,
+  body {
+    background: #fff !important;
+  }
+  body > div > header,
+  body > div > footer,
+  .no-print {
+    display: none !important;
+  }
+  .print-sheet {
+    padding: 0 !important;
+    max-width: none !important;
+  }
+  .break-inside-avoid {
+    break-inside: avoid;
+  }
+}

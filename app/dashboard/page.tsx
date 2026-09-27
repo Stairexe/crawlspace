@@ -4,6 +4,8 @@ import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { DashboardEmpty } from "@/components/DashboardEmpty";
+import { FixPlan } from "@/components/FixPlan";
+import { PrintButton } from "@/components/PrintReport";
 import { CrawlspaceLogo } from "@/components/CrawlspaceLogo";
 import type { AuditReport } from "@/lib/types";
 import { CrawlerCenter } from "@/components/CrawlerCenter";
@@ -560,6 +562,13 @@ function DashboardContent() {
               <span className="hidden sm:inline">Export Report ↗</span>
               <span className="sm:hidden">Export ↗</span>
             </button>
+            <PrintButton report={report} className="mono hidden sm:inline rounded-xl border border-line bg-surface px-3 py-1.5 text-[12px] font-medium text-ink hover:border-line-bright transition-colors" />
+            <a
+              href="/compare"
+              className="mono hidden sm:inline rounded-xl border border-line bg-surface px-3 py-1.5 text-[12px] font-medium text-ink hover:border-line-bright transition-colors"
+            >
+              Compare
+            </a>
           </div>
         </header>
 
@@ -698,6 +707,8 @@ function DashboardContent() {
           {/* TAB 1: OVERVIEW */}
           {activeTab === "overview" && (
             <div className="space-y-8 tab-transition">
+              <FixPlan report={report} />
+
               {/* Priority Issues & Recommended Actions */}
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 {/* Priority Issues */}
