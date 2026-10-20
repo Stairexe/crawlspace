@@ -4,7 +4,8 @@ Read this before every task. Rules only. Rationale lives in `ARCHITECTURE.md`.
 
 ## Stack
 Next.js 15 App Router · TypeScript strict · Tailwind v4 · cheerio · direct fetch to
-Anthropic/OpenAI REST · no database · Vercel.
+Anthropic/OpenAI REST · GSAP + three.js (client only) · Vercel Blob for optional accounts
+(`lib/store.ts`; `.data/` in development) · Vercel.
 
 ## The pipeline — never reorder it
 `fetch → Evidence → CheckResult[] → per-engine scores → findings`
@@ -39,6 +40,11 @@ hard-caps at 25 and leads the report. Never average a gate away.
    an SSRF surface; treat it as one.
 7. **No secrets to the client.** Server env vars stay server-side. User-supplied keys live in
    sessionStorage only and are never logged.
+8. **Accounts are optional and never load-bearing.** Passwords are scrypt-hashed, sessions are
+   HMAC-signed httpOnly cookies, mutating account routes refuse cross-site origins. Without
+   `AUTH_SECRET` + a store in production, account routes answer 503 `ACCOUNTS_OFF`.
+9. **The headline visibility number obeys the gates.** Each gated engine removes its share of
+   the headroom above 25; all five gated caps it at 25.
 
 ## Conventions
 - Components: PascalCase in `components/`, one component per file, props typed inline.
@@ -49,7 +55,7 @@ hard-caps at 25 and leads the report. Never average a gate away.
 - Tailwind: theme tokens in `app/globals.css` `@theme`. No arbitrary hex in components.
 
 ## Never do this
-- Never add a database, auth, or account to v1.
+- Never make the audit wait on, or fail because of, accounts or storage.
 - Never use `jsdom` or regex-parse HTML.
 - Never fetch third-party URLs from the client.
 - Never make the rewrite layer a hard dependency of the audit.

@@ -91,15 +91,22 @@ server-side.
 ANTHROPIC_API_KEY=        # enables the rewrite layer with Claude
 OPENAI_API_KEY=           # or with GPT
 CRAWLSPACE_DEFAULT_PROVIDER= # anthropic | openai
+AUTH_SECRET=              # accounts: signs session cookies (32+ chars)
+BLOB_READ_WRITE_TOKEN=    # accounts: Vercel Blob private store (dev uses ./.data/)
 ```
+
+**Accounts are optional.** Signing in adds saved history with score trends, and read-only share
+links. To switch them on in production, connect a **private** Vercel Blob store to the project
+(Storage → Create → Blob → Connect) and set `AUTH_SECRET`. Without both, account routes answer
+503 and the UI says accounts are off; audits are unaffected.
 
 ## Stack
 
 Next.js 15 (App Router) · TypeScript strict · Tailwind CSS v4 · cheerio · direct `fetch` to
-the Anthropic and OpenAI REST APIs · no database · Vercel.
+the Anthropic and OpenAI REST APIs · GSAP + three.js · Vercel Blob (optional, accounts) · Vercel.
 
-No paid dependency. No storage — a report exists only in the tab that produced it, and
-exports to Markdown or JSON.
+No paid dependency. Guests' audits stay in their browser; signed-in audits are stored
+privately; every audit exports to Markdown, JSON or PDF.
 
 ## Security
 
@@ -126,8 +133,8 @@ Built with a full groundwork pass before any code was written:
 
 Crawlspace models citability — it does not confirm citation. It does not measure off-domain
 presence (brands are cited ~6.5× more often through third parties than their own site),
-backlinks, or domain authority, and it audits one URL at a time. Site-wide crawling and saved
-reports were deliberately cut rather than half-built; see `DECISIONS.md`.
+backlinks, or domain authority. Site surveys sample up to 20 pages from the sitemap. See
+`DECISIONS.md` for what was cut and what was later reversed (D8: accounts).
 
 ## Licence
 

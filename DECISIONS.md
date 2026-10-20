@@ -74,3 +74,20 @@ The audit route fetches an arbitrary user-supplied URL server-side. The first ar
 draft did not mention it. Added as `ARCHITECTURE.md` §5 with post-DNS and post-redirect
 private-range validation. This is the single most likely way this project embarrasses its
 author in a code review. `[ADDED]`
+
+---
+
+## D8 — Reversed: accounts, saved history and share links (v1.1)
+
+**Was:** D1/D2 cut storage, accounts and shareable reports from v1.
+**Changed because:** the owner asked for a "proper website" with logins and storage. The
+reasons D2 gave — retention, hosting snapshots of third-party pages — are handled by keeping
+it opt-in: nothing is stored unless a signed-in user runs an audit, saved audits are private,
+and a share link exists only while its owner keeps it on (and is `noindex`).
+**Kept:** the audit itself still needs no account and no key, and never fails because saving
+failed. Email + password only (no third-party auth to configure). Storage is Vercel Blob
+(private) behind `lib/store.ts`, with a local directory in development; production without a
+store switches accounts off and says so rather than writing to an instance's `/tmp`.
+**Also fixed:** the dashboard's headline "visibility" number blended a gated GEO score with
+SEO and crawler sub-scores, so a page no engine could read showed 42–53. It now obeys the gates
+(D-rule: never average a failed gate into a passing score). `[REVERSED]`

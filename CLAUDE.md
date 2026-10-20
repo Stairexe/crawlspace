@@ -28,11 +28,13 @@ Audit at least one content-rich real site and one deliberately hostile one (JS-o
 robots-blocked) before calling a scoring change done.
 
 ## Environment
-All optional. With none set, everything except `/api/rewrite` works — keep it that way.
+All optional. With none set, everything except `/api/rewrite` and accounts works — keep it that way.
 ```
 ANTHROPIC_API_KEY=
 OPENAI_API_KEY=
 CRAWLSPACE_DEFAULT_PROVIDER=anthropic
+AUTH_SECRET=              # signs session cookies (accounts)
+BLOB_READ_WRITE_TOKEN=    # Vercel Blob, private store (accounts); dev falls back to ./.data/
 ```
 
 ## Conventions
@@ -42,6 +44,10 @@ CRAWLSPACE_DEFAULT_PROVIDER=anthropic
 - Weights change in `lib/scoring/weights.ts` and nowhere else.
 - API routes return `{ error, code }` with a real status. Never leak stack traces.
 - Tailwind theme tokens in `app/globals.css`. No arbitrary hex in components.
+- Design language: firecrawl.dev — off-white ground, hairline frame, one orange accent,
+  Geist + Geist Mono, bracket labels. Motion is GSAP (`components/Motion.tsx`) and three.js
+  (`components/HeroGlobe.tsx`); both pause off-screen and respect reduced motion.
+- Storage goes through `lib/store.ts` only; account logic lives in `lib/accounts.ts`.
 
 ## Never touch
 - **Never weaken the SSRF guards in `lib/fetcher.ts`.** Private-range rejection happens after
@@ -50,7 +56,9 @@ CRAWLSPACE_DEFAULT_PROVIDER=anthropic
   The negative constraints in `lib/ai/prompts.ts` are correctness requirements.
 - **Never make the audit depend on an API key.**
 - **Never average a failed gate into a passing score.**
-- **Never add a database, auth, or accounts to v1** — see DECISIONS D1/D2.
+- **Never make an audit depend on an account or on storage.** Accounts (D8) only add history
+  and share links; `/api/audit` saves best-effort and still answers if saving fails.
+- **Never store a user's rewrite key server-side**, and never return `passwordHash` to a client.
 
 ## Commit
 Conventional commits (`feat:`, `fix:`, `docs:`, `refactor:`). One concern per commit.
