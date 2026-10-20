@@ -377,9 +377,11 @@ function entityPresence(e: Evidence): CheckResult {
   }
   const profiles = en.sameAs.filter((s) => !/wikidata\.org|wikipedia\.org/i.test(s)).length;
   if (en.wikidata) {
-    const name = en.wikidata.label ?? en.wikidata.id;
+    // Items with no English label come back labelled with their own id: do not print it twice.
+    const label = en.wikidata.label && en.wikidata.label !== en.wikidata.id ? `“${en.wikidata.label}”` : null;
+    const about = [label, en.wikidata.description].filter(Boolean).join(", ");
     const found =
-      `Wikidata ${en.wikidata.id} (“${name}”${en.wikidata.description ? `, ${en.wikidata.description}` : ""}) lists ${en.domain} as its official website` +
+      `Wikidata ${en.wikidata.id}${about ? ` (${about})` : ""} lists ${en.domain} as its official website` +
       (en.wikipedia ? `, and has an English Wikipedia article.` : `; no English Wikipedia article.`);
     if (en.linkedFromPage) {
       return { ...base, status: "pass", value: 1, evidence: `${found} The page's sameAs links back to it.` };

@@ -141,8 +141,18 @@ export function calculateVisibilityScores(
       schema * 0.12,
   );
 
+  // A failed gate is never averaged into a passing number. Each engine that cannot read
+  // the page takes its share of the headroom above the gate cap away: all five gated
+  // means the headline is capped exactly like the engines are.
+  const gated = new Set<string>();
+  for (const check of checks) {
+    if (!check.gate || check.status === "pass" || check.status === "na") continue;
+    for (const engine of check.gate === "all" ? ENGINES : check.gate) gated.add(engine);
+  }
+  const ceiling = Math.round(GATE_CAP + (100 - GATE_CAP) * (1 - gated.size / ENGINES.length));
+
   return {
-    overall: Math.min(100, Math.max(0, overall)),
+    overall: Math.min(ceiling, Math.max(0, overall)),
     seo: Math.min(100, Math.max(0, seo)),
     geo: Math.min(100, Math.max(0, compositeGeo)),
     crawlers: Math.min(100, Math.max(0, crawlers)),

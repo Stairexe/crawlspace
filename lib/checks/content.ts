@@ -116,7 +116,10 @@ export function contentChecks(e: Evidence): CheckResult[] {
     status: qh >= 3 ? "pass" : qh >= 1 ? "warn" : "fail",
     value: Math.min(1, qh / 4),
     weight: 6,
-    evidence: `${qh} of ${headingCount} H2+ headings are phrased as a question or start with what/how/why.`,
+    evidence:
+      headingCount === 0
+        ? "The page has no H2 or lower headings, so nothing is phrased as a question."
+        : `${qh} of ${headingCount} H2+ headings are phrased as a question or start with what/how/why.`,
     fix:
       qh < 3
         ? {
