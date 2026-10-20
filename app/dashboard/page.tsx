@@ -16,6 +16,9 @@ import { PerformanceAnalyzer } from "@/components/PerformanceAnalyzer";
 import { SpecializedPrompts } from "@/components/SpecializedPrompts";
 import { ExportModal } from "@/components/ExportModal";
 import { Generated } from "@/components/Generated";
+import { HistoryPanel } from "@/components/HistoryPanel";
+import { useSession, signOut } from "@/components/useSession";
+import { rememberAudit } from "@/components/guestHistory";
 import {
   LayoutDashboard,
   Zap,
@@ -127,6 +130,25 @@ function DashboardContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const session = useSession();
+
+  /** Shows a saved or remembered audit as the current report. */
+  function openReport(r: AuditReport) {
+    setReport(r);
+    setScanError(null);
+    try {
+      setActiveDomain(new URL(r.evidence.finalUrl).host);
+    } catch {
+      /* keep the current label */
+    }
+    try {
+      sessionStorage.setItem(LAST_REPORT_KEY, JSON.stringify(r));
+    } catch {
+      /* storage unavailable */
+    }
+    switchTab("overview");
+  }
+
   function switchTab(raw: SidebarTab) {
     const tab = tabFrom(raw);
     setActiveTab(tab);
@@ -151,6 +173,7 @@ function DashboardContent() {
       // Only a successful survey changes what is on screen. A failed one must never
       // relabel the previous report with the new domain.
       setReport(json as AuditReport);
+      rememberAudit(json as AuditReport);
       setActiveDomain(val);
       try {
         sessionStorage.setItem(LAST_REPORT_KEY, JSON.stringify(json));
@@ -171,6 +194,8 @@ function DashboardContent() {
         onChange={setSearchInput}
         onRun={() => handleAuditRun(searchInput)}
         isScanning={isScanning}
+        error={scanError}
+        history={<HistoryPanel onOpen={openReport} />}
       />
     );
   }
@@ -318,6 +343,31 @@ function DashboardContent() {
 
         {/* Sidebar Footer */}
         <div className="p-4 border-t border-line/80 space-y-1 text-[13px]">
+          {session.user ? (
+            <div className="mb-2 flex items-center gap-2.5 rounded-xl border border-line bg-surface px-3 py-2.5">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-ink text-[11px] font-semibold text-white">
+                {session.user.name.slice(0, 1).toUpperCase()}
+              </span>
+              <Link href="/account" className="min-w-0 flex-1">
+                <div className="truncate text-[13px] font-medium text-ink">{session.user.name}</div>
+                <div className="truncate text-[11.5px] text-ink-faint">{session.user.email}</div>
+              </Link>
+              <button
+                type="button"
+                onClick={() => void signOut()}
+                className="text-[11.5px] text-ink-faint hover:text-ink"
+              >
+                Sign out
+              </button>
+            </div>
+          ) : session.accounts && !session.loading ? (
+            <Link
+              href="/signup?next=/dashboard?tab=history"
+              className="mb-2 block rounded-xl border border-line bg-surface px-3 py-2.5 text-[12.5px] text-ink-dim hover:border-line-bright"
+            >
+              <span className="font-medium text-ink">Save your audits.</span> Create a free account →
+            </Link>
+          ) : null}
           <button
             type="button"
             onClick={() => switchTab("settings")}
@@ -354,7 +404,7 @@ function DashboardContent() {
             onClick={() => setMobileDrawerOpen(false)}
           />
           {/* Drawer Menu */}
-          <div className="relative z-10 w-4/5 max-w-[320px] h-full bg-surface-raised border-r border-line p-5 flex flex-col justify-between overflow-y-auto shadow-2xl">
+          <div className="relative z-10 w-4/5 max-w-[320px] h-full bg-surface border-r border-line p-5 flex flex-col justify-between overflow-y-auto shadow-2xl">
             <div className="space-y-6">
               <div className="flex items-center justify-between border-b border-line/80 pb-4">
                 <CrawlspaceLogo size={24} />
@@ -678,7 +728,7 @@ function DashboardContent() {
                 id: "crawlers",
                 label: "AI Crawlers",
                 score: v.crawlers,
-                status: `${Object.values(report.engines).filter((x) => !x.capped).length}/5 not gated`,
+                status: `${Math.round(v.crawlers / 20)}/5 search bots allowed`,
               },
               { id: "performance", label: "Page fetch", score: `${e.timings.fetchMs}ms`, status: "Measured" },
             ].map((sub) => (
@@ -721,21 +771,23 @@ function DashboardContent() {
                 </div>
               </div>
 
-              {/* Score history: nothing is stored, so there is none to show */}
               <div className="title-block">
                 <div className="tb-label">Score history</div>
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-[13px] leading-relaxed text-ink-dim">
-                    Surveys are not stored, so there is nothing to compare this one against yet.
-                    Export it, and load two exports into Compare to see what changed.
+                  <p className="text-[13.5px] leading-relaxed text-ink-dim">
+                    {report.savedId
+                      ? "This audit is saved to your account. Run it again after a fix and the trend shows what moved."
+                      : session.user
+                        ? "Audits you run while signed in are saved automatically."
+                        : "Kept in this browser. Sign in to keep audits everywhere and share them."}
                   </p>
                   <div className="flex shrink-0 gap-2">
+                    <button type="button" onClick={() => switchTab("history")} className="btn-quiet">
+                      View history
+                    </button>
                     <button type="button" onClick={() => setExportOpen(true)} className="btn-quiet">
                       Export
                     </button>
-                    <a href="/compare" className="btn-quiet">
-                      Compare
-                    </a>
                   </div>
                 </div>
               </div>
@@ -745,22 +797,6 @@ function DashboardContent() {
                     {/* TAB 2: AUDIT & SUB-ANALYSES */}
           {activeTab === "audit" && (
             <div className="space-y-6 tab-transition">
-              <div className="card glass-panel p-6">
-                <h2 className="text-[18px] font-bold text-ink mb-1">Live Audit View</h2>
-                <p className="text-[13px] text-ink-dim mb-4">
-                  Inspecting {activeDomain} across all 6 diagnostic pillars.
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="rounded-[3px] border border-line bg-surface/50 p-4">
-                    <div className="mono text-[11px] text-ink-faint uppercase">Target URL</div>
-                    <div className="mono font-semibold text-ink mt-1 break-all">{e.finalUrl}</div>
-                  </div>
-                  <div className="rounded-[3px] border border-line bg-surface/50 p-4">
-                    <div className="mono text-[11px] text-ink-faint uppercase">Server Response</div>
-                    <div className="mono font-semibold text-signal mt-1">HTTP {e.status} · {e.timings.totalMs}ms</div>
-                  </div>
-                </div>
-              </div>
               <DefectSchedule
                 findings={report.findings}
                 onRewrite={() => switchTab("geo")}
@@ -1082,44 +1118,67 @@ function DashboardContent() {
           )}
 
           {/* TAB 12: HISTORY */}
-{activeTab === "history" && (
-            <div className="space-y-6 tab-transition">
-              <div className="card p-6 space-y-3">
-                <h2 className="text-[18px] font-bold text-ink">History</h2>
-                <p className="max-w-xl text-[13.5px] leading-relaxed text-ink-dim">
-                  There is no history yet. Surveys are not stored, so no earlier score exists to
-                  compare with. History arrives with accounts.
-                </p>
+          {activeTab === "history" && (
+            <div className="space-y-5 tab-transition">
+              <div>
+                <h2 className="text-[22px] text-ink">History</h2>
+                <p className="mt-1 text-[13.5px] text-ink-dim">Every audit you have run, newest first. Open one to bring it back on screen.</p>
               </div>
+              <HistoryPanel onOpen={openReport} focusUrl={e.finalUrl} />
             </div>
           )}
 
-                    {/* TAB 13: REPORTS */}
+          {/* TAB 13: REPORTS */}
           {activeTab === "reports" && (
-            <div className="space-y-6 tab-transition">
-              <div className="card p-6 space-y-4">
-                <h2 className="text-[18px] font-bold text-ink">Saved surveys</h2>
-                <p className="max-w-xl text-[13.5px] leading-relaxed text-ink-dim">
-                  Nothing is saved yet. Crawlspace has no accounts or storage, so a survey lives only
-                  in this tab. Saved and shareable surveys arrive with accounts. Until then, export
-                  this one to keep it.
-                </p>
-                <button type="button" onClick={() => setExportOpen(true)} className="btn-primary">
-                  Export this survey
+            <div className="space-y-5 tab-transition">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <h2 className="text-[22px] text-ink">Shared reports</h2>
+                  <p className="mt-1 max-w-xl text-[13.5px] text-ink-dim">
+                    Audits with a public, read-only link. Anyone with the link can view the report; nobody can change it.
+                  </p>
+                </div>
+                <button type="button" onClick={() => setExportOpen(true)} className="btn-quiet shrink-0">
+                  Export this audit
                 </button>
               </div>
+              <HistoryPanel onOpen={openReport} mode="shared" />
             </div>
           )}
 
           {/* TAB 14: SETTINGS */}
           {activeTab === "settings" && (
-            <div className="space-y-6 tab-transition">
-              <div className="card p-6 space-y-4">
-                <h2 className="text-[18px] font-bold text-ink">Settings</h2>
-                <p className="max-w-xl text-[13.5px] leading-relaxed text-ink-dim">
-                  There is nothing to configure yet. Monitoring, alerts and saved domains need
-                  accounts, which are not built. The only setting today is the optional rewrite key,
-                  entered on the home page and kept in your browser tab.
+            <div className="space-y-5 tab-transition">
+              <h2 className="text-[22px] text-ink">Settings</h2>
+              <div className="title-block">
+                <div className="tb-label">Account</div>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-[13.5px] leading-relaxed text-ink-dim">
+                    {session.user
+                      ? `Signed in as ${session.user.email}. Name, password and account deletion live on the account page.`
+                      : session.accounts
+                        ? "You are not signed in. Audits still work; an account adds saved history and share links."
+                        : "Accounts are not switched on for this deployment. Everything else works without one."}
+                  </p>
+                  {session.user ? (
+                    <Link href="/account" className="btn-quiet shrink-0">
+                      Account settings
+                    </Link>
+                  ) : session.accounts ? (
+                    <Link href="/login?next=/dashboard?tab=settings" className="btn-primary shrink-0">
+                      Log in
+                    </Link>
+                  ) : null}
+                </div>
+                <div className="tb-label">Rewrite key</div>
+                <p className="text-[13.5px] leading-relaxed text-ink-dim">
+                  Optional, and only for rewriting passages. Enter it on the home page; it stays in that browser tab and is
+                  never saved to your account.
+                </p>
+                <div className="tb-label">Data</div>
+                <p className="text-[13.5px] leading-relaxed text-ink-dim">
+                  Signed-in audits are stored privately and listed only to you until you share one. Guest audits stay in
+                  this browser. Every audit exports as Markdown, JSON or PDF.
                 </p>
               </div>
             </div>

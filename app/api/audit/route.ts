@@ -3,6 +3,8 @@ import { gatherEvidence } from "@/lib/extract";
 import { runChecks, scoreReport } from "@/lib/scoring/score";
 import { FetchGuardError } from "@/lib/fetcher";
 import { rateLimit } from "@/lib/ratelimit";
+import { currentUser } from "@/lib/session";
+import { saveAudit } from "@/lib/accounts";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -53,6 +55,18 @@ export async function POST(req: Request) {
 
     const checks = runChecks(evidence);
     const report = scoreReport(evidence, checks);
+
+    // Signed in: keep it in their history. Best effort only: the audit never depends on
+    // an account or on storage, so a failed save is logged and the report still returns.
+    if (!site) {
+      try {
+        const user = await currentUser();
+        if (user) report.savedId = (await saveAudit(user.id, report)).id;
+      } catch (err) {
+        console.error("[audit] save failed", err);
+      }
+    }
+
     return NextResponse.json(report, {
       headers: { "Cache-Control": "no-store" },
     });

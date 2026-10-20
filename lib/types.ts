@@ -314,6 +314,8 @@ export interface AuditReport {
   summary: string;
   /** Optional so surveys exported before it existed still load. */
   plan?: FixPlan;
+  /** Set when the audit was saved to the signed-in user's history. */
+  savedId?: string;
 }
 
 export interface RewriteResult {
@@ -332,3 +334,50 @@ export interface ApiError {
   error: string;
   code: string;
 }
+
+// ── Accounts and storage (v1.1) ─────────────────────────────────────────────
+// Accounts are optional. An audit never requires one; signing in only adds history,
+// saved reports and share links.
+
+/** The stored user record. `passwordHash` never leaves the server. */
+export interface UserRecord {
+  id: string;
+  email: string;
+  name: string;
+  passwordHash: string;
+  createdAt: string;
+}
+
+/** What the client is allowed to see about the signed-in user. */
+export interface PublicUser {
+  id: string;
+  email: string;
+  name: string;
+  createdAt: string;
+}
+
+/** One row of a user's audit history: enough to list and chart without loading reports. */
+export interface SavedAuditSummary {
+  id: string;
+  url: string;
+  host: string;
+  title: string | null;
+  createdAt: string;
+  composite: number;
+  overall: number;
+  engines: Record<Engine, number>;
+  gated: number;
+  findings: number;
+  critical: number;
+  /** Set when the owner has made a public link for this audit. */
+  shareId?: string;
+}
+
+/** A saved audit: the summary row plus the full report it was made from. */
+export interface SavedAudit {
+  summary: SavedAuditSummary;
+  report: AuditReport;
+}
+
+/** Where saved data lives. "none" means accounts are switched off on this deployment. */
+export type StorageKind = "blob" | "fs" | "none";

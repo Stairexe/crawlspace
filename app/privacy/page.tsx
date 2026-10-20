@@ -40,9 +40,12 @@ export default function PrivacyPage() {
       {/* Content */}
       <div className="card glass-panel p-8 sm:p-10 space-y-8 text-[14.5px] leading-relaxed text-ink-dim">
         <section className="space-y-3">
-          <h2 className="text-[18px] font-bold text-ink">1. Zero-Key & Zero-Storage Guarantee</h2>
+          <h2 className="text-[18px] font-bold text-ink">1. No key, no account required</h2>
           <p>
-            Crawlspace is designed with privacy-first engineering. You do not need to provide an API key to audit any website. When you do supply an optional OpenAI or Anthropic API key for passage rewrites, that key is stored strictly in your browser&apos;s ephemeral <code className="mono text-[13px] text-signal">sessionStorage</code> and is never logged to our databases, server disks, or telemetry logs.
+            You do not need an API key or an account to audit any website. When you supply an optional OpenAI or Anthropic API key for passage rewrites, that key is kept only in your browser&apos;s <code className="mono text-[13px] text-signal">sessionStorage</code>, sent only with rewrite requests, and never stored on our servers or written to logs.
+          </p>
+          <p>
+            Without an account, the audits you run are kept only in your browser&apos;s <code className="mono text-[13px] text-signal">localStorage</code> so the History view works. Nothing about them is sent to us beyond the audit request itself.
           </p>
         </section>
 
@@ -57,21 +60,31 @@ export default function PrivacyPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-[18px] font-bold text-ink">3. Analytics & Cookies</h2>
+          <h2 className="text-[18px] font-bold text-ink">3. Accounts</h2>
           <p>
-            We do not use invasive third-party tracking cookies. Session state is maintained locally in your browser to power fast navigation across audit views.
+            If you create an account we store your email address, your name, a salted scrypt hash of your password (never the password itself), and the audits you run while signed in. Saved audits are private to you. A saved audit becomes viewable by others only if you create a share link for it, and stops being viewable when you turn that link off or delete the audit.
+          </p>
+          <p>
+            You can delete your account from the account page at any time; that removes your account, every saved audit and every share link.
           </p>
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-[18px] font-bold text-ink">4. Data Security</h2>
+          <h2 className="text-[18px] font-bold text-ink">4. Analytics & Cookies</h2>
+          <p>
+            We do not use third-party tracking or advertising cookies. Signing in sets one first-party, httpOnly session cookie (<code className="mono text-[13px] text-signal">cs_session</code>) that keeps you logged in for up to 30 days.
+          </p>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="text-[18px] font-bold text-ink">5. Data Security</h2>
           <p>
             All network communication with Crawlspace is encrypted via TLS 1.3. Outbound crawler requests use verified DNS resolution and strict IP filtering to ensure secure execution.
           </p>
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-[18px] font-bold text-ink">5. Contact Information</h2>
+          <h2 className="text-[18px] font-bold text-ink">6. Contact Information</h2>
           <p>
             For privacy inquiries, contact Rohith Reddy at{" "}
             <a

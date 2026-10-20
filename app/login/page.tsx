@@ -1,11 +1,16 @@
 import type { Metadata } from "next";
-import { AuthPending } from "@/components/AuthPending";
+import { Suspense } from "react";
+import { AuthForm } from "@/components/AuthForm";
 
 export const metadata: Metadata = {
-  title: "Sign in",
+  title: "Log in",
   robots: { index: false, follow: true },
 };
 
-export default function LoginPage() {
-  return <AuthPending mode="signin" />;
+export default function Page() {
+  return (
+    <Suspense>
+      <AuthForm mode="signin" />
+    </Suspense>
+  );
 }
