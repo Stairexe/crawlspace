@@ -138,7 +138,7 @@ export default function AlternativesPage() {
         for today&apos;s.
       </p>
 
-      <section aria-labelledby="two-kinds" className="mt-12 grid gap-0 border border-signal md:grid-cols-2">
+      <section aria-labelledby="two-kinds" className="mt-12 grid gap-0 border border-line md:grid-cols-2">
         <div className="border-b border-line p-5 md:border-b-0 md:border-r">
           <div className="tb-label">Audits</div>
           <h2 id="two-kinds" className="mt-1 text-[20px]">Is this page citable?</h2>
@@ -159,7 +159,7 @@ export default function AlternativesPage() {
 
       <section aria-labelledby="field" className="mt-14">
         <h2 id="field" className="text-[24px]">The field</h2>
-        <div className="mt-5 border-t border-signal">
+        <div className="mt-5 border-t border-line">
           {TOOLS.map((t) => (
             <article key={t.name} className="grid gap-x-8 gap-y-3 border-b border-line py-6 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
               <div>
@@ -185,7 +185,7 @@ export default function AlternativesPage() {
       <section aria-labelledby="ours" className="mt-14 grid gap-8 lg:grid-cols-2">
         <div>
           <h2 id="ours" className="text-[24px]">What Crawlspace does</h2>
-          <dl className="mt-5 border-t border-signal">
+          <dl className="mt-5 border-t border-line">
             {OURS.map(([k, v]) => (
               <div key={k} className="grid grid-cols-[110px_1fr] gap-4 border-b border-line py-3">
                 <dt className="tb-label pt-0.5">{k}</dt>
@@ -196,7 +196,7 @@ export default function AlternativesPage() {
         </div>
         <div>
           <h2 className="text-[24px]">What it does not do</h2>
-          <dl className="mt-5 border-t border-signal">
+          <dl className="mt-5 border-t border-line">
             {NOT_YET.map(([k, v]) => (
               <div key={k} className="grid grid-cols-[110px_1fr] gap-4 border-b border-line py-3">
                 <dt className="tb-label pt-0.5">{k}</dt>

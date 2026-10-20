@@ -3,40 +3,49 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CrawlspaceLogo } from "./CrawlspaceLogo";
+import { GitHubIcon, LinkedInIcon } from "./SocialIcons";
+import { AsciiField } from "./AsciiField";
 
 const HIDDEN = ["/dashboard", "/report/", "/audit/", "/login", "/signup"];
 
 const COLUMNS: { title: string; links: { href: string; label: string; external?: boolean }[] }[] = [
   {
-    title: "Survey",
+    title: "Product",
     links: [
-      { href: "/", label: "Run a survey" },
+      { href: "/", label: "Page audit" },
       { href: "/site", label: "Site survey" },
-      { href: "/compare", label: "Compare surveys" },
+      { href: "/compare", label: "Compare audits" },
       { href: "/logs", label: "Crawler log analyser" },
-      { href: "/developers", label: "API, MCP & CLI" },
       { href: "/dashboard", label: "Dashboard" },
-      { href: "/#faq", label: "Questions" },
     ],
   },
   {
-    title: "Record",
+    title: "Developers",
     links: [
-      { href: "/sample", label: "Sample report" },
+      { href: "/developers", label: "API reference" },
+      { href: "/developers#mcp", label: "MCP server" },
+      { href: "/developers#cli", label: "CLI" },
+      { href: "/developers#action", label: "GitHub Action" },
+      { href: "/tools", label: "Free tools" },
+    ],
+  },
+  {
+    title: "Resources",
+    links: [
       { href: "/methodology", label: "Methodology" },
-      { href: "/glossary", label: "Glossary" },
+      { href: "/sample", label: "Sample report" },
+      { href: "/glossary", label: "GEO glossary" },
       { href: "/alternatives", label: "Alternatives" },
-      { href: "https://github.com/Stairexe/crawlspace", label: "Source on GitHub", external: true },
-      { href: "/terms", label: "Terms" },
-      { href: "/privacy", label: "Privacy" },
+      { href: "/#faq", label: "FAQ" },
     ],
   },
   {
-    title: "Surveyor",
+    title: "Account",
     links: [
-      { href: "https://github.com/Stairexe", label: "Rohith Reddy", external: true },
-      { href: "https://www.linkedin.com/in/rohithreddyasodi", label: "LinkedIn", external: true },
-      { href: "mailto:rohithreddyasodi@gmail.com", label: "Email", external: true },
+      { href: "/signup", label: "Create account" },
+      { href: "/login", label: "Log in" },
+      { href: "/account", label: "Account settings" },
+      { href: "https://github.com/Stairexe/crawlspace", label: "Source code", external: true },
     ],
   },
 ];
@@ -48,33 +57,76 @@ export function Footer() {
   }
 
   return (
-    <footer className="border-t border-signal/40 bg-surface">
-      <div className="mx-auto max-w-6xl px-5">
-        <div className="grid grid-cols-1 border-x border-line sm:grid-cols-2 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
-          <div className="border-b border-line p-6 md:border-b-0 md:border-r">
-            <CrawlspaceLogo size={30} showTagline />
-            <p className="mt-4 max-w-xs text-[13px] leading-relaxed text-ink-dim">
-              Fetches one page the way an AI crawler does and reports, engine by engine,
+    <footer className="mt-24 border-t border-line">
+      <div className="frame">
+        {/* Brand row */}
+        <div className="grid md:grid-cols-2">
+          <div className="relative overflow-hidden border-b border-line px-6 py-10 md:border-r">
+            <CrawlspaceLogo showTagline />
+            <p className="mt-5 max-w-sm text-[14px] leading-relaxed text-ink-dim">
+              Crawlspace fetches a page the way an AI crawler does and reports, engine by engine,
               what an assistant can and cannot quote from it.
             </p>
+            <AsciiField shape="terrain" accent className="absolute inset-x-0 bottom-0 h-24 w-full opacity-70" cell={8} />
+            <div className="h-16" />
           </div>
-          {COLUMNS.map((c) => (
-            <div key={c.title} className="border-b border-line p-6 last:border-b-0 md:border-b-0 md:border-r md:last:border-r-0">
-              <div className="tb-label">{c.title}</div>
-              <ul className="mt-3 space-y-2 text-[13px]">
-                {c.links.map((l) => (
-                  <li key={l.href}>
+          <div className="grid grid-cols-2 border-b border-line">
+            <a
+              href="https://github.com/Stairexe/crawlspace"
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-3 border-b border-r border-line px-6 py-5 text-[14px] text-ink-dim transition-colors hover:bg-surface hover:text-ink"
+            >
+              <GitHubIcon className="h-4 w-4" /> GitHub
+            </a>
+            <a
+              href="https://www.linkedin.com/in/rohithreddyasodi"
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-3 border-b border-line px-6 py-5 text-[14px] text-ink-dim transition-colors hover:bg-surface hover:text-ink"
+            >
+              <LinkedInIcon className="h-4 w-4" /> LinkedIn
+            </a>
+            <Link
+              href="/developers"
+              className="flex items-center gap-3 border-r border-line px-6 py-5 text-[14px] text-ink-dim transition-colors hover:bg-surface hover:text-ink"
+            >
+              <span className="mono text-[12px] text-signal">{"{ }"}</span> API docs
+            </Link>
+            <Link
+              href="/methodology"
+              className="flex items-center gap-3 px-6 py-5 text-[14px] text-ink-dim transition-colors hover:bg-surface hover:text-ink"
+            >
+              <span className="mono text-[12px] text-signal">§</span> Methodology
+            </Link>
+          </div>
+        </div>
+
+        {/* Link grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4">
+          {COLUMNS.map((col, ci) => (
+            <div
+              key={col.title}
+              className={`border-b border-line ${ci % 2 === 0 ? "border-r" : ""} md:border-r ${ci === COLUMNS.length - 1 ? "md:border-r-0" : ""}`}
+            >
+              <div className="border-b border-line px-6 py-4 text-[14px] font-medium text-ink">{col.title}</div>
+              <ul>
+                {col.links.map((l) => (
+                  <li key={l.href + l.label} className="border-b border-line last:border-b-0">
                     {l.external ? (
                       <a
                         href={l.href}
-                        target={l.href.startsWith("http") ? "_blank" : undefined}
-                        rel={l.label === "Rohith Reddy" ? "author noreferrer" : "noreferrer"}
-                        className="nav-link text-ink-dim"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="block px-6 py-3 text-[14px] text-ink-dim transition-colors hover:bg-surface hover:text-ink"
                       >
                         {l.label}
                       </a>
                     ) : (
-                      <Link href={l.href} className="nav-link text-ink-dim">
+                      <Link
+                        href={l.href}
+                        className="block px-6 py-3 text-[14px] text-ink-dim transition-colors hover:bg-surface hover:text-ink"
+                      >
                         {l.label}
                       </Link>
                     )}
@@ -84,11 +136,19 @@ export function Footer() {
             </div>
           ))}
         </div>
-        <div className="mono flex flex-col gap-2 border-x border-t border-line px-6 py-4 text-[11px] text-ink-faint sm:flex-row sm:items-center sm:justify-between">
-          <span>© {new Date().getFullYear()} Crawlspace</span>
-          <span className="max-w-lg sm:text-right">
-            Scores model how citable a page is. They do not measure whether it is cited.
-          </span>
+
+        {/* Legal row */}
+        <div className="grid grid-cols-2 md:grid-cols-4">
+          <div className="border-r border-line px-6 py-4 text-[13px] text-ink-faint">© {new Date().getFullYear()} Crawlspace</div>
+          <Link href="/terms" className="border-line px-6 py-4 text-[13px] text-ink-dim hover:text-ink md:border-r">
+            Terms of Service
+          </Link>
+          <Link href="/privacy" className="border-r border-t border-line px-6 py-4 text-[13px] text-ink-dim hover:text-ink md:border-t-0">
+            Privacy Policy
+          </Link>
+          <div className="flex items-center gap-2 border-t border-line px-6 py-4 text-[13px] text-ink-dim md:border-t-0">
+            <span className="h-1.5 w-1.5 rounded-full bg-good" /> Scores model citability, not citations
+          </div>
         </div>
       </div>
     </footer>

@@ -76,7 +76,8 @@ export function VisibilityDashboard({
 }: {
   report: AuditReport;
   ai: AiState;
-  onReset: () => void;
+  /** Omitted on read-only views (shared reports): hides “New survey”. */
+  onReset?: () => void;
 }) {
   const [tab, setTab] = useState<Tab>("overview");
   const [exportOpen, setExportOpen] = useState(false);
@@ -140,14 +141,16 @@ export function VisibilityDashboard({
             <a href="/compare" className="btn-quiet">
               Compare
             </a>
-            <button type="button" onClick={onReset} className="btn-quiet">
-              New survey
-            </button>
+            {onReset && (
+              <button type="button" onClick={onReset} className="btn-quiet">
+                New audit
+              </button>
+            )}
           </div>
         </div>
 
         {/* Composite + five engines */}
-        <div className="grid grid-cols-2 border-t border-signal sm:grid-cols-3 lg:grid-cols-6 [&>*]:border-b [&>*]:border-r [&>*]:border-line">
+        <div className="grid grid-cols-2 border-t border-line sm:grid-cols-3 lg:grid-cols-6 [&>*]:border-b [&>*]:border-r [&>*]:border-line">
           <div className="min-w-0 bg-wash/40 px-3 py-3 sm:px-4">
             <div className="tb-label">Composite</div>
             <div className="num mt-1 text-[26px] leading-none" style={{ color: scoreColor(report.composite) }}>
@@ -182,7 +185,18 @@ export function VisibilityDashboard({
           <Fact label="robots.txt" value={e.robots.found ? "Served" : "None"} tone={e.robots.found ? "good" : "warn"} />
           <Fact label="llms.txt" value={e.llmsTxt.found ? (e.llmsTxt.valid ? "Valid" : "Has issues") : "None"} tone={e.llmsTxt.found ? (e.llmsTxt.valid ? "good" : "warn") : "neutral"} />
           <Fact label="sitemap.xml" value={e.sitemap.found ? `Found${e.sitemap.urlCount ? ` · ${e.sitemap.urlCount} URLs` : ""}` : "None"} tone={e.sitemap.found ? "good" : "warn"} />
-          <Fact label="Without JavaScript" value={e.renderedWithoutJs ? "Content present" : "Empty shell"} tone={e.renderedWithoutJs ? "good" : "bad"} />
+          {(() => {
+            // Follow the check, not the raw flag: a short page that renders fine is thin, not a shell.
+            const js = report.checks.find((c) => c.id === "renders-without-js")?.status;
+            const shell = js === "fail" || (!js && !e.renderedWithoutJs);
+            return (
+              <Fact
+                label="Without JavaScript"
+                value={shell ? "Empty shell" : js === "warn" ? "Thin content" : "Content present"}
+                tone={shell ? "bad" : js === "warn" ? "warn" : "good"}
+              />
+            );
+          })()}
           <Fact
             label="Knowledge graph"
             value={
@@ -198,7 +212,7 @@ export function VisibilityDashboard({
       </section>
 
       {/* ── Sheet tabs ── */}
-      <nav id="sheet-tabs" aria-label="Survey sections" className="scroll-mt-20 border-b border-signal">
+      <nav id="sheet-tabs" aria-label="Survey sections" className="scroll-mt-20 border-b border-line">
         <div className="thin-scroll -mb-px flex gap-0 overflow-x-auto">
           {TABS.map((t) => (
             <button

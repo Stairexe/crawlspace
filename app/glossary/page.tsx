@@ -47,7 +47,7 @@ export default function GlossaryPage() {
         ))}
       </nav>
 
-      <dl className="mt-10 border-t border-signal">
+      <dl className="mt-10 border-t border-line">
         {GLOSSARY.map((t, i) => (
           <div
             key={t.id}

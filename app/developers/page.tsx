@@ -21,7 +21,7 @@ function Code({ children }: { children: string }) {
 
 function Section({ id, mark, title, children }: { id: string; mark: string; title: string; children: React.ReactNode }) {
   return (
-    <section id={id} className="scroll-mt-20 border-t border-signal pt-5">
+    <section id={id} className="scroll-mt-20 border-t border-line pt-5">
       <div className="mono text-[11px] uppercase tracking-[0.14em] text-signal">{mark}</div>
       <h2 className="mt-2 text-[clamp(24px,3vw,34px)] leading-tight">{title}</h2>
       <div className="mt-4 space-y-3 text-[14.5px] leading-relaxed text-ink-dim">{children}</div>

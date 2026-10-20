@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 import { getSpecimen } from "@/lib/demo";
 import { FAQ } from "@/lib/faq";
-import { LiveSpecimen } from "@/components/LiveSpecimen";
 import { HomeClient } from "@/components/HomeClient";
 import { LandingSections } from "@/components/LandingSections";
-import { Descent } from "@/components/Descent";
 
 // The specimen is a real audit, re-run when this page regenerates (at most daily).
 export const revalidate = 86400;
@@ -29,7 +27,7 @@ export default async function Page() {
         "@type": "WebPage",
         "@id": `${BASE}/#webpage`,
         url: BASE,
-        name: "Crawlspace — can an AI assistant quote this page?",
+        name: "Crawlspace — see your site the way AI engines do",
         description:
           "A structural survey of one web page: crawler access, passage-by-passage citability, and five engine scores that are allowed to disagree.",
         ...(modified ? { dateModified: modified } : {}),
@@ -52,9 +50,8 @@ export default async function Page() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
-      <Descent />
       <HomeClient>
-        <LandingSections specimen={<LiveSpecimen specimen={specimen} />} />
+        <LandingSections specimen={specimen} />
       </HomeClient>
     </>
   );

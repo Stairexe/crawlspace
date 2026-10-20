@@ -1,29 +1,17 @@
 import type { Metadata } from "next";
-import { Archivo, Martian_Mono } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 
-// Archivo carries a width axis: 100 for body, stretched to 118-125 for plate titles.
-const archivo = Archivo({
-  subsets: ["latin"],
-  axes: ["wdth"],
-  variable: "--font-archivo",
-  display: "swap",
-});
-
-// Annotation face: addresses, agent names, scores, the title block.
-const martian = Martian_Mono({
-  subsets: ["latin"],
-  variable: "--font-martian",
-  display: "swap",
-});
+const geist = Geist({ subsets: ["latin"], variable: "--font-geist", display: "swap" });
+const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono", display: "swap" });
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { RevealObserver } from "@/components/RevealObserver";
+import { Motion } from "@/components/Motion";
 import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://crawlspace-geo.vercel.app"),
   title: {
-    default: "Crawlspace — a structural survey of any page, for AI assistants",
+    default: "Crawlspace — GEO audits for ChatGPT, Claude, Perplexity and AI Overviews",
     template: "%s · Crawlspace",
   },
   description:
@@ -40,11 +28,13 @@ export const metadata: Metadata = {
     apple: "/favicon.svg",
   },
   openGraph: {
-    title: "Crawlspace — can an AI assistant quote this page?",
+    title: "Crawlspace — see your site the way AI engines do",
     description:
-      "A structural survey of one web page: crawler access, passage by passage citability, and five engine scores that are allowed to disagree.",
+      "Free GEO audit: crawler access, passage-by-passage citability, and five engine scores for ChatGPT, Claude, Perplexity, Copilot and Google AI Overviews.",
     type: "website",
+    siteName: "Crawlspace",
   },
+  twitter: { card: "summary_large_image" },
   robots: { index: true, follow: true },
 };
 
@@ -85,20 +75,18 @@ const JSON_LD = {
   ],
 };
 
-// Every first visit to "/" gets the opening, on every device. With reduced motion it is
-// the calm version: a still title sheet that fades, no walking, splitting or flying.
-const HEAD_SCRIPT = `(function(){var d=document.documentElement;d.setAttribute("data-js","");try{if(location.pathname==="/"&&!sessionStorage.getItem("cs-descent")){d.setAttribute("data-descent","play");if(matchMedia("(prefers-reduced-motion: reduce)").matches)d.setAttribute("data-descent-calm","")}}catch(e){}})();`;
+// Runs before first paint. Marks JS as present so [data-reveal] can start hidden for GSAP,
+// and un-hides it after 3s if the motion layer never loads — the page can never stay blank.
+const HEAD_SCRIPT = `(function(){var d=document.documentElement;d.setAttribute("data-js","");setTimeout(function(){if(!d.hasAttribute("data-motion"))d.setAttribute("data-reveal-fallback","")},3000)})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="en"
-      className={`${archivo.variable} ${martian.variable}`}
+      className={`${geist.variable} ${geistMono.variable}`}
       suppressHydrationWarning
     >
       <head>
-        {/* Runs before first paint: marks JS as present, and opts this visit into the
-            Descent only on the home page, once per session, never with reduced motion. */}
         <script dangerouslySetInnerHTML={{ __html: HEAD_SCRIPT }} />
       </head>
       <body className="text-ink antialiased">
@@ -111,7 +99,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main className="flex-1">{children}</main>
           <Footer />
         </div>
-        <RevealObserver />
+        <Motion />
       </body>
     </html>
   );
